@@ -6,7 +6,7 @@
     <title>Panel de Control - Societa Di Calcio</title>
     <style>
         body { font-family: 'Helvetica Neue', Arial, sans-serif; background-color: #f4f4f4; padding: 40px; }
-        .admin-container { background-color: white; max-width: 600px; margin: 0 auto; padding: 30px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .admin-container { background-color: white; max-width: 800px; margin: 0 auto; padding: 30px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
         h1 { text-align: center; color: #333; font-size: 24px; margin-bottom: 20px; }
         .form-group { margin-bottom: 15px; }
         label { display: block; font-weight: bold; margin-bottom: 5px; color: #555; font-size: 14px; }
@@ -14,41 +14,41 @@
         .stock-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
         .btn-guardar { background-color: #000; color: white; border: none; padding: 12px 20px; width: 100%; font-size: 16px; font-weight: bold; cursor: pointer; border-radius: 4px; margin-top: 20px; }
         .btn-guardar:hover { background-color: #333; }
+        .btn-eliminar { background-color: #dc3545; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; transition: background 0.3s;}
+        .btn-eliminar:hover { background-color: #c82333; }
+        .btn-actualizar { background-color: #007bff; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; transition: background 0.3s; margin-right: 5px;}
+        .btn-actualizar:hover { background-color: #0056b3; }
         .mensaje { display: none; padding: 10px; margin-top: 15px; text-align: center; border-radius: 4px; font-weight: bold; }
         .exito { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        hr { margin: 40px 0; border: none; border-top: 2px dashed #ccc; }
+        .talla-input { width: 50px !important; padding: 5px !important; text-align: center; border: 1px solid #ccc; border-radius: 4px; }
     </style>
 </head>
 <body>
 
     <div class="admin-container">
         <h1>⚙️ Ingreso de Nueva Mercancía</h1>
-        
         <form id="form-nuevo-producto">
             <div class="form-group">
                 <label>ID del Producto (Sin espacios, ej: playera-visitante):</label>
                 <input type="text" id="prod-id" required>
             </div>
-
             <div class="form-group">
                 <label>Nombre de la Playera:</label>
                 <input type="text" id="prod-nombre" required>
             </div>
-
             <div class="form-group">
                 <label>Precio ($):</label>
                 <input type="number" id="prod-precio" step="0.01" required>
             </div>
-
             <div class="form-group">
                 <label>Nombre de la Imagen (ej: foto1.png):</label>
                 <input type="text" id="prod-imagen" required>
             </div>
-
             <div class="form-group">
                 <label>Descripción:</label>
                 <textarea id="prod-desc" rows="3" required></textarea>
             </div>
-
             <div class="form-group">
                 <label>Inventario Inicial (Piezas por Talla):</label>
                 <div class="stock-grid">
@@ -58,31 +58,35 @@
                     <div><label>XL:</label><input type="number" id="stock-xl" value="0" min="0"></div>
                 </div>
             </div>
-
             <button type="submit" class="btn-guardar">Guardar Producto en Bodega</button>
         </form>
-
         <div id="mensaje-alerta" class="mensaje"></div>
-    </div>
-    <hr style="margin: 40px 0; border: none; border-top: 2px dashed #ccc;">
+
+        <hr>
+
+        <h1>👕 Inventario Actual</h1>
+        <div id="lista-inventario" style="margin-top: 20px;">
+            <p style="text-align: center; color: #777;">Cargando inventario...</p>
+        </div>
+
+        <hr>
         
         <h1>📦 Registro de Ventas</h1>
         <div id="lista-ordenes" style="margin-top: 20px;">
             <p style="text-align: center; color: #777;">Cargando ventas...</p>
         </div>
+    </div>
 
     <script>
+        // 1. LÓGICA PARA AGREGAR PRODUCTO (Igual)
         document.getElementById('form-nuevo-producto').addEventListener('submit', async (e) => {
-            e.preventDefault(); // Evita que la página se recargue
-
-            // 1. Recolectamos la información que escribiste en las cajas
+            e.preventDefault(); 
             const nuevoProducto = {
                 id: document.getElementById('prod-id').value,
                 nombre: document.getElementById('prod-nombre').value,
                 precio: parseFloat(document.getElementById('prod-precio').value),
                 imagen: document.getElementById('prod-imagen').value,
                 descripcion: document.getElementById('prod-desc').value,
-                // Agrupamos las tallas en un solo bloque
                 stock: {
                     'S': parseInt(document.getElementById('stock-s').value),
                     'M': parseInt(document.getElementById('stock-m').value),
@@ -91,39 +95,127 @@
                 }
             };
 
-            // 2. Tocamos la puerta secreta del servidor
             try {
                 const respuesta = await fetch('/api/admin/productos', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(nuevoProducto)
                 });
-
                 const resultado = await respuesta.json();
-
-                // 3. Mostramos el mensaje de éxito y limpiamos el formulario
                 const mensajeDiv = document.getElementById('mensaje-alerta');
                 mensajeDiv.style.display = 'block';
                 
                 if (resultado.success) {
                     mensajeDiv.className = 'mensaje exito';
                     mensajeDiv.innerText = "✅ ¡Producto agregado a la tienda exitosamente!";
-                    document.getElementById('form-nuevo-producto').reset(); // Limpia las cajas
+                    document.getElementById('form-nuevo-producto').reset(); 
+                    cargarInventario(); 
                 } else {
                     mensajeDiv.style.backgroundColor = '#f8d7da';
                     mensajeDiv.style.color = '#721c24';
                     mensajeDiv.innerText = "🚨 Error: " + resultado.error;
                 }
-
             } catch (error) {
                 console.error("Error de conexión:", error);
             }
         });
-    </script>
-    <script>
-        // ========================================== //
-        // ====== LÓGICA PARA VER LAS VENTAS ======== //
-        // ========================================== //
+
+        // 2. LÓGICA PARA CARGAR EL INVENTARIO (Ahora con cajitas editables)
+        async function cargarInventario() {
+            try {
+                const respuesta = await fetch('/api/productos');
+                const productos = await respuesta.json();
+                const contenedor = document.getElementById('lista-inventario');
+
+                if (productos.length === 0) {
+                    contenedor.innerHTML = '<p style="text-align: center;">Tu bodega está vacía.</p>';
+                    return;
+                }
+
+                let htmlInventario = '';
+                productos.forEach(prod => {
+                    htmlInventario += `
+                    <div style="background: #f9f9f9; padding: 15px; margin-bottom: 15px; border-radius: 8px; border-left: 5px solid #000; display: flex; flex-direction: column; gap: 10px;">
+                        
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <strong style="font-size: 1.1rem;">${prod.nombre}</strong> <span style="color: #888; font-size: 0.9em;">(ID: ${prod.id})</span><br>
+                                <span style="color: #28a745; font-weight: bold;">$${prod.precio}</span>
+                            </div>
+                            <div>
+                                <button class="btn-actualizar" onclick="actualizarStock('${prod.id}')">💾 Guardar Cambios</button>
+                                <button class="btn-eliminar" onclick="eliminarProducto('${prod.id}')">🗑️ Eliminar</button>
+                            </div>
+                        </div>
+
+                        <div style="background: #eee; padding: 10px; border-radius: 4px; display: flex; gap: 15px; align-items: center;">
+                            <strong>Inventario:</strong>
+                            <label>S: <input type="number" id="edit-s-${prod.id}" class="talla-input" value="${prod.stock['S']}" min="0"></label>
+                            <label>M: <input type="number" id="edit-m-${prod.id}" class="talla-input" value="${prod.stock['M']}" min="0"></label>
+                            <label>L: <input type="number" id="edit-l-${prod.id}" class="talla-input" value="${prod.stock['L']}" min="0"></label>
+                            <label>XL: <input type="number" id="edit-xl-${prod.id}" class="talla-input" value="${prod.stock['XL']}" min="0"></label>
+                        </div>
+
+                    </div>`;
+                });
+                contenedor.innerHTML = htmlInventario;
+            } catch (error) {
+                console.error("Error cargando inventario:", error);
+                document.getElementById('lista-inventario').innerHTML = '<p style="color: red; text-align: center;">Error al cargar el inventario.</p>';
+            }
+        }
+
+        // 3. NUEVA LÓGICA: GUARDAR STOCK EDITADO
+        async function actualizarStock(idProducto) {
+            // Recogemos los números que escribiste en las cajitas de ese producto
+            const nuevoStock = {
+                'S': parseInt(document.getElementById(`edit-s-${idProducto}`).value),
+                'M': parseInt(document.getElementById(`edit-m-${idProducto}`).value),
+                'L': parseInt(document.getElementById(`edit-l-${idProducto}`).value),
+                'XL': parseInt(document.getElementById(`edit-xl-${idProducto}`).value)
+            };
+
+            try {
+                const respuesta = await fetch(`/api/admin/productos/${idProducto}/stock`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ stock: nuevoStock })
+                });
+                
+                const resultado = await respuesta.json();
+
+                if (resultado.success) {
+                    alert("✅ " + resultado.message);
+                } else {
+                    alert("❌ Error: " + resultado.error);
+                }
+            } catch (error) {
+                console.error("🚨 Error de conexión:", error);
+                alert("Hubo un problema al contactar con la bodega.");
+            }
+        }
+
+        // 4. LÓGICA PARA ELIMINAR (Igual)
+        async function eliminarProducto(idDelProducto) {
+            const confirmacion = confirm("¿Estás seguro de que quieres eliminar este producto? Desaparecerá de tu tienda.");
+            if (confirmacion) {
+                try {
+                    const respuesta = await fetch(`/api/admin/productos/${idDelProducto}`, { method: 'DELETE' });
+                    const resultado = await respuesta.json();
+                    if (resultado.success) {
+                        alert("✅ " + resultado.message);
+                        cargarInventario(); 
+                    } else {
+                        alert("❌ Error: " + resultado.error);
+                    }
+                } catch (error) {
+                    console.error("🚨 Error de conexión:", error);
+                    alert("Hubo un problema al intentar contactar con la bodega.");
+                }
+            }
+        }
+
+        // 5. LÓGICA PARA VER LAS VENTAS (Igual)
         async function cargarVentas() {
             try {
                 const respuesta = await fetch('/api/admin/ordenes');
@@ -136,17 +228,14 @@
                 }
 
                 let htmlVentas = '';
-                
                 ventas.forEach(venta => {
-                    // Preparamos la lista de lo que compró
                     let listaArticulos = '';
                     venta.productos.forEach(item => {
                         listaArticulos += `<li style="margin-bottom: 5px;"><strong>${item.quantity}x</strong> ${item.name} (Talla: ${item.size}) - $${(item.price * item.quantity).toFixed(2)}</li>`;
                     });
 
-                    // Dibujamos el "Ticket"
                     htmlVentas += `
-                    <div style="background: white; padding: 20px; margin-bottom: 20px; border-radius: 8px; border-left: 5px solid #000; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+                    <div style="background: white; padding: 20px; margin-bottom: 20px; border-radius: 8px; border-left: 5px solid #28a745; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
                         <div style="display: flex; justify-content: space-between; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 10px;">
                             <strong style="font-size: 1.1rem;">Orden #${venta.id}</strong>
                             <span style="color: #666;">${new Date(venta.fecha).toLocaleString()}</span>
@@ -163,15 +252,13 @@
                         </div>
                     </div>`;
                 });
-
                 contenedor.innerHTML = htmlVentas;
             } catch (error) {
                 console.error("Error cargando ventas:", error);
-                document.getElementById('lista-ordenes').innerHTML = '<p style="color: red; text-align: center;">Error al cargar el registro de ventas.</p>';
             }
         }
 
-        // Le decimos a la página que ejecute esta función apenas la abramos
+        cargarInventario();
         cargarVentas();
     </script>
 </body>

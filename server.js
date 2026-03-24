@@ -181,6 +181,25 @@ app.post('/api/admin/productos', (req, res) => {
         res.json({ success: true, message: "Producto guardado en bodega correctamente" });
     });
 });
+// 6. Ruta para Eliminar un Producto de la Bodega
+app.delete('/api/admin/productos/:id', (req, res) => {
+    const idProducto = req.params.id;
+    const sql = "DELETE FROM productos WHERE id = ?";
+
+    db.run(sql, [idProducto], function(err) {
+        if (err) {
+            console.error("🚨 Error al eliminar el producto:", err.message);
+            return res.status(500).json({ success: false, error: err.message });
+        }
+        
+        // Si changes es 0, significa que no encontró el producto
+        if (this.changes === 0) {
+            return res.status(404).json({ success: false, error: "Producto no encontrado" });
+        }
+
+        res.json({ success: true, message: "Producto eliminado de la bodega correctamente" });
+    });
+});
 
 // Ver el Libro de Registro (Ventas)
 app.get('/api/admin/ordenes', (req, res) => {
@@ -191,6 +210,22 @@ app.get('/api/admin/ordenes', (req, res) => {
             return row;
         });
         res.json(ordenesFormateadas);
+    });
+});
+
+// 7. Ruta para Modificar el Inventario (Stock) de un Producto
+app.put('/api/admin/productos/:id/stock', (req, res) => {
+    const idProducto = req.params.id;
+    const nuevoStock = JSON.stringify(req.body.stock); // Recibimos el nuevo conteo de tallas
+
+    const sql = "UPDATE productos SET stock = ? WHERE id = ?";
+    
+    db.run(sql, [nuevoStock, idProducto], function(err) {
+        if (err) {
+            console.error("🚨 Error al actualizar el inventario:", err.message);
+            return res.status(500).json({ success: false, error: err.message });
+        }
+        res.json({ success: true, message: "¡Inventario actualizado con éxito!" });
     });
 });
 
