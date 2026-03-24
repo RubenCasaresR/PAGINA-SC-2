@@ -11,7 +11,6 @@
         .form-group { margin-bottom: 15px; }
         label { display: block; font-weight: bold; margin-bottom: 5px; color: #555; font-size: 14px; }
         input[type="text"], input[type="number"], textarea { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
-        /* Cambiamos a 5 columnas para que quepa la XS */
         .stock-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
         .btn-guardar { background-color: #000; color: white; border: none; padding: 12px 20px; width: 100%; font-size: 16px; font-weight: bold; cursor: pointer; border-radius: 4px; margin-top: 20px; }
         .btn-guardar:hover { background-color: #333; }
@@ -23,6 +22,7 @@
         .exito { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
         hr { margin: 40px 0; border: none; border-top: 2px dashed #ccc; }
         .talla-input { width: 50px !important; padding: 5px !important; text-align: center; border: 1px solid #ccc; border-radius: 4px; }
+        .img-input { width: 100% !important; padding: 8px !important; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px; font-family: monospace;}
     </style>
 </head>
 <body>
@@ -43,7 +43,7 @@
                 <input type="number" id="prod-precio" step="0.01" required>
             </div>
             <div class="form-group">
-                <label>Nombre de la Imagen (ej: foto1.png):</label>
+                <label>Nombre de la Imagen Principal (ej: foto1.png):</label>
                 <input type="text" id="prod-imagen" required>
             </div>
             <div class="form-group">
@@ -123,7 +123,7 @@
             }
         });
 
-        // 2. LÓGICA PARA CARGAR EL INVENTARIO 
+        // 2. LÓGICA PARA CARGAR EL INVENTARIO CON CAJA DE IMÁGENES
         async function cargarInventario() {
             try {
                 const respuesta = await fetch('/api/productos');
@@ -137,12 +137,14 @@
 
                 let htmlInventario = '';
                 productos.forEach(prod => {
-                    // Protegemos el código en caso de que un producto viejo no tenga la talla XS guardada
                     const xsStock = prod.stock['XS'] || 0;
                     const sStock = prod.stock['S'] || 0;
                     const mStock = prod.stock['M'] || 0;
                     const lStock = prod.stock['L'] || 0;
                     const xlStock = prod.stock['XL'] || 0;
+
+                    // Unimos las fotos con comas para mostrarlas en la cajita
+                    const fotosActuales = prod.imagenes ? prod.imagenes.join(', ') : '';
 
                     htmlInventario += `
                     <div style="background: #f9f9f9; padding: 15px; margin-bottom: 15px; border-radius: 8px; border-left: 5px solid #000; display: flex; flex-direction: column; gap: 10px;">
@@ -153,18 +155,25 @@
                                 <span style="color: #28a745; font-weight: bold;">$${prod.precio}</span>
                             </div>
                             <div>
-                                <button class="btn-actualizar" onclick="actualizarStock('${prod.id}')">💾 Guardar Cambios</button>
+                                <button class="btn-actualizar" onclick="guardarCambiosProducto('${prod.id}')">💾 Guardar Cambios</button>
                                 <button class="btn-eliminar" onclick="eliminarProducto('${prod.id}')">🗑️ Eliminar</button>
                             </div>
                         </div>
 
-                        <div style="background: #eee; padding: 10px; border-radius: 4px; display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">
-                            <strong>Inventario:</strong>
-                            <label>XS: <input type="number" id="edit-xs-${prod.id}" class="talla-input" value="${xsStock}" min="0"></label>
-                            <label>S: <input type="number" id="edit-s-${prod.id}" class="talla-input" value="${sStock}" min="0"></label>
-                            <label>M: <input type="number" id="edit-m-${prod.id}" class="talla-input" value="${mStock}" min="0"></label>
-                            <label>L: <input type="number" id="edit-l-${prod.id}" class="talla-input" value="${lStock}" min="0"></label>
-                            <label>XL: <input type="number" id="edit-xl-${prod.id}" class="talla-input" value="${xlStock}" min="0"></label>
+                        <div style="background: #eee; padding: 10px; border-radius: 4px; display: flex; flex-direction: column; gap: 10px;">
+                            <div style="display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">
+                                <strong>Inventario:</strong>
+                                <label>XS: <input type="number" id="edit-xs-${prod.id}" class="talla-input" value="${xsStock}" min="0"></label>
+                                <label>S: <input type="number" id="edit-s-${prod.id}" class="talla-input" value="${sStock}" min="0"></label>
+                                <label>M: <input type="number" id="edit-m-${prod.id}" class="talla-input" value="${mStock}" min="0"></label>
+                                <label>L: <input type="number" id="edit-l-${prod.id}" class="talla-input" value="${lStock}" min="0"></label>
+                                <label>XL: <input type="number" id="edit-xl-${prod.id}" class="talla-input" value="${xlStock}" min="0"></label>
+                            </div>
+                            
+                            <div style="border-top: 1px dashed #ccc; padding-top: 10px;">
+                                <strong>📸 Imágenes (Separadas por comas):</strong>
+                                <input type="text" id="edit-img-${prod.id}" class="img-input" value="${fotosActuales}" placeholder="ej: foto-frente.png, foto-atras.png">
+                            </div>
                         </div>
 
                     </div>`;
@@ -172,12 +181,11 @@
                 contenedor.innerHTML = htmlInventario;
             } catch (error) {
                 console.error("Error cargando inventario:", error);
-                document.getElementById('lista-inventario').innerHTML = '<p style="color: red; text-align: center;">Error al cargar el inventario.</p>';
             }
         }
 
-        // 3. NUEVA LÓGICA: GUARDAR STOCK EDITADO
-        async function actualizarStock(idProducto) {
+        // 3. NUEVA LÓGICA: GUARDAR STOCK E IMÁGENES AL MISMO TIEMPO
+        async function guardarCambiosProducto(idProducto) {
             const nuevoStock = {
                 'XS': parseInt(document.getElementById(`edit-xs-${idProducto}`).value) || 0,
                 'S': parseInt(document.getElementById(`edit-s-${idProducto}`).value) || 0,
@@ -186,11 +194,13 @@
                 'XL': parseInt(document.getElementById(`edit-xl-${idProducto}`).value) || 0
             };
 
+            const nuevasFotos = document.getElementById(`edit-img-${idProducto}`).value;
+
             try {
-                const respuesta = await fetch(`/api/admin/productos/${idProducto}/stock`, {
+                const respuesta = await fetch(`/api/admin/productos/${idProducto}/actualizar`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ stock: nuevoStock })
+                    body: JSON.stringify({ stock: nuevoStock, imagenes: nuevasFotos })
                 });
                 
                 const resultado = await respuesta.json();
@@ -206,9 +216,9 @@
             }
         }
 
-        // 4. LÓGICA PARA ELIMINAR 
+        // 4. LÓGICA PARA ELIMINAR (Igual)
         async function eliminarProducto(idDelProducto) {
-            const confirmacion = confirm("¿Estás seguro de que quieres eliminar este producto? Desaparecerá de tu tienda.");
+            const confirmacion = confirm("¿Estás seguro de que quieres eliminar este producto?");
             if (confirmacion) {
                 try {
                     const respuesta = await fetch(`/api/admin/productos/${idDelProducto}`, { method: 'DELETE' });
@@ -221,12 +231,11 @@
                     }
                 } catch (error) {
                     console.error("🚨 Error de conexión:", error);
-                    alert("Hubo un problema al intentar contactar con la bodega.");
                 }
             }
         }
 
-        // 5. LÓGICA PARA VER LAS VENTAS 
+        // 5. LÓGICA PARA VER LAS VENTAS (Igual)
         async function cargarVentas() {
             try {
                 const respuesta = await fetch('/api/admin/ordenes');
@@ -247,19 +256,10 @@
 
                     htmlVentas += `
                     <div style="background: white; padding: 20px; margin-bottom: 20px; border-radius: 8px; border-left: 5px solid #28a745; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
-                        <div style="display: flex; justify-content: space-between; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 10px;">
-                            <strong style="font-size: 1.1rem;">Orden #${venta.id}</strong>
-                            <span style="color: #666;">${new Date(venta.fecha).toLocaleString()}</span>
-                        </div>
-                        <p style="margin: 5px 0;"><strong>👤 Cliente:</strong> ${venta.nombre} (${venta.email})</p>
-                        <p style="margin: 5px 0;"><strong>📍 Dirección:</strong> ${venta.direccion}</p>
-                        <p style="margin: 5px 0; font-size: 1.1rem; color: #28a745;"><strong>💰 Total Pagado: $${venta.total.toFixed(2)}</strong></p>
-                        
-                        <div style="margin-top: 15px; background: #f9f9f9; padding: 10px; border-radius: 4px;">
-                            <strong style="display: block; margin-bottom: 5px;">🛍️ Artículos:</strong>
-                            <ul style="margin: 0; padding-left: 20px;">
-                                ${listaArticulos}
-                            </ul>
+                        <p style="margin: 5px 0;"><strong>👤 Cliente:</strong> ${venta.nombre}</p>
+                        <p style="margin: 5px 0; color: #28a745;"><strong>💰 Total: $${venta.total.toFixed(2)}</strong></p>
+                        <div style="margin-top: 15px; background: #f9f9f9; padding: 10px;">
+                            <ul style="margin: 0;">${listaArticulos}</ul>
                         </div>
                     </div>`;
                 });

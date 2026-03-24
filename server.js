@@ -213,19 +213,25 @@ app.get('/api/admin/ordenes', (req, res) => {
     });
 });
 
-// 7. Ruta para Modificar el Inventario (Stock) de un Producto
-app.put('/api/admin/productos/:id/stock', (req, res) => {
+// 7. Ruta para Modificar el Inventario y las Imágenes de un Producto
+app.put('/api/admin/productos/:id/actualizar', (req, res) => {
     const idProducto = req.params.id;
-    const nuevoStock = JSON.stringify(req.body.stock); // Recibimos el nuevo conteo de tallas
-
-    const sql = "UPDATE productos SET stock = ? WHERE id = ?";
+    const nuevoStock = JSON.stringify(req.body.stock);
     
-    db.run(sql, [nuevoStock, idProducto], function(err) {
+    // Convertimos el texto "foto1.png, foto2.png" en una lista real para la base de datos
+    const textoImagenes = req.body.imagenes || "";
+    // Separamos por comas y limpiamos los espacios vacíos
+    const arrayImagenes = textoImagenes.split(',').map(img => img.trim()).filter(img => img !== "");
+    const nuevasImagenesJson = JSON.stringify(arrayImagenes);
+
+    const sql = "UPDATE productos SET stock = ?, imagenes = ? WHERE id = ?";
+    
+    db.run(sql, [nuevoStock, nuevasImagenesJson, idProducto], function(err) {
         if (err) {
-            console.error("🚨 Error al actualizar el inventario:", err.message);
+            console.error("🚨 Error al actualizar el producto:", err.message);
             return res.status(500).json({ success: false, error: err.message });
         }
-        res.json({ success: true, message: "¡Inventario actualizado con éxito!" });
+        res.json({ success: true, message: "¡Cambios de inventario y fotos guardados con éxito!" });
     });
 });
 
