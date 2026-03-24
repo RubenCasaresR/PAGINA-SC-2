@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>¡Gracias por tu compra! - Societa Di Calcio</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+<body>
+
+    <header class="main-header">
+        <button class="hamburger-btn" id="hamburger-btn">
+            <i class="fas fa-bars"></i>
+        </button>
+        <div class="logo">
+            <a href="index.html"><img src="logo SC sin fondo.png" alt="Logo de la Marca"></a>
+        </div>
+        <nav class="main-nav" id="main-nav">
+            <button class="close-menu-btn" id="close-menu-btn">&times;</button>
+            <a href="index.html#novedades">Novedades</a>
+            <a href="index.html#colecciones">Colecciones</a>
+            <a href="index.html#nosotros">Nosotros</a>
+            <a href="index.html#contacto">Contacto</a>
+        </nav>
+        <div class="cart-icon">
+            <a href="#" onclick="openCartDrawer(); return false;">🛒 <span class="cart-text"></span>(0)</a>
+        </div>
+    </header>
+
+    <main class="thank-you-page">
+        <div class="thank-you-content">
+            <i class="fas fa-check-circle" style="font-size: 4rem; color: #28a745; margin-bottom: 20px;"></i>
+            <h1>¡Gracias por tu compra!</h1>
+            <p style="font-size: 1.5rem; font-weight: bold;">Tu pedido <span id="order-number" style="color: var(--verde-pino);">#SDC-0000</span> ha sido confirmado.</p>
+            <p style="color: #666; max-width: 600px; margin: 0 auto 40px auto; font-size: 1rem;">
+                En breve recibirás un correo electrónico con los detalles de tu recibo y la información de seguimiento para que sepas exactamente cuándo llegará tu paquete.
+            </p>
+            <a href="index.html" class="btn">Seguir explorando la tienda</a>
+        </div>
+    </main>
+
+    <footer id="contacto" class="main-footer">
+        <div class="footer-grid">
+            <div class="footer-column">
+                <h4>Societa Di Calcio</h4>
+                <p>Ropa inspirada en la pasión del fútbol, diseñada para el día a día.</p>
+            </div>
+            <div class="footer-column">
+                <h4>Soporte</h4>
+                <ul>
+                    <li><a href="faq.html">Preguntas Frecuentes</a></li>
+                    <li><a href="returns.html">Políticas de Devolución</a></li>
+                    <li><a href="terms.html">Términos y Condiciones</a></li>
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h4>Síguenos</h4>
+                <div class="social-media">
+                    <a href="https://www.instagram.com/societadicalcio?igsh=MWM4NjZhbXh6ZDVkaQ==" target="_blank"><i class="fab fa-instagram"></i></a>
+                    <a href="https://www.tiktok.com/@societadicalcio?_t=ZS-90L4HyP5Aud&_r=1" target="_blank"><i class="fab fa-tiktok"></i></a>
+                    <a href="#" target="_blank"><i class="fab fa-facebook"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 Societa Di Calcio. Todos los derechos reservados.</p>
+        </div>
+    </footer>
+
+    <script src="cart.js"></script>
+    <script>
+        // Este pequeño script genera un número de orden aleatorio para darle realismo
+        document.addEventListener('DOMContentLoaded', () => {
+            const randomNumber = Math.floor(10000 + Math.random() * 90000); // Genera número de 5 dígitos
+            document.getElementById('order-number').innerText = '#SDC-' + randomNumber;
+        });
+    </script>
+</body>
+</html>

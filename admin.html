@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Control - Societa Di Calcio</title>
+    <style>
+        body { font-family: 'Helvetica Neue', Arial, sans-serif; background-color: #f4f4f4; padding: 40px; }
+        .admin-container { background-color: white; max-width: 600px; margin: 0 auto; padding: 30px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        h1 { text-align: center; color: #333; font-size: 24px; margin-bottom: 20px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; font-weight: bold; margin-bottom: 5px; color: #555; font-size: 14px; }
+        input[type="text"], input[type="number"], textarea { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        .stock-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+        .btn-guardar { background-color: #000; color: white; border: none; padding: 12px 20px; width: 100%; font-size: 16px; font-weight: bold; cursor: pointer; border-radius: 4px; margin-top: 20px; }
+        .btn-guardar:hover { background-color: #333; }
+        .mensaje { display: none; padding: 10px; margin-top: 15px; text-align: center; border-radius: 4px; font-weight: bold; }
+        .exito { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+    </style>
+</head>
+<body>
+
+    <div class="admin-container">
+        <h1>⚙️ Ingreso de Nueva Mercancía</h1>
+        
+        <form id="form-nuevo-producto">
+            <div class="form-group">
+                <label>ID del Producto (Sin espacios, ej: playera-visitante):</label>
+                <input type="text" id="prod-id" required>
+            </div>
+
+            <div class="form-group">
+                <label>Nombre de la Playera:</label>
+                <input type="text" id="prod-nombre" required>
+            </div>
+
+            <div class="form-group">
+                <label>Precio ($):</label>
+                <input type="number" id="prod-precio" step="0.01" required>
+            </div>
+
+            <div class="form-group">
+                <label>Nombre de la Imagen (ej: foto1.png):</label>
+                <input type="text" id="prod-imagen" required>
+            </div>
+
+            <div class="form-group">
+                <label>Descripción:</label>
+                <textarea id="prod-desc" rows="3" required></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Inventario Inicial (Piezas por Talla):</label>
+                <div class="stock-grid">
+                    <div><label>S:</label><input type="number" id="stock-s" value="0" min="0"></div>
+                    <div><label>M:</label><input type="number" id="stock-m" value="0" min="0"></div>
+                    <div><label>L:</label><input type="number" id="stock-l" value="0" min="0"></div>
+                    <div><label>XL:</label><input type="number" id="stock-xl" value="0" min="0"></div>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-guardar">Guardar Producto en Bodega</button>
+        </form>
+
+        <div id="mensaje-alerta" class="mensaje"></div>
+    </div>
+    <hr style="margin: 40px 0; border: none; border-top: 2px dashed #ccc;">
+        
+        <h1>📦 Registro de Ventas</h1>
+        <div id="lista-ordenes" style="margin-top: 20px;">
+            <p style="text-align: center; color: #777;">Cargando ventas...</p>
+        </div>
+
+    <script>
+        document.getElementById('form-nuevo-producto').addEventListener('submit', async (e) => {
+            e.preventDefault(); // Evita que la página se recargue
+
+            // 1. Recolectamos la información que escribiste en las cajas
+            const nuevoProducto = {
+                id: document.getElementById('prod-id').value,
+                nombre: document.getElementById('prod-nombre').value,
+                precio: parseFloat(document.getElementById('prod-precio').value),
+                imagen: document.getElementById('prod-imagen').value,
+                descripcion: document.getElementById('prod-desc').value,
+                // Agrupamos las tallas en un solo bloque
+                stock: {
+                    'S': parseInt(document.getElementById('stock-s').value),
+                    'M': parseInt(document.getElementById('stock-m').value),
+                    'L': parseInt(document.getElementById('stock-l').value),
+                    'XL': parseInt(document.getElementById('stock-xl').value)
+                }
+            };
+
+            // 2. Tocamos la puerta secreta del servidor
+            try {
+                const respuesta = await fetch('/api/admin/productos', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(nuevoProducto)
+                });
+
+                const resultado = await respuesta.json();
+
+                // 3. Mostramos el mensaje de éxito y limpiamos el formulario
+                const mensajeDiv = document.getElementById('mensaje-alerta');
+                mensajeDiv.style.display = 'block';
+                
+                if (resultado.success) {
+                    mensajeDiv.className = 'mensaje exito';
+                    mensajeDiv.innerText = "✅ ¡Producto agregado a la tienda exitosamente!";
+                    document.getElementById('form-nuevo-producto').reset(); // Limpia las cajas
+                } else {
+                    mensajeDiv.style.backgroundColor = '#f8d7da';
+                    mensajeDiv.style.color = '#721c24';
+                    mensajeDiv.innerText = "🚨 Error: " + resultado.error;
+                }
+
+            } catch (error) {
+                console.error("Error de conexión:", error);
+            }
+        });
+    </script>
+    <script>
+        // ========================================== //
+        // ====== LÓGICA PARA VER LAS VENTAS ======== //
+        // ========================================== //
+        async function cargarVentas() {
+            try {
+                const respuesta = await fetch('/api/admin/ordenes');
+                const ventas = await respuesta.json();
+                const contenedor = document.getElementById('lista-ordenes');
+
+                if (ventas.length === 0) {
+                    contenedor.innerHTML = '<p style="text-align: center;">Aún no hay ventas registradas.</p>';
+                    return;
+                }
+
+                let htmlVentas = '';
+                
+                ventas.forEach(venta => {
+                    // Preparamos la lista de lo que compró
+                    let listaArticulos = '';
+                    venta.productos.forEach(item => {
+                        listaArticulos += `<li style="margin-bottom: 5px;"><strong>${item.quantity}x</strong> ${item.name} (Talla: ${item.size}) - $${(item.price * item.quantity).toFixed(2)}</li>`;
+                    });
+
+                    // Dibujamos el "Ticket"
+                    htmlVentas += `
+                    <div style="background: white; padding: 20px; margin-bottom: 20px; border-radius: 8px; border-left: 5px solid #000; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+                        <div style="display: flex; justify-content: space-between; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 10px;">
+                            <strong style="font-size: 1.1rem;">Orden #${venta.id}</strong>
+                            <span style="color: #666;">${new Date(venta.fecha).toLocaleString()}</span>
+                        </div>
+                        <p style="margin: 5px 0;"><strong>👤 Cliente:</strong> ${venta.nombre} (${venta.email})</p>
+                        <p style="margin: 5px 0;"><strong>📍 Dirección:</strong> ${venta.direccion}</p>
+                        <p style="margin: 5px 0; font-size: 1.1rem; color: #28a745;"><strong>💰 Total Pagado: $${venta.total.toFixed(2)}</strong></p>
+                        
+                        <div style="margin-top: 15px; background: #f9f9f9; padding: 10px; border-radius: 4px;">
+                            <strong style="display: block; margin-bottom: 5px;">🛍️ Artículos:</strong>
+                            <ul style="margin: 0; padding-left: 20px;">
+                                ${listaArticulos}
+                            </ul>
+                        </div>
+                    </div>`;
+                });
+
+                contenedor.innerHTML = htmlVentas;
+            } catch (error) {
+                console.error("Error cargando ventas:", error);
+                document.getElementById('lista-ordenes').innerHTML = '<p style="color: red; text-align: center;">Error al cargar el registro de ventas.</p>';
+            }
+        }
+
+        // Le decimos a la página que ejecute esta función apenas la abramos
+        cargarVentas();
+    </script>
+</body>
+</html>

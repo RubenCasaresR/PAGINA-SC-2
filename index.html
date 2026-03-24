@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Societa Di Calcio</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    
+
+</head>
+<body>
+    <div class="announcement-bar">
+        <p>🔥 ENVÍO GRATIS EN PEDIDOS MAYORES A $1,500 MXN <a href="#colecciones">COMPRA AHORA</a></p>
+    </div>
+
+    <header class="main-header">
+        <button class="hamburger-btn" id="hamburger-btn">
+            <i class="fas fa-bars"></i>
+        </button>
+
+        <div class="logo">
+            <img src="logo SC sin fondo.png" alt="Logo de la Marca">
+        </div>
+
+        <nav class="main-nav" id="main-nav">
+            <button class="close-menu-btn" id="close-menu-btn">&times;</button>
+            <a href="#novedades">Novedades</a>
+            <a href="#colecciones">Colecciones</a>
+            <a href="#nosotros">Nosotros</a>
+            <a href="#contacto">Contacto</a>
+        </nav>
+
+        <div class="cart-icon">
+            <a href="carrito.html">🛒 <span class="cart-text"></span>(0)</a>
+        </div>
+    </header>
+
+    <main>
+        <section class="lookbook-section">
+            <div class="lookbook-banner">
+                <img src="Player Horizontal Societa y Portugal.jpg" alt="Campaña Societa Di Calcio" class="banner-img">
+                <div class="banner-overlay">
+                    <h2>Nueva Colección</h2>
+                    <a href="#colecciones" class="btn btn-blanco">Explorar</a>
+                </div>
+            </div>
+
+            <div class="lookbook-grid">
+                <a href="product.html?product=ronaldo-classic" class="lookbook-item">
+                    <img src="Esquina de porteria.jpg" alt="Look 1">
+                    <div class="lookbook-info">
+                        
+                    </div>
+                </a>
+                <a href="product.html?product=ronaldo-classic" class="lookbook-item">
+                    <img src="Tipografia Societa Playera.jpg" alt="Look 2">
+                    <div class="lookbook-info">
+                        
+                    </div>
+                </a>
+                <a href="product.html?product=ronaldo-classic" class="lookbook-item">
+                    <img src="Playera Espalda Agachado.JPG" alt="Look 3">
+                    <div class="lookbook-info">
+                        
+                    </div>
+                </a>
+                <a href="product.html?product=ronaldo-classic" class="lookbook-item">
+                    <img src="Bolsas SC.JPG" alt="Look 4">
+                    <div class="lookbook-info">
+                        
+                    </div>
+                </a>
+            </div>
+        </section>
+        <section id="novedades" class="hero-section">
+            <div class="hero-text">
+                <h1>Nuevas Tendencias</h1>
+                <p>Descubre los próximos lanzamientos de nuestra colección.</p>
+                <a href="#colecciones" class="btn">Ver Colección</a>
+            </div>
+            <div class="hero-images">
+                <a href="#" id="hero-link-1">
+                    <img src="23.png" alt="Novedad 1" id="hero-img-1">
+                </a>
+                <a href="#" id="hero-link-2">
+                    <img src="24.png" alt="Novedad 2" class="img-destacada" id="hero-img-2">
+                </a>
+                <a href="#" id="hero-link-3">
+                    <img src="42.png" alt="Novedad 3" id="hero-img-3">
+                </a>
+            </div>
+        </section>
+
+        <section id="nosotros" class="about-section">
+            <div class="about-content">
+                <img src="LOGO.png" alt="Logo de la Marca" class="about-logo">
+                <h2>¿Quiénes somos?</h2>
+                <p>Societa Di Calcio nació de la pasión por el fútbol y la moda. Creemos que la ropa es más que una simple prenda; es una forma de expresar quién eres. Cada diseño está inspirado en momentos icónicos del deporte, combinando la nostalgia del pasado con la simplicidad del diseño moderno. Usamos materiales de alta calidad para crear piezas cómodas y con estilo que puedes usar dentro y fuera de la cancha.</p>
+            </div>
+        </section>
+
+        <section id="colecciones" class="collections-section">
+            <h2>Colecciones</h2>
+            <div class="tabs">
+                <button class="tab-button active" onclick="filterSelection('all')">Todo</button>
+                <button class="tab-button" onclick="filterSelection('novedades-cat')">Novedades</button>
+                <button class="tab-button" onclick="filterSelection('descuentos')">Descuentos</button>
+                <button class="tab-button" onclick="filterSelection('must-have')">Must Have</button>
+            </div>
+            <div class="product-grid">
+                </div>
+        </section>
+    </main>
+    
+    <footer id="contacto" class="main-footer">
+    <div class="footer-grid">
+        <div class="footer-column">
+            <h4>Societa Di Calcio</h4>
+            <p>Ropa inspirada en la pasión del fútbol, diseñada para el día a día.</p>
+        </div>
+        <div class="footer-column">
+            <h4>Soporte</h4>
+            <ul>
+                <li><a href="faq.html">Preguntas Frecuentes</a></li>
+                <li><a href="returns.html">Políticas de Devolución</a></li>
+                <li><a href="terms.html">Términos y Condiciones</a></li>
+            </ul>
+        </div>
+        <div class="footer-column">
+            <h4>Síguenos</h4>
+            <div class="social-media">
+                <a href="https://www.instagram.com/societadicalcio?igsh=MWM4NjZhbXh6ZDVkaQ==" target="_blank"><i class="fab fa-instagram"></i></a>
+                <a href="https://www.tiktok.com/@societadicalcio?_t=ZS-90L4HyP5Aud&_r=1" target="_blank"><i class="fab fa-tiktok"></i></a>
+                <a href="#" target="_blank"><i class="fab fa-facebook"></i></a>
+            </div>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        <p>&copy; 2026 Societa Di Calcio. Todos los derechos reservados.</p>
+    </div>
+   </footer>
+
+   <div class="cart-overlay" id="cart-overlay"></div>
+    <div class="cart-drawer" id="cart-drawer">
+        <div class="cart-drawer-header">
+            <h2>Tu Carrito</h2>
+            <button class="close-cart-btn" id="close-cart-btn">&times;</button>
+        </div>
+        
+        <div class="shipping-progress-container">
+            <p id="shipping-message">Calculando envío...</p>
+            <div class="progress-bar-bg">
+                <div class="progress-bar-fill" id="shipping-progress-fill"></div>
+            </div>
+        </div>
+
+        <div class="cart-drawer-items" id="cart-drawer-items">
+            </div>
+
+        <div class="cart-drawer-footer">
+            <div class="drawer-summary-row">
+                <span>Subtotal</span>
+                <span id="drawer-subtotal">$0.00</span>
+            </div>
+            <p class="shipping-note">Impuestos y envío calculados en el checkout.</p>
+            <button class="btn btn-checkout-drawer" id="btn-checkout-drawer" onclick="window.location.href='checkout.html'">Proceder al Pago</button>
+        </div>
+    </div>
+    
+    <script src="index-loader.js"></script>
+    <script src="scripts.js"></script>
+    <script src="cart.js"></script>
+</body>
+</html>

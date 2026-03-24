@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout - Societa Di Calcio</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header class="main-header">
+        <div class="logo">
+            <a href="index.html"><img src="logo SC sin fondo.png" width="150" alt="Logo de la Marca"></a>
+        </div>
+        <nav class="main-nav">
+            <a href="index.html#colecciones">Colecciones</a>
+        </nav>
+        <div class="cart-icon">
+            <a href="carrito.html">🛒 Carrito (0)</a>
+        </div>
+    </header>
+
+    <main class="checkout-page-main">
+        <h1>Finalizar Compra</h1>
+        <div class="checkout-layout">
+            <div class="checkout-form">
+                
+                <h2>Contacto</h2>
+                <div class="form-group">
+                    <input type="email" id="email" placeholder="Correo electrónico" required>
+                </div>
+
+                <h2>Dirección de envío</h2>
+                <div class="form-row">
+                    <div class="form-group" style="flex: 1;">
+                        <input type="text" id="nombre" placeholder="Nombre" required>
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <input type="text" id="apellidos" placeholder="Apellidos" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <input type="text" id="direccion" placeholder="Calle y número" required>
+                </div>
+                <div class="form-group">
+                    <input type="text" id="referencia" placeholder="Apartamento, local, etc. (Opcional)">
+                </div>
+                <div class="form-row">
+                    <div class="form-group" style="flex: 1;">
+                        <input type="text" id="cp" placeholder="Código postal" required>
+                    </div>
+                    <div class="form-group" style="flex: 2;">
+                        <input type="text" id="ciudad" placeholder="Ciudad" required>
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <input type="text" id="estado" placeholder="Estado" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <input type="tel" id="telefono" placeholder="Teléfono para paquetería" required>
+                </div>
+
+                <h2>Pago</h2>
+                <p class="secure-note"><i class="fas fa-lock"></i> Todas las transacciones son seguras y están encriptadas.</p>
+                <div class="payment-box">
+                    <div class="form-group">
+                        <input type="text" placeholder="Número de tarjeta" maxlength="16" required>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group" style="flex: 1;">
+                            <input type="text" placeholder="Fecha (MM / AA)" maxlength="5" required>
+                        </div>
+                        <div class="form-group" style="flex: 1;">
+                            <input type="text" placeholder="Código de seguridad (CVC)" maxlength="4" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <input type="text" placeholder="Nombre en la tarjeta" required>
+                    </div>
+                </div>
+<div class="checkout-form-container" style="background: #f9f9f9; padding: 25px; border-radius: 8px; margin-bottom: 20px;">
+    <h3 style="margin-top: 0; margin-bottom: 20px; font-size: 1.2rem; border-bottom: 2px solid #000; padding-bottom: 10px;">Datos de Envío</h3>
+    
+    <div style="margin-bottom: 15px;">
+        <label for="cliente-nombre" style="display: block; font-weight: bold; margin-bottom: 5px;">Nombre Completo:</label>
+        <input type="text" id="cliente-nombre" placeholder="Ej. Rubén..." required style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
+    </div>
+
+    <div style="margin-bottom: 15px;">
+        <label for="cliente-email" style="display: block; font-weight: bold; margin-bottom: 5px;">Correo Electrónico:</label>
+        <input type="email" id="cliente-email" placeholder="tu@correo.com" required style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
+    </div>
+
+    <div style="margin-bottom: 20px;">
+        <label for="cliente-direccion" style="display: block; font-weight: bold; margin-bottom: 5px;">Dirección de Entrega:</label>
+        <input type="text" id="cliente-direccion" placeholder="Calle, Número, Colonia, C.P." required style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
+    </div>
+</div>
+                <button class="btn btn-comprar" style="width: 100%; font-size: 1.2rem; padding: 20px; margin-top: 10px;" onclick="procesarPago(event)">Pagar Ahora</button>
+            </div>
+
+            <div class="order-summary">
+                <h2>Resumen del Pedido</h2>
+                
+                <div id="checkout-items-container"></div>
+
+                <div class="checkout-totals" style="margin-top: 20px; border-top: 1px solid #EAE7DC; padding-top: 20px;">
+                    <div class="summary-row">
+                        <span>Subtotal</span>
+                        <span id="checkout-subtotal">$0.00</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>Envío</span>
+                        <span id="checkout-shipping">Calculando...</span>
+                    </div>
+                    <div class="summary-total">
+                        <span>Total</span>
+                        <span id="checkout-total">$0.00</span>
+                    </div>
+                </div>
+            </div>
+    </main>
+    
+
+    <footer id="contacto" class="main-footer">
+        <div class="footer-grid">
+            <div class="footer-column">
+                <h4>Societa Di Calcio</h4>
+                <p>Ropa inspirada en la pasión del fútbol, diseñada para el día a día.</p>
+            </div>
+            <div class="footer-column">
+                <h4>Soporte</h4>
+                <ul>
+                    <li><a href="faq.html">Preguntas Frecuentes</a></li>
+                    <li><a href="returns.html">Políticas de Devolución</a></li>
+                    <li><a href="terms.html">Términos y Condiciones</a></li>
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h4>Síguenos</h4>
+                <div class="social-media">
+                    <a href="https://www.instagram.com/societadicalcio?igsh=MWM4NjZhbXh6ZDVkaQ==" target="_blank"><i class="fab fa-instagram"></i></a>
+                    <a href="https://www.tiktok.com/@societadicalcio?_t=ZS-90L4HyP5Aud&_r=1" target="_blank"><i class="fab fa-tiktok"></i></a>
+                    <a href="#" target="_blank"><i class="fab fa-facebook"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 Societa Di Calcio. Todos los derechos reservados.</p>
+        </div>
+    </footer>
+    <div class="cart-overlay" id="cart-overlay"></div>
+    <div class="cart-drawer" id="cart-drawer">
+        <div class="cart-drawer-header">
+            <h2>Tu Carrito</h2>
+            <button class="close-cart-btn" id="close-cart-btn">&times;</button>
+        </div>
+        
+        <div class="shipping-progress-container">
+            <p id="shipping-message">Calculando envío...</p>
+            <div class="progress-bar-bg">
+                <div class="progress-bar-fill" id="shipping-progress-fill"></div>
+            </div>
+        </div>
+
+        <div class="cart-drawer-items" id="cart-drawer-items">
+            </div>
+
+        <div class="cart-drawer-footer">
+            <div class="drawer-summary-row">
+                <span>Subtotal</span>
+                <span id="drawer-subtotal">$0.00</span>
+            </div>
+            <p class="shipping-note">Impuestos y envío calculados en el checkout.</p>
+            <button class="btn btn-checkout-drawer" style="background: var(--beige); color: var(--negro);" onclick="closeCartDrawer()">Seguir en Checkout</button>
+        </div>
+    </div>
+
+    <script src="cart.js"></script>
+</body>
+</html>
+    <script src="cart.js"></script>
+    <script src="checkout.js"></script>
+</body>
+
+   
