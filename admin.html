@@ -6,12 +6,13 @@
     <title>Panel de Control - Societa Di Calcio</title>
     <style>
         body { font-family: 'Helvetica Neue', Arial, sans-serif; background-color: #f4f4f4; padding: 40px; }
-        .admin-container { background-color: white; max-width: 800px; margin: 0 auto; padding: 30px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .admin-container { background-color: white; max-width: 850px; margin: 0 auto; padding: 30px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
         h1 { text-align: center; color: #333; font-size: 24px; margin-bottom: 20px; }
         .form-group { margin-bottom: 15px; }
         label { display: block; font-weight: bold; margin-bottom: 5px; color: #555; font-size: 14px; }
         input[type="text"], input[type="number"], textarea { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
-        .stock-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+        /* Cambiamos a 5 columnas para que quepa la XS */
+        .stock-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
         .btn-guardar { background-color: #000; color: white; border: none; padding: 12px 20px; width: 100%; font-size: 16px; font-weight: bold; cursor: pointer; border-radius: 4px; margin-top: 20px; }
         .btn-guardar:hover { background-color: #333; }
         .btn-eliminar { background-color: #dc3545; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; transition: background 0.3s;}
@@ -52,6 +53,7 @@
             <div class="form-group">
                 <label>Inventario Inicial (Piezas por Talla):</label>
                 <div class="stock-grid">
+                    <div><label>XS:</label><input type="number" id="stock-xs" value="0" min="0"></div>
                     <div><label>S:</label><input type="number" id="stock-s" value="0" min="0"></div>
                     <div><label>M:</label><input type="number" id="stock-m" value="0" min="0"></div>
                     <div><label>L:</label><input type="number" id="stock-l" value="0" min="0"></div>
@@ -78,7 +80,7 @@
     </div>
 
     <script>
-        // 1. LÓGICA PARA AGREGAR PRODUCTO (Igual)
+        // 1. LÓGICA PARA AGREGAR PRODUCTO
         document.getElementById('form-nuevo-producto').addEventListener('submit', async (e) => {
             e.preventDefault(); 
             const nuevoProducto = {
@@ -88,6 +90,7 @@
                 imagen: document.getElementById('prod-imagen').value,
                 descripcion: document.getElementById('prod-desc').value,
                 stock: {
+                    'XS': parseInt(document.getElementById('stock-xs').value),
                     'S': parseInt(document.getElementById('stock-s').value),
                     'M': parseInt(document.getElementById('stock-m').value),
                     'L': parseInt(document.getElementById('stock-l').value),
@@ -120,7 +123,7 @@
             }
         });
 
-        // 2. LÓGICA PARA CARGAR EL INVENTARIO (Ahora con cajitas editables)
+        // 2. LÓGICA PARA CARGAR EL INVENTARIO 
         async function cargarInventario() {
             try {
                 const respuesta = await fetch('/api/productos');
@@ -134,6 +137,13 @@
 
                 let htmlInventario = '';
                 productos.forEach(prod => {
+                    // Protegemos el código en caso de que un producto viejo no tenga la talla XS guardada
+                    const xsStock = prod.stock['XS'] || 0;
+                    const sStock = prod.stock['S'] || 0;
+                    const mStock = prod.stock['M'] || 0;
+                    const lStock = prod.stock['L'] || 0;
+                    const xlStock = prod.stock['XL'] || 0;
+
                     htmlInventario += `
                     <div style="background: #f9f9f9; padding: 15px; margin-bottom: 15px; border-radius: 8px; border-left: 5px solid #000; display: flex; flex-direction: column; gap: 10px;">
                         
@@ -148,12 +158,13 @@
                             </div>
                         </div>
 
-                        <div style="background: #eee; padding: 10px; border-radius: 4px; display: flex; gap: 15px; align-items: center;">
+                        <div style="background: #eee; padding: 10px; border-radius: 4px; display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">
                             <strong>Inventario:</strong>
-                            <label>S: <input type="number" id="edit-s-${prod.id}" class="talla-input" value="${prod.stock['S']}" min="0"></label>
-                            <label>M: <input type="number" id="edit-m-${prod.id}" class="talla-input" value="${prod.stock['M']}" min="0"></label>
-                            <label>L: <input type="number" id="edit-l-${prod.id}" class="talla-input" value="${prod.stock['L']}" min="0"></label>
-                            <label>XL: <input type="number" id="edit-xl-${prod.id}" class="talla-input" value="${prod.stock['XL']}" min="0"></label>
+                            <label>XS: <input type="number" id="edit-xs-${prod.id}" class="talla-input" value="${xsStock}" min="0"></label>
+                            <label>S: <input type="number" id="edit-s-${prod.id}" class="talla-input" value="${sStock}" min="0"></label>
+                            <label>M: <input type="number" id="edit-m-${prod.id}" class="talla-input" value="${mStock}" min="0"></label>
+                            <label>L: <input type="number" id="edit-l-${prod.id}" class="talla-input" value="${lStock}" min="0"></label>
+                            <label>XL: <input type="number" id="edit-xl-${prod.id}" class="talla-input" value="${xlStock}" min="0"></label>
                         </div>
 
                     </div>`;
@@ -167,12 +178,12 @@
 
         // 3. NUEVA LÓGICA: GUARDAR STOCK EDITADO
         async function actualizarStock(idProducto) {
-            // Recogemos los números que escribiste en las cajitas de ese producto
             const nuevoStock = {
-                'S': parseInt(document.getElementById(`edit-s-${idProducto}`).value),
-                'M': parseInt(document.getElementById(`edit-m-${idProducto}`).value),
-                'L': parseInt(document.getElementById(`edit-l-${idProducto}`).value),
-                'XL': parseInt(document.getElementById(`edit-xl-${idProducto}`).value)
+                'XS': parseInt(document.getElementById(`edit-xs-${idProducto}`).value) || 0,
+                'S': parseInt(document.getElementById(`edit-s-${idProducto}`).value) || 0,
+                'M': parseInt(document.getElementById(`edit-m-${idProducto}`).value) || 0,
+                'L': parseInt(document.getElementById(`edit-l-${idProducto}`).value) || 0,
+                'XL': parseInt(document.getElementById(`edit-xl-${idProducto}`).value) || 0
             };
 
             try {
@@ -195,7 +206,7 @@
             }
         }
 
-        // 4. LÓGICA PARA ELIMINAR (Igual)
+        // 4. LÓGICA PARA ELIMINAR 
         async function eliminarProducto(idDelProducto) {
             const confirmacion = confirm("¿Estás seguro de que quieres eliminar este producto? Desaparecerá de tu tienda.");
             if (confirmacion) {
@@ -215,7 +226,7 @@
             }
         }
 
-        // 5. LÓGICA PARA VER LAS VENTAS (Igual)
+        // 5. LÓGICA PARA VER LAS VENTAS 
         async function cargarVentas() {
             try {
                 const respuesta = await fetch('/api/admin/ordenes');
