@@ -3,23 +3,74 @@ const path = require('path');
 const sqlite3 = require('sqlite3').verbose(); 
 
 const app = express();
-// Le decimos: "Usa el puerto de internet, o si estás en mi compu, usa el 3000"
+
+// ========================================== //
+// ======= CONFIGURACIÓN PRINCIPAL ========== //
+// ========================================== //
 const PORT = process.env.PORT || 3000;
 
 // Conexión a la base de datos
 const db = new sqlite3.Database('./tienda.sqlite', sqlite3.OPEN_READWRITE, (err) => {
-    if (err) console.error("Error al conectar:", err.message);
+    if (err) console.error("Error al conectar a la BD:", err.message);
     else console.log("📦 Bóveda de datos conectada con éxito.");
 });
 
-// Carpeta de archivos web
+// Middlewares: Para que el servidor lea los archivos y entienda JSON
 app.use(express.static(path.join(__dirname)));
-// IMPORTANTE: Esto le permite al servidor entender los datos que le mande el carrito
 app.use(express.json());
 
 // Página principal
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
+});
+
+// ========================================== //
+// ======= CAJERO DE MERCADO PAGO =========== //
+// ========================================== //
+const { MercadoPagoConfig, Preference } = require('mercadopago');
+
+// Agrega tu llave maestra de prueba (Access Token)
+const client = new MercadoPagoConfig({ accessToken: 'REVOCADO_MP' });
+
+// Ruta para generar el ticket de cobro
+app.post('/api/crear-pago', async (req, res) => {
+    try {
+        const paquete = req.body;
+        // Tomamos el carrito, ya sea que venga dentro de "paquete.carrito" o directo en "paquete"
+        const carrito = paquete.carrito ? paquete.carrito : paquete;
+
+        // 1. Traducir el carrito de Societa Di Calcio al idioma del banco
+        const articulosBancarios = carrito.map(item => {
+            return {
+                title: item.name + " (Talla: " + item.size + ")",
+                unit_price: Number(item.price),
+                currency_id: "MXN",
+                quantity: Number(item.quantity)
+            };
+        });
+
+        // 2. Crear la "Preferencia" (El ticket de cobro oficial)
+        const preference = new Preference(client);
+        
+        const respuestaBanco = await preference.create({
+            body: {
+                items: articulosBancarios,
+                back_urls: {
+                    success: "http://localhost:3000/thank-you.html",
+                    failure: "http://localhost:3000/checkout.html",
+                    pending: "http://localhost:3000/checkout.html"
+                }
+                // 🛑 ELIMINAMOS auto_return AQUI PARA QUE EL BANCO NO NOS BLOQUEE
+            }
+        });
+
+        // 3. El banco nos responde con un Link. Se lo mandamos a la página web.
+        res.json({ success: true, link_de_pago: respuestaBanco.sandbox_init_point });
+
+    } catch (error) {
+        console.error("🚨 Error en el cajero virtual:", error);
+        res.status(500).json({ success: false, error: "El banco no respondió." });
+    }
 });
 
 // ========================================== //
@@ -57,46 +108,34 @@ app.get('/api/productos/:id', (req, res) => {
         res.json(row);
     });
 });
-// 3. Ruta de Caja Registradora (Checkout) - ¡VERSIÓN BLINDADA! 🛡️
+
+// ========================================== //
+// ======= RUTA DE CAJA REGISTRADORA (LOCAL)  //
+// ========================================== //
 app.post('/api/checkout', (req, res) => {
     const paquete = req.body; 
-
-    // SISTEMA ANTIBALAS: Detectamos si la página web mandó el formato nuevo o el viejo
-    // Si viene la etiqueta "carrito", la usamos. Si no, asumimos que todo el paquete es el carrito.
     const carrito = paquete.carrito ? paquete.carrito : paquete; 
-    
-    // Si viene el cliente, lo usamos. Si no, inventamos uno por defecto.
     const cliente = paquete.cliente ? paquete.cliente : {
-        nombre: "Cliente de Mostrador (Por Caché)",
+        nombre: "Cliente de Mostrador",
         email: "sin-correo@test.com",
         direccion: "Recogida en Tienda"
     };
 
-    // Verificación extra para que no explote el servidor
     if (!carrito || !Array.isArray(carrito)) {
         return res.status(400).json({ success: false, error: "El carrito llegó vacío o dañado." });
     }
 
-    // 1. Calculamos el total de la venta
     let total = 0;
     carrito.forEach(item => total += (item.price * item.quantity));
 
-    // 2. Anotamos al cliente y su compra en el Libro de Registro (Tabla ordenes)
     const sqlInsert = `INSERT INTO ordenes (nombre, email, direccion, total, productos) VALUES (?, ?, ?, ?, ?)`;
     
-    db.run(sqlInsert, [
-        cliente.nombre, 
-        cliente.email, 
-        cliente.direccion, 
-        total, 
-        JSON.stringify(carrito) 
-    ], function(err) {
+    db.run(sqlInsert, [cliente.nombre, cliente.email, cliente.direccion, total, JSON.stringify(carrito)], function(err) {
         if (err) {
             console.error("🚨 Error al guardar la orden:", err.message);
             return res.status(500).json({ success: false, error: err.message });
         }
 
-        // 3. Descontamos el inventario de la bodega
         carrito.forEach(item => {
             const sqlSelect = "SELECT stock FROM productos WHERE id = ?";
             db.get(sqlSelect, [item.id], (err, row) => {
@@ -105,7 +144,6 @@ app.post('/api/checkout', (req, res) => {
                     if (stockActual[item.size] !== undefined) {
                         stockActual[item.size] -= item.quantity;
                         if (stockActual[item.size] < 0) stockActual[item.size] = 0;
-                        
                         const sqlUpdate = "UPDATE productos SET stock = ? WHERE id = ?";
                         db.run(sqlUpdate, [JSON.stringify(stockActual), item.id]);
                     }
@@ -113,68 +151,49 @@ app.post('/api/checkout', (req, res) => {
             });
         });
 
-        // 4. Éxito
         res.json({ success: true, message: "¡Orden registrada con éxito!" });
     });
 });
+
 // ========================================== //
 // ======= PANEL DE ADMINISTRACIÓN ========== //
 // ========================================== //
 
-// 4. Ruta para Guardar un Nuevo Producto en la Bodega
+// Guardar un Nuevo Producto en la Bodega
 app.post('/api/admin/productos', (req, res) => {
-    // 1. Recibimos la caja con los datos que mandó el formulario HTML
     const nuevo = req.body;
-
-    // 2. Preparamos la instrucción SQL para insertar una nueva fila
     const sql = `INSERT INTO productos 
         (id, nombre, precio, oldPrice, categoria, status, descripcion, composicion, imagenes, related, stock) 
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
 
-    // 3. Damos formato a los datos (convertimos listas de fotos y tallas a texto JSON)
-    const imagenesJson = JSON.stringify([nuevo.imagen]); // El formulario manda 1 foto, la guardamos como lista
-    const stockJson = JSON.stringify(nuevo.stock); // Las tallas que escribiste en las cajitas
-    const relatedJson = JSON.stringify([]); // Por ahora lo dejamos sin productos relacionados
+    const imagenesJson = JSON.stringify([nuevo.imagen]); 
+    const stockJson = JSON.stringify(nuevo.stock); 
+    const relatedJson = JSON.stringify([]); 
 
-    // 4. Ejecutamos la orden en la bóveda SQLite
     db.run(sql, [
-        nuevo.id, 
-        nuevo.nombre, 
-        nuevo.precio, 
-        null,                  // oldPrice (sin descuento inicial)
-        'novedades-cat',       // categoria por defecto
-        'active',              // status: activo para que se venda ya
-        nuevo.descripcion, 
-        '100% algodón premium.', // composicion por defecto
-        imagenesJson, 
-        relatedJson, 
-        stockJson
+        nuevo.id, nuevo.nombre, nuevo.precio, null, 'novedades-cat', 'active', 
+        nuevo.descripcion, '100% algodón premium.', imagenesJson, relatedJson, stockJson
     ], function(err) {
-        // Si la base de datos se queja (por ejemplo, si el ID ya existe)
         if (err) {
             console.error("🚨 Error al guardar en BD:", err.message);
             return res.status(500).json({ success: false, error: err.message });
         }
-        
-        // Si todo sale bien, le avisamos a la página
         res.json({ success: true, message: "Producto guardado en bodega correctamente" });
     });
 });
-// 5. Ruta para ver el Libro de Registro (Ventas) en el Panel Admin
+
+// Ver el Libro de Registro (Ventas)
 app.get('/api/admin/ordenes', (req, res) => {
-    // Pedimos todas las órdenes ordenadas de la más nueva a la más vieja
     db.all("SELECT * FROM ordenes ORDER BY fecha DESC", [], (err, rows) => {
         if (err) return res.status(500).json({ error: err.message });
-        
-        // Convertimos la lista de productos de texto JSON a formato real
         const ordenesFormateadas = rows.map(row => {
             row.productos = JSON.parse(row.productos);
             return row;
         });
-        
         res.json(ordenesFormateadas);
     });
 });
+
 // Encender el servidor
 app.listen(PORT, () => {
     console.log(`🚀 Servidor de Societa Di Calcio corriendo en el puerto ${PORT}`);
