@@ -37,16 +37,31 @@ function renderizarCuadricula(productos) {
     productGrid.innerHTML = ''; // Limpiamos lo que haya
 
     productos.forEach(producto => {
-        // Formateamos el precio
-        const priceDisplay = `$${producto.precio.toFixed(2)}`;
+        // 1. Calculamos si hay inventario en la bodega
+        let totalStock = 0;
+        if (producto.stock) {
+            // Sumamos todas las piezas de todas las tallas
+            totalStock = Object.values(producto.stock).reduce((a, b) => a + b, 0);
+        }
+        
+        // 2. Si el stock es 0, activamos el modo "Próximamente"
+        const esProximamente = (totalStock === 0 || producto.status === 'coming_soon');
 
-        // Creamos la tarjeta HTML (Nota cómo usamos producto.nombre, producto.precio, etc.)
+        // 3. Formateamos el precio o ponemos el texto de expectativa
+        const priceDisplay = esProximamente ? `<span class="coming-soon-text">Lanzamiento Oficial</span>` : `$${producto.precio.toFixed(2)}`;
+
+        // 4. Si no hay stock, el link no te deja hacer clic
+        const linkDestino = esProximamente ? 'javascript:void(0)' : `product.html?product=${producto.id}`;
+
+        // Creamos la tarjeta HTML con el velo oscuro integrado
         const cardHTML = `
-            <a href="product.html?product=${producto.id}" class="product-card-link">
-                <div class="product-card filterDiv novedades-cat">
+            <a href="${linkDestino}" class="product-card-link ${esProximamente ? 'proximamente-link' : ''}">
+                <div class="product-card filterDiv novedades-cat ${esProximamente ? 'is-coming-soon' : ''}">
                     <div class="product-image-container">
-                        <img src="${producto.imagen}" alt="${producto.nombre}" class="main-img">
-                        <img src="${producto.imagen}" alt="${producto.nombre}" class="hover-img">
+                        <img src="${producto.imagen}" alt="${producto.nombre}" class="main-img" loading="lazy">
+                        <img src="${producto.imagen}" alt="${producto.nombre}" class="hover-img" loading="lazy">
+                        
+                        ${esProximamente ? '<div class="coming-soon-overlay"><span>Próximamente</span></div>' : ''}
                     </div>
                     <div class="product-info">
                         <h3>${producto.nombre}</h3>
