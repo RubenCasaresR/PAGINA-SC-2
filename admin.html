@@ -123,7 +123,7 @@
             }
         });
 
-        // 2. LÓGICA PARA CARGAR EL INVENTARIO CON CAJA DE IMÁGENES
+        // 2. LÓGICA PARA CARGAR EL INVENTARIO (Ahora con cajita para el Precio)
         async function cargarInventario() {
             try {
                 const respuesta = await fetch('/api/productos');
@@ -143,7 +143,6 @@
                     const lStock = prod.stock['L'] || 0;
                     const xlStock = prod.stock['XL'] || 0;
 
-                    // Unimos las fotos con comas para mostrarlas en la cajita
                     const fotosActuales = prod.imagenes ? prod.imagenes.join(', ') : '';
 
                     htmlInventario += `
@@ -152,7 +151,10 @@
                         <div style="display: flex; justify-content: space-between; align-items: center;">
                             <div>
                                 <strong style="font-size: 1.1rem;">${prod.nombre}</strong> <span style="color: #888; font-size: 0.9em;">(ID: ${prod.id})</span><br>
-                                <span style="color: #28a745; font-weight: bold;">$${prod.precio}</span>
+                                <div style="display: flex; align-items: center; margin-top: 5px;">
+                                    <span style="color: #28a745; font-weight: bold; margin-right: 5px;">$</span>
+                                    <input type="number" id="edit-precio-${prod.id}" value="${prod.precio}" step="0.01" style="width: 80px; padding: 5px; border: 1px solid #ccc; border-radius: 4px; font-weight: bold; color: #28a745;">
+                                </div>
                             </div>
                             <div>
                                 <button class="btn-actualizar" onclick="guardarCambiosProducto('${prod.id}')">💾 Guardar Cambios</button>
@@ -184,8 +186,10 @@
             }
         }
 
-        // 3. NUEVA LÓGICA: GUARDAR STOCK E IMÁGENES AL MISMO TIEMPO
+        // 3. LÓGICA: GUARDAR STOCK, IMÁGENES Y PRECIO
         async function guardarCambiosProducto(idProducto) {
+            const nuevoPrecio = parseFloat(document.getElementById(`edit-precio-${idProducto}`).value);
+            
             const nuevoStock = {
                 'XS': parseInt(document.getElementById(`edit-xs-${idProducto}`).value) || 0,
                 'S': parseInt(document.getElementById(`edit-s-${idProducto}`).value) || 0,
@@ -200,7 +204,7 @@
                 const respuesta = await fetch(`/api/admin/productos/${idProducto}/actualizar`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ stock: nuevoStock, imagenes: nuevasFotos })
+                    body: JSON.stringify({ precio: nuevoPrecio, stock: nuevoStock, imagenes: nuevasFotos })
                 });
                 
                 const resultado = await respuesta.json();
@@ -216,7 +220,7 @@
             }
         }
 
-        // 4. LÓGICA PARA ELIMINAR (Igual)
+        // 4. LÓGICA PARA ELIMINAR 
         async function eliminarProducto(idDelProducto) {
             const confirmacion = confirm("¿Estás seguro de que quieres eliminar este producto?");
             if (confirmacion) {
@@ -235,7 +239,7 @@
             }
         }
 
-        // 5. LÓGICA PARA VER LAS VENTAS (Igual)
+        // 5. LÓGICA PARA VER LAS VENTAS 
         async function cargarVentas() {
             try {
                 const respuesta = await fetch('/api/admin/ordenes');
@@ -256,7 +260,12 @@
 
                     htmlVentas += `
                     <div style="background: white; padding: 20px; margin-bottom: 20px; border-radius: 8px; border-left: 5px solid #28a745; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
-                        <p style="margin: 5px 0;"><strong>👤 Cliente:</strong> ${venta.nombre}</p>
+                        <div style="display: flex; justify-content: space-between; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 10px;">
+                            <strong style="font-size: 1.1rem;">Orden #${venta.id}</strong>
+                            <span style="color: #666;">${new Date(venta.fecha).toLocaleString()}</span>
+                        </div>
+                        <p style="margin: 5px 0;"><strong>👤 Cliente:</strong> ${venta.nombre} (${venta.email})</p>
+                        <p style="margin: 5px 0;"><strong>📍 Dirección:</strong> ${venta.direccion}</p>
                         <p style="margin: 5px 0; color: #28a745;"><strong>💰 Total: $${venta.total.toFixed(2)}</strong></p>
                         <div style="margin-top: 15px; background: #f9f9f9; padding: 10px;">
                             <ul style="margin: 0;">${listaArticulos}</ul>
