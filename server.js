@@ -65,7 +65,7 @@ app.post('/api/crear-pago', async (req, res) => {
         });
 
         // 3. El banco nos responde con un Link. Se lo mandamos a la página web.
-        res.json({ success: true, link_de_pago: respuestaBanco.sandbox_init_point });
+        res.json({ success: true, link_de_pago: respuestaBanco.init_point });
 
     } catch (error) {
         console.error("🚨 Error en el cajero virtual:", error);
