@@ -45,7 +45,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
 
         // ======================================================= //
-        // 2. A PARTIR DE AQUÍ ES TU CÓDIGO VISUAL INTACTO         //
+        // 2. LÓGICA VISUAL Y MULTIMEDIA (FOTOS Y VIDEOS)          //
         // ======================================================= //
         
         // Llenar la información básica
@@ -63,24 +63,80 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         document.getElementById('product-description').innerText = product.description;
         document.getElementById('product-composition').innerText = product.composition;
-        document.getElementById('main-product-image').src = product.images[0];
         document.title = `${product.name} - Societa Di Calcio`;
 
-        // Galería de miniaturas
+        // Lógica de Galería (Fotos y Videos)
+        const mainImageContainer = document.querySelector('.main-image-container');
         const thumbnailContainer = document.querySelector('.thumbnail-container');
-        product.images.forEach((imgSrc, index) => {
-            const thumb = document.createElement('img');
-            thumb.src = imgSrc;
-            thumb.classList.add('thumbnail');
-            if (index === 0) thumb.classList.add('active');
-            thumb.addEventListener('click', () => {
-                document.getElementById('main-product-image').src = imgSrc;
-                document.querySelectorAll('.thumbnail').forEach(t => t.classList.remove('active'));
-                thumb.classList.add('active');
+        thumbnailContainer.innerHTML = ''; // Limpiar por si acaso
+
+        // Función para cambiar la imagen/video principal
+        const actualizarMedioPrincipal = (src) => {
+            mainImageContainer.innerHTML = ''; // Limpiar el contenedor principal
+            const esVideo = src.toLowerCase().endsWith('.mp4');
+
+            if (esVideo) {
+                const videoEl = document.createElement('video');
+                videoEl.src = src;
+                videoEl.id = 'main-product-image';
+                videoEl.autoplay = true;
+                videoEl.loop = true;
+                videoEl.muted = true;
+                videoEl.playsInline = true;
+                videoEl.style.width = '100%';
+                videoEl.style.height = 'auto';
+                videoEl.style.objectFit = 'cover';
+                mainImageContainer.appendChild(videoEl);
+            } else {
+                const imgEl = document.createElement('img');
+                imgEl.src = src;
+                imgEl.id = 'main-product-image';
+                imgEl.alt = product.name;
+                imgEl.style.width = '100%';
+                imgEl.style.height = 'auto';
+                imgEl.style.objectFit = 'cover';
+                imgEl.style.transition = 'transform 0.2s ease-out';
+                mainImageContainer.appendChild(imgEl);
+            }
+        };
+
+        // Pintar el primer elemento al cargar la página
+        if (product.images && product.images.length > 0) {
+            actualizarMedioPrincipal(product.images[0]);
+        }
+
+        // Crear las miniaturas (Thumbnails)
+        if (product.images) {
+            product.images.forEach((mediaSrc, index) => {
+                const esVideo = mediaSrc.toLowerCase().endsWith('.mp4');
+                let thumb;
+
+                if (esVideo) {
+                    thumb = document.createElement('video');
+                    thumb.src = mediaSrc;
+                    thumb.muted = true; // El thumbnail de video debe estar mudo
+                } else {
+                    thumb = document.createElement('img');
+                    thumb.src = mediaSrc;
+                }
+
+                thumb.classList.add('thumbnail');
+                if (index === 0) thumb.classList.add('active');
+
+                thumb.addEventListener('click', () => {
+                    actualizarMedioPrincipal(mediaSrc);
+                    document.querySelectorAll('.thumbnail').forEach(t => t.classList.remove('active'));
+                    thumb.classList.add('active');
+                });
+
+                thumbnailContainer.appendChild(thumb);
             });
-            thumbnailContainer.appendChild(thumb);
-        });
-        
+        }
+
+        // ======================================================= //
+        // 3. LÓGICA DE CARRITO, TALLAS Y ZOOM                     //
+        // ======================================================= //
+
         // REFERENCIAS A LOS BOTONES
         const tallasBtns = document.querySelectorAll('.tallas button');
         const urgencyMsg = document.getElementById('urgency-message');
@@ -110,7 +166,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                     btn.classList.add('selected');
 
                     const selectedSize = btn.innerText;
-                    const stockAvailable = product.stock[selectedSize];
+                    // Proteger por si la talla no existe en el registro
+                    const stockAvailable = product.stock[selectedSize] || 0; 
 
                     if (urgencyMsg && addToCartButton) {
                         urgencyMsg.classList.remove('hidden');
@@ -172,8 +229,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                     const selectedSize = selectedSizeBtn.innerText;
                     const quantity = parseInt(quantityValue.innerText);
                     
-                    // Asegúrate de que la función addToCart global esté disponible
-                    addToCart(productId, product.name, product.price, product.images[0], quantity, selectedSize);
+                    // Al carrito siempre mandamos la foto 1, aunque sea video para que no se rompa la vista del cajero
+                    const imagenCarrito = product.images[0].toLowerCase().endsWith('.mp4') && product.images.length > 1 ? product.images[1] : product.images[0];
+
+                    addToCart(productId, product.name, product.price, imagenCarrito, quantity, selectedSize);
                 });
             }
         } 
@@ -193,12 +252,16 @@ document.addEventListener('DOMContentLoaded', async () => {
                         relatedPriceDisplay = `<span style="color: #ff8c00; font-weight: 700; font-size: 0.9rem; text-transform: uppercase;">Próximamente</span>`;
                     }
 
+                    // Prevenir que un video rompa los productos relacionados
+                    const imgPrincipal = relatedProduct.images[0].toLowerCase().endsWith('.mp4') ? 'logo SC sin fondo.png' : relatedProduct.images[0];
+                    const imgHover = relatedProduct.images.length > 1 && !relatedProduct.images[1].toLowerCase().endsWith('.mp4') ? relatedProduct.images[1] : imgPrincipal;
+
                     const card = `
                         <a href="product.html?product=${relatedId}" class="product-card-link">
                             <div class="product-card">
                                 <div class="product-image-container">
-                                    <img src="${relatedProduct.images[0]}" alt="${relatedProduct.name}" class="main-img">
-                                    <img src="${relatedProduct.images.length > 1 ? relatedProduct.images[1] : relatedProduct.images[0]}" alt="${relatedProduct.name}" class="hover-img">
+                                    <img src="${imgPrincipal}" alt="${relatedProduct.name}" class="main-img">
+                                    <img src="${imgHover}" alt="${relatedProduct.name}" class="hover-img">
                                 </div>
                                 <div class="product-info">
                                     <h3>${relatedProduct.name}</h3>
@@ -211,40 +274,49 @@ document.addEventListener('DOMContentLoaded', async () => {
             });
         }
 
-        // LÓGICA DE ZOOM MANUAL
+        // LÓGICA DE ZOOM MANUAL (Modificada para ignorar videos)
         const zoomContainer = document.querySelector('.main-image-container');
-        const mainImage = document.getElementById('main-product-image');
 
-        if (zoomContainer && mainImage) {
+        if (zoomContainer) {
             let isZoomed = false;
-            const panImage = (e) => {
-                if (!isZoomed) return; 
+
+            const panImage = (e, mainMedia) => {
+                if (!isZoomed || mainMedia.tagName !== 'IMG') return; 
                 const rect = zoomContainer.getBoundingClientRect();
                 const x = ((e.clientX - rect.left) / rect.width) * 100;
                 const y = ((e.clientY - rect.top) / rect.height) * 100;
-                mainImage.style.transformOrigin = `${x}% ${y}%`;
+                mainMedia.style.transformOrigin = `${x}% ${y}%`;
             };
 
             zoomContainer.addEventListener('click', (e) => {
+                const mainMedia = document.getElementById('main-product-image');
+                if (!mainMedia || mainMedia.tagName !== 'IMG') return; // Si es video, cancelamos el zoom
+
                 isZoomed = !isZoomed;
                 if (isZoomed) {
-                    mainImage.style.transform = 'scale(2)';
-                    mainImage.style.cursor = 'zoom-out';
-                    panImage(e); 
+                    mainMedia.style.transform = 'scale(2)';
+                    mainMedia.style.cursor = 'zoom-out';
+                    panImage(e, mainMedia); 
                 } else {
-                    mainImage.style.transform = 'scale(1)';
-                    mainImage.style.transformOrigin = 'center center';
-                    mainImage.style.cursor = 'zoom-in';
+                    mainMedia.style.transform = 'scale(1)';
+                    mainMedia.style.transformOrigin = 'center center';
+                    mainMedia.style.cursor = 'zoom-in';
                 }
             });
 
-            zoomContainer.addEventListener('mousemove', panImage);
+            zoomContainer.addEventListener('mousemove', (e) => {
+                const mainMedia = document.getElementById('main-product-image');
+                if (mainMedia) panImage(e, mainMedia);
+            });
 
             zoomContainer.addEventListener('mouseleave', () => {
+                const mainMedia = document.getElementById('main-product-image');
+                if (!mainMedia || mainMedia.tagName !== 'IMG') return;
+                
                 isZoomed = false;
-                mainImage.style.transform = 'scale(1)';
-                mainImage.style.transformOrigin = 'center center';
-                mainImage.style.cursor = 'zoom-in';
+                mainMedia.style.transform = 'scale(1)';
+                mainMedia.style.transformOrigin = 'center center';
+                mainMedia.style.cursor = 'zoom-in';
             });
         }
 
