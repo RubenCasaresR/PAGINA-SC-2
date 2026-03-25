@@ -40,26 +40,31 @@ function renderizarCuadricula(productos) {
         // 1. Calculamos si hay inventario en la bodega
         let totalStock = 0;
         if (producto.stock) {
-            // Sumamos todas las piezas de todas las tallas
             totalStock = Object.values(producto.stock).reduce((a, b) => a + b, 0);
         }
         
         // 2. Si el stock es 0, activamos el modo "Próximamente"
         const esProximamente = (totalStock === 0 || producto.status === 'coming_soon');
 
-        // 3. Formateamos el precio o ponemos el texto de expectativa
+        // 3. Formateamos el precio
         const priceDisplay = esProximamente ? `<span class="coming-soon-text">Lanzamiento Oficial</span>` : `$${producto.precio.toFixed(2)}`;
 
-        // 4. Si no hay stock, el link no te deja hacer clic
+        // 4. Link bloqueado si no hay stock
         const linkDestino = esProximamente ? 'javascript:void(0)' : `product.html?product=${producto.id}`;
 
-        // Creamos la tarjeta HTML con el velo oscuro integrado
+        // 5. MAGIA PARA LAS DOS FOTOS (Principal y la que aparece al pasar el mouse)
+        // Revisamos si el producto tiene la nueva lista de imágenes, si no, usamos la vieja
+        const arrayFotos = producto.imagenes || [producto.imagen];
+        const foto1 = arrayFotos[0] || 'logo SC sin fondo.png'; // Foto principal
+        const foto2 = arrayFotos.length > 1 ? arrayFotos[1] : foto1; // Segunda foto (o repite la 1 si solo hay una)
+
+        // Creamos la tarjeta HTML
         const cardHTML = `
             <a href="${linkDestino}" class="product-card-link ${esProximamente ? 'proximamente-link' : ''}">
                 <div class="product-card filterDiv novedades-cat ${esProximamente ? 'is-coming-soon' : ''}">
                     <div class="product-image-container">
-                        <img src="${producto.imagen}" alt="${producto.nombre}" class="main-img" loading="lazy">
-                        <img src="${producto.imagen}" alt="${producto.nombre}" class="hover-img" loading="lazy">
+                        <img src="${foto1}" alt="${producto.nombre}" class="main-img" loading="lazy">
+                        <img src="${foto2}" alt="${producto.nombre}" class="hover-img" loading="lazy">
                         
                         ${esProximamente ? '<div class="coming-soon-overlay"><span>Próximamente</span></div>' : ''}
                     </div>
