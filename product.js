@@ -260,8 +260,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                         <a href="product.html?product=${relatedId}" class="product-card-link">
                             <div class="product-card">
                                 <div class="product-image-container">
-                                    <img src="${imgPrincipal}" alt="${relatedProduct.name}" class="main-img">
-                                    <img src="${imgHover}" alt="${relatedProduct.name}" class="hover-img">
+                                    <img src="${imgPrincipal}" alt="${relatedProduct.name}" class="main-img" loading="lazy">
+                                    <img src="${imgHover}" alt="${relatedProduct.name}" class="hover-img" loading="lazy">
                                 </div>
                                 <div class="product-info">
                                     <h3>${relatedProduct.name}</h3>
