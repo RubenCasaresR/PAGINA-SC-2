@@ -1498,31 +1498,35 @@ body.no-scroll {
     cursor: default;
 }
 /* ========================================== */
-/* CORRECCIÓN DE COLORES EN EL CARRITO        */
+/* TINTA NEGRA ABSOLUTA PARA EL CARRITO       */
 /* ========================================== */
 
-/* Nombre de la playera en el carrito */
-.cart-drawer-items h3,
-.cart-item-info h3,
-.cart-item h3 {
-    color: #000000 !important; /* Negro puro y elegante */
-    font-weight: 700 !important; /* Letra gruesa (negrita) */
-    font-size: 1rem !important;
+/* Atacamos cualquier texto dentro de la lista del carrito */
+#cart-drawer-items *,
+#cart-drawer-items h1,
+#cart-drawer-items h2,
+#cart-drawer-items h3,
+#cart-drawer-items p,
+#cart-drawer-items span,
+#cart-drawer-items div {
+    color: #000000 !important;
     opacity: 1 !important;
+    text-shadow: none !important;
 }
 
-/* Letras de "Subtotal" y los precios finales */
-.drawer-summary-row span,
+/* Forzamos el grosor de la letra del producto */
+.cart-item-title,
+.cart-item-name,
+.cart-product-title {
+    font-weight: 700 !important;
+    font-size: 1rem !important;
+}
+
+/* Subtotal oscuro y contundente */
 #drawer-subtotal,
-.cart-summary h3 {
-    color: #000000 !important; 
+.drawer-summary-row span,
+.drawer-summary-row div {
+    color: #000000 !important;
     font-weight: 700 !important;
     opacity: 1 !important;
-}
-
-/* Asegurar que el precio individual de la prenda también resalte */
-.cart-drawer-items .price,
-.cart-item-info .price {
-    color: #333333 !important; /* Un gris muy oscuro casi negro */
-    font-weight: bold !important;
 }
