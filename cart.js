@@ -1,8 +1,8 @@
 // cart.js
 
 // CONFIGURACIÓN DE ENVÍO GRATIS
-const FREE_SHIPPING_THRESHOLD = 0;
-const STANDARD_SHIPPING_COST = 0;
+const FREE_SHIPPING_THRESHOLD = 1500.00;
+const STANDARD_SHIPPING_COST = 99.00;
 
 document.addEventListener('DOMContentLoaded', () => {
     updateCartIcon();
