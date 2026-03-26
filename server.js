@@ -56,11 +56,15 @@ app.post('/api/crear-pago', async (req, res) => {
             body: {
                 items: articulosBancarios,
                 back_urls: {
-                    success: "http://localhost:3000/thank-you.html",
-                    failure: "http://localhost:3000/checkout.html",
-                    pending: "http://localhost:3000/checkout.html"
+                    // 👇 CAMBIAMOS LOCALHOST POR TU DOMINIO REAL 👇
+                    success: "https://societadicalcio.com/thank-you.html",
+                    failure: "https://societadicalcio.com/checkout.html",
+                    pending: "https://societadicalcio.com/checkout.html"
+                },
+                // 👇 ESTA ES LA MAGIA PARA QUE PIDA LA DIRECCIÓN 👇
+                shipments: {
+                    mode: "not_specified"
                 }
-                // 🛑 ELIMINAMOS auto_return AQUI PARA QUE EL BANCO NO NOS BLOQUEE
             }
         });
 
