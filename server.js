@@ -61,9 +61,11 @@ app.post('/api/crear-pago', async (req, res) => {
                     failure: "https://societadicalcio.com/checkout.html",
                     pending: "https://societadicalcio.com/checkout.html"
                 },
-                // 👇 ESTA ES LA MAGIA PARA QUE PIDA LA DIRECCIÓN 👇
+                // 👇 ESTA ES LA REGLA ESTRICTA PARA ENVÍOS FÍSICOS 👇
                 shipments: {
-                    mode: "not_specified"
+                    mode: "not_specified",
+                    local_pickup: false, // Le decimos que NO se recoge en local
+                    cost: 0 // Si quieres cobrar envío, cambia el 0 por 99, 150, etc.
                 }
             }
         });
