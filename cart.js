@@ -288,8 +288,8 @@ function renderCheckoutSummary() {
 // ========================================== //
 // ====== BOTÓN FINAL DE PAGO (MERCADO PAGO)  //
 // ========================================== //
-async function procesarPago(event) {
-    event.preventDefault(); 
+function procesarPago(event) {
+    if (event) event.preventDefault(); 
 
     const cart = JSON.parse(localStorage.getItem('shoppingCart')) || [];
     
@@ -298,52 +298,6 @@ async function procesarPago(event) {
         return;
     }
 
-    // 1. Buscamos las cajas de texto en tu HTML
-    const nombreInput = document.getElementById('cliente-nombre');
-    const emailInput = document.getElementById('cliente-email');
-    const dirInput = document.getElementById('cliente-direccion');
-
-    // Obligamos al cliente a llenar sus datos
-    if (nombreInput && emailInput && dirInput) {
-        if (!nombreInput.value || !emailInput.value || !dirInput.value) {
-            alert("Por favor, llena tus datos de envío antes de pagar.");
-            return;
-        }
-    }
-
-    // 2. Empacamos quién compra y qué compra (¡Aquí definimos ordenCompleta!)
-    const ordenCompleta = {
-        cliente: {
-            nombre: nombreInput ? nombreInput.value : "Cliente de Mostrador",
-            email: emailInput ? emailInput.value : "sin-correo@test.com",
-            direccion: dirInput ? dirInput.value : "Recogida en Tienda"
-        },
-        carrito: cart
-    };
-
-    try {
-        // 3. Le tocamos la puerta al nuevo Cajero Virtual (Mercado Pago)
-        const respuesta = await fetch('/api/crear-pago', {
-            method: 'POST', 
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(ordenCompleta) // Ahora sí sabe qué mandar
-        });
-
-        const resultado = await respuesta.json();
-
-        if (resultado.success) {
-            console.log("✅ El banco autorizó el ticket. Redirigiendo a Mercado Pago...");
-            // Vaciamos el carrito local
-            localStorage.removeItem('shoppingCart'); 
-            
-            // 🚀 ¡MAGIA! Mandamos al cliente a la pantalla azul de cobro
-            window.location.href = resultado.link_de_pago; 
-        } else {
-            alert("Error al contactar con el banco: " + (resultado.error || "Desconocido"));
-        }
-        
-    } catch (error) {
-        console.error("🚨 Error al procesar el pago:", error);
-        alert("Hubo un problema de conexión con la caja. Por favor, intenta de nuevo.");
-    }
+    // 🚀 Cerramos el carrito lateral y mandamos al cliente a la página de envíos
+    window.location.href = "checkout.html"; 
 }

@@ -3,109 +3,111 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Checkout - Societa Di Calcio</title>
+    <title>Envío | Societa Di Calcio</title>
     <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* Diseño premium para la zona de pago */
+        .checkout-container { max-width: 500px; margin: 60px auto; padding: 20px; font-family: 'Helvetica Neue', Arial, sans-serif; }
+        .checkout-container h1 { text-align: center; margin-bottom: 30px; font-size: 1.5rem; text-transform: uppercase; letter-spacing: 2px; }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 8px; font-weight: bold; font-size: 0.85rem; color: #000; text-transform: uppercase; }
+        .form-group input { width: 100%; padding: 14px; border: 1px solid #ddd; border-radius: 4px; font-size: 1rem; box-sizing: border-box; }
+        .form-group input:focus { border-color: #000; outline: none; }
+        .btn-pagar { width: 100%; padding: 16px; background-color: #000; color: #fff; border: none; font-size: 1rem; font-weight: bold; cursor: pointer; text-transform: uppercase; letter-spacing: 1.5px; transition: background 0.3s; margin-top: 10px; }
+        .btn-pagar:hover { background-color: #333; }
+    </style>
 </head>
 <body>
-    <header class="main-header">
-        <div class="logo">
-            <a href="index.html"><img src="logo SC sin fondo.png" width="150" alt="Logo de la Marca"></a>
-        </div>
-        <nav class="main-nav">
-            <a href="index.html#colecciones">Colecciones</a>
-        </nav>
-        <div class="cart-icon">
-            <a href="carrito.html">🛒 Carrito (0)</a>
-        </div>
-    </header>
+    <div class="checkout-container">
+        <h1>Detalles de Envío</h1>
+        <form id="checkout-form">
+            <div class="form-group">
+                <label for="nombre">Nombre Completo</label>
+                <input type="text" id="nombre" required placeholder="Ej. Rubén Hernández">
+            </div>
+            <div class="form-group">
+                <label for="email">Correo Electrónico</label>
+                <input type="email" id="email" required placeholder="tu@correo.com">
+            </div>
+            <div class="form-group">
+                <label for="calle">Calle, Número y Cruzamientos</label>
+                <input type="text" id="calle" required placeholder="Ej. Av. Patria 123, entre X e Y">
+            </div>
+            <div class="form-group">
+                <label for="colonia">Colonia / Fraccionamiento</label>
+                <input type="text" id="colonia" required placeholder="Ej. Puerta de Hierro">
+            </div>
+            <div class="form-group">
+                <label for="ciudad">Ciudad y Estado</label>
+                <input type="text" id="ciudad" required placeholder="Ej. Zapopan, Jalisco">
+            </div>
+            <div class="form-group">
+                <label for="cp">Código Postal</label>
+                <input type="text" id="cp" required placeholder="Ej. 45116">
+            </div>
+            <button type="submit" class="btn-pagar" id="btn-submit">Proceder al Pago Seguro</button>
+        </form>
+    </div>
 
-    <main class="checkout-page-main">
-        <h1>Finalizar Compra</h1>
-        <div class="checkout-layout">
+    <script>
+        document.getElementById('checkout-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
             
-            <div class="checkout-form">
-                <div class="checkout-form-container" style="background: #f9f9f9; padding: 25px; border-radius: 8px; margin-bottom: 20px;">
-                    <h3 style="margin-top: 0; margin-bottom: 20px; font-size: 1.2rem; border-bottom: 2px solid #000; padding-bottom: 10px;">Datos de Envío</h3>
-                    
-                    <div style="margin-bottom: 15px;">
-                        <label for="cliente-nombre" style="display: block; font-weight: bold; margin-bottom: 5px;">Nombre Completo:</label>
-                        <input type="text" id="cliente-nombre" placeholder="Ej. Rubén..." required style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
-                    </div>
+            const btn = document.getElementById('btn-submit');
+            btn.innerText = "Procesando...";
+            btn.disabled = true;
 
-                    <div style="margin-bottom: 15px;">
-                        <label for="cliente-email" style="display: block; font-weight: bold; margin-bottom: 5px;">Correo Electrónico:</label>
-                        <input type="email" id="cliente-email" placeholder="tu@correo.com" required style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
-                    </div>
+            // 1. Juntar toda la dirección en un solo texto
+            const direccionFisica = `${document.getElementById('calle').value}, Col. ${document.getElementById('colonia').value}, ${document.getElementById('ciudad').value}, CP: ${document.getElementById('cp').value}`;
 
-                    <div style="margin-bottom: 20px;">
-                        <label for="cliente-direccion" style="display: block; font-weight: bold; margin-bottom: 5px;">Dirección de Entrega:</label>
-                        <input type="text" id="cliente-direccion" placeholder="Calle, Número, Colonia, C.P., Ciudad, Estado" required style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
-                    </div>
-                </div>
+            const cliente = {
+                nombre: document.getElementById('nombre').value,
+                email: document.getElementById('email').value,
+                direccion: direccionFisica
+            };
 
-                <div style="text-align: center; padding: 20px; background-color: #e5f4fb; border-radius: 8px; border: 1px solid #009ee3; margin-bottom: 20px;">
-                    <i class="fas fa-shield-alt" style="color: #009ee3; font-size: 24px; margin-bottom: 10px;"></i>
-                    <h3 style="color: #009ee3; margin: 0 0 10px 0;">Pago Seguro</h3>
-                    <p style="margin: 0; font-size: 0.9rem; color: #333;">Al dar clic en pagar, serás redirigido a la plataforma oficial de <b>Mercado Pago</b> para completar tu compra con tarjeta, efectivo u otros medios.</p>
-                </div>
+            // 2. Leer el carrito actual
+            const carrito = JSON.parse(localStorage.getItem('carrito')) || [];
+            if(carrito.length === 0) {
+                alert("Tu carrito está vacío.");
+                window.location.href = "index.html";
+                return;
+            }
 
-                <button class="btn btn-comprar" style="width: 100%; font-size: 1.2rem; padding: 20px; background-color: #009ee3; color: white; border: none; border-radius: 4px; cursor: pointer;" onclick="procesarPago(event)">Ir a Pagar con Mercado Pago</button>
-            </div>
+            try {
+                // 3. Guardar los datos del cliente y su orden en tu base de datos
+                await fetch('/api/checkout', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ carrito: carrito, cliente: cliente })
+                });
 
-            <div class="order-summary">
-                <h2>Resumen del Pedido</h2>
-                <div id="checkout-items-container"></div>
-                <div class="checkout-totals" style="margin-top: 20px; border-top: 1px solid #EAE7DC; padding-top: 20px;">
-                    <div class="summary-row">
-                        <span>Subtotal</span>
-                        <span id="checkout-subtotal">$0.00</span>
-                    </div>
-                    <div class="summary-row">
-                        <span>Envío</span>
-                        <span id="checkout-shipping">Calculando...</span>
-                    </div>
-                    <div class="summary-total">
-                        <span>Total</span>
-                        <span id="checkout-total">$0.00</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </main>
-    
-    <footer id="contacto" class="main-footer">
-        <div class="footer-grid">
-            <div class="footer-column">
-                <h4>Societa Di Calcio</h4>
-                <p>Ropa inspirada en la pasión del fútbol, diseñada para el día a día.</p>
-            </div>
-            <div class="footer-column">
-                <h4>Soporte</h4>
-                <ul>
-                    <li><a href="faq.html">Preguntas Frecuentes</a></li>
-                    <li><a href="returns.html">Políticas de Devolución</a></li>
-                    <li><a href="terms.html">Términos y Condiciones</a></li>
-                </ul>
-            </div>
-            <div class="footer-column">
-                <h4>Síguenos</h4>
-                <div class="social-media">
-                    <a href="https://www.instagram.com/societadicalcio?igsh=MWM4NjZhbXh6ZDVkaQ==" target="_blank"><i class="fab fa-instagram"></i></a>
-                    <a href="https://www.tiktok.com/@societadicalcio?_t=ZS-90L4HyP5Aud&_r=1" target="_blank"><i class="fab fa-tiktok"></i></a>
-                    <a href="#" target="_blank"><i class="fab fa-facebook"></i></a>
-                </div>
-            </div>
-        </div>
-        <div class="footer-bottom">
-            <p>&copy; 2026 Societa Di Calcio. Todos los derechos reservados.</p>
-        </div>
-    </footer>
+                // 4. Solicitar el enlace de cobro al banco (Mercado Pago)
+                const respuestaMP = await fetch('/api/crear-pago', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ carrito: carrito })
+                });
+                
+                const datosMP = await respuestaMP.json();
 
-    <script src="cart.js"></script>
-    <script src="checkout.js"></script>
+                // 5. Redirigir a la pantalla de la tarjeta
+                if(datosMP.success) {
+                    window.location.href = datosMP.link_de_pago;
+                } else {
+                    alert("Error al conectar con la terminal bancaria.");
+                    btn.innerText = "Proceder al Pago Seguro";
+                    btn.disabled = false;
+                }
+            } catch(error) {
+                console.error("Error:", error);
+                alert("Hubo un problema procesando tu orden.");
+                btn.innerText = "Proceder al Pago Seguro";
+                btn.disabled = false;
+            }
+        });
+    </script>
 </body>
-</html> 
+</html>
 
    
