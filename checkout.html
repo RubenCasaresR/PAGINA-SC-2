@@ -8,19 +8,24 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         /* ========================================== */
-        /* DISEÑO PREMIUM DE LA ZONA DE PAGO          */
+        /* DISEÑO PREMIUM Y SIMÉTRICO                 */
         /* ========================================== */
         
-        /* Encabezado limpio y minimalista */
+        /* Encabezado: Centrado absoluto con Flexbox */
         .checkout-header {
-            text-align: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
             padding: 25px 0;
             border-bottom: 1px solid #eaeaea;
             background-color: #fff;
+            width: 100%;
         }
         .checkout-header img {
-            max-height: 70px; /* Tamaño elegante para el logo */
+            max-height: 70px;
             object-fit: contain;
+            display: block;
+            margin: 0 auto;
         }
 
         .checkout-wrapper {
@@ -31,15 +36,23 @@
             display: flex;
             gap: 50px;
             align-items: flex-start;
-            min-height: 60vh; /* Para empujar el footer hacia abajo */
+            min-height: 60vh;
         }
 
         /* Columna Izquierda: Formulario */
-        .checkout-form-container { flex: 1; }
-        .checkout-form-container h1 { margin-bottom: 30px; font-size: 1.5rem; text-transform: uppercase; letter-spacing: 2px; }
+        .checkout-form-container { flex: 1; width: 100%; }
+        
+        /* Título de Envío: Perfectamente centrado */
+        .checkout-form-container h1 { 
+            text-align: center; 
+            margin-bottom: 30px; 
+            font-size: 1.5rem; 
+            text-transform: uppercase; 
+            letter-spacing: 2px; 
+        }
         
         .form-group { margin-bottom: 20px; }
-        .form-group label { display: block; margin-bottom: 8px; font-weight: bold; font-size: 0.85rem; color: #000; text-transform: uppercase; }
+        .form-group label { display: block; margin-bottom: 8px; font-weight: bold; font-size: 0.85rem; color: #000; text-transform: uppercase; text-align: left; }
         .form-group input { width: 100%; padding: 14px; border: 1px solid #ccc; border-radius: 4px; font-size: 1rem; box-sizing: border-box; }
         .form-group input:focus { border-color: #000; outline: none; }
         
@@ -55,7 +68,7 @@
             position: sticky;
             top: 20px;
         }
-        .checkout-summary-container h2 { font-size: 1.1rem; text-transform: uppercase; margin-bottom: 20px; border-bottom: 1px solid #ddd; padding-bottom: 10px; }
+        .checkout-summary-container h2 { font-size: 1.1rem; text-transform: uppercase; margin-bottom: 20px; border-bottom: 1px solid #ddd; padding-bottom: 10px; text-align: center; }
         
         .summary-item { display: flex; align-items: center; gap: 15px; margin-bottom: 15px; }
         .summary-item img { width: 65px; height: 65px; object-fit: cover; border-radius: 4px; border: 1px solid #eee; }
@@ -64,9 +77,19 @@
         .summary-row { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 0.95rem; }
         .summary-row.total { font-weight: bold; font-size: 1.3rem; margin-top: 15px; border-top: 1px solid #ddd; padding-top: 15px; }
 
+        /* Comportamiento exacto en Celulares */
         @media (max-width: 800px) {
-            .checkout-wrapper { flex-direction: column-reverse; margin-top: 20px;}
-            .checkout-summary-container { width: 100%; box-sizing: border-box; position: static; margin-bottom: 30px;}
+            .checkout-wrapper { 
+                flex-direction: column-reverse; 
+                margin-top: 10px;
+                padding: 15px; /* Da un respiro a los lados en pantallas chicas */
+            }
+            .checkout-summary-container { 
+                width: 100%; 
+                box-sizing: border-box; 
+                position: static; 
+                margin-bottom: 30px;
+            }
         }
 
         /* Estilo para el Footer de Checkout */
@@ -74,6 +97,7 @@
             border-top: 1px solid #eaeaea;
             padding-bottom: 30px;
             background-color: #fff;
+            text-align: center; /* Asegura que el footer también esté centrado */
         }
     </style>
 </head>
