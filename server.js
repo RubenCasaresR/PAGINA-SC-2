@@ -99,7 +99,7 @@ app.post('/api/newsletter', (req, res) => {
             }
             return res.status(500).json({ success: false, error: "Error del servidor." });
         }
-        res.json({ success: true, message: "¡Bienvenido al club de Societa Di Calcio!" });
+        res.json({ success: true, message: "¡Bienvenido a la Società Di Calcio!" });
     });
 });
 // ========================================== //
