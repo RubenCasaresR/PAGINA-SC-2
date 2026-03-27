@@ -5,10 +5,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pago Seguro | Societa Di Calcio</title>
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         /* ========================================== */
-        /* DISEÑO PREMIUM DE DOS COLUMNAS             */
+        /* DISEÑO PREMIUM DE LA ZONA DE PAGO          */
         /* ========================================== */
+        
+        /* Encabezado limpio y minimalista */
+        .checkout-header {
+            text-align: center;
+            padding: 25px 0;
+            border-bottom: 1px solid #eaeaea;
+            background-color: #fff;
+        }
+        .checkout-header img {
+            max-height: 70px; /* Tamaño elegante para el logo */
+            object-fit: contain;
+        }
+
         .checkout-wrapper {
             max-width: 1100px;
             margin: 40px auto;
@@ -17,6 +31,7 @@
             display: flex;
             gap: 50px;
             align-items: flex-start;
+            min-height: 60vh; /* Para empujar el footer hacia abajo */
         }
 
         /* Columna Izquierda: Formulario */
@@ -34,15 +49,14 @@
         /* Columna Derecha: Resumen de la Orden */
         .checkout-summary-container {
             width: 400px;
-            background-color: #f9f9f9; /* Un gris muy elegante */
+            background-color: #f9f9f9;
             padding: 30px;
             border-radius: 8px;
-            position: sticky; /* Se queda pegado si el formulario es muy largo */
+            position: sticky;
             top: 20px;
         }
         .checkout-summary-container h2 { font-size: 1.1rem; text-transform: uppercase; margin-bottom: 20px; border-bottom: 1px solid #ddd; padding-bottom: 10px; }
         
-        /* Estilos para los productos (Tu cart.js usa estas clases) */
         .summary-item { display: flex; align-items: center; gap: 15px; margin-bottom: 15px; }
         .summary-item img { width: 65px; height: 65px; object-fit: cover; border-radius: 4px; border: 1px solid #eee; }
         
@@ -50,14 +64,27 @@
         .summary-row { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 0.95rem; }
         .summary-row.total { font-weight: bold; font-size: 1.3rem; margin-top: 15px; border-top: 1px solid #ddd; padding-top: 15px; }
 
-        /* Responsivo: Si lo ven en celular, el resumen se pasa para arriba o abajo */
         @media (max-width: 800px) {
-            .checkout-wrapper { flex-direction: column-reverse; } /* Pone el formulario abajo y el resumen arriba */
-            .checkout-summary-container { width: 100%; box-sizing: border-box; position: static; }
+            .checkout-wrapper { flex-direction: column-reverse; margin-top: 20px;}
+            .checkout-summary-container { width: 100%; box-sizing: border-box; position: static; margin-bottom: 30px;}
+        }
+
+        /* Estilo para el Footer de Checkout */
+        .checkout-footer {
+            border-top: 1px solid #eaeaea;
+            padding-bottom: 30px;
+            background-color: #fff;
         }
     </style>
 </head>
 <body>
+
+    <header class="checkout-header">
+        <a href="index.html">
+            <img src="logo SC sin fondo.png" alt="Societa Di Calcio"> 
+        </a>
+    </header>
+
     <div class="checkout-wrapper">
         
         <div class="checkout-form-container">
@@ -93,7 +120,6 @@
 
         <div class="checkout-summary-container">
             <h2>Resumen de tu Orden</h2>
-            
             <div id="checkout-items-container"></div>
             
             <div class="summary-totals">
@@ -111,15 +137,25 @@
                 </div>
             </div>
         </div>
-
     </div>
 
-    <script src="cart.js"></script>
+    <footer class="checkout-footer">
+        <div class="footer-bottom">
+            <p>&copy; 2026 Societa Di Calcio. Todos los derechos reservados.</p>
+            <div class="payment-methods">
+                <span class="mp-text">Procesado de forma segura por</span>
+                <img src="https://http2.mlstatic.com/frontend-assets/mp-web-navigation/ui-navigation/5.19.5/mercadopago/logo__small.png" alt="Mercado Pago" class="mp-logo">
+                <div class="card-icons">
+                    <i class="fab fa-cc-visa"></i>
+                    <i class="fab fa-cc-mastercard"></i>
+                    <i class="fab fa-cc-amex"></i>
+                </div>
+            </div>
+        </div>
+    </footer>
 
+    <script src="cart.js"></script>
     <script>
-        // ========================================== //
-        // ====== CONEXIÓN AL BANCO (NO TOCAR) ====== //
-        // ========================================== //
         document.getElementById('checkout-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             
@@ -143,14 +179,12 @@
             }
 
             try {
-                // 1. Guardar orden en tu base de datos
                 await fetch('/api/checkout', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ carrito: carrito, cliente: cliente })
                 });
 
-                // 2. Pedirle permiso a Mercado Pago
                 const respuestaMP = await fetch('/api/crear-pago', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -160,7 +194,7 @@
                 const datosMP = await respuestaMP.json();
 
                 if(datosMP.success) {
-                    window.location.href = datosMP.link_de_pago; // Viaje al banco
+                    window.location.href = datosMP.link_de_pago; 
                 } else {
                     alert("Error al conectar con la terminal bancaria.");
                     btn.innerText = "Proceder al Pago Seguro";
