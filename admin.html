@@ -294,61 +294,18 @@
         // ========================================== //
         // ====== DESCARGAR EXCEL DE CORREOS ======== //
         // ========================================== //
-        document.addEventListener('DOMContentLoaded', () => {
-            const btnDescargarCorreos = document.getElementById('btn-descargar-correos');
+        const btnDescargarCorreos = document.getElementById('btn-descargar-correos');
 
-            if (btnDescargarCorreos) {
-                btnDescargarCorreos.addEventListener('click', async () => {
-                    try {
-                        // 👇 EL TRUCO MILITAR ANTIBLOQUEO 👇
-                        // Le pegamos la hora exacta al enlace y le prohibimos usar la memoria
-                        const urlFresca = '/api/admin/suscriptores?hora=' + new Date().getTime();
-                        const response = await fetch(urlFresca, {
-                            method: 'GET',
-                            headers: {
-                                'Cache-Control': 'no-cache, no-store, must-revalidate',
-                                'Pragma': 'no-cache',
-                                'Expires': '0'
-                            }
-                        });
+        if (btnDescargarCorreos) {
+            btnDescargarCorreos.addEventListener('click', () => {
+                // Redirigimos al servidor para que nos entregue el archivo (evita cualquier bloqueo)
+                window.location.href = '/api/admin/descargar-csv?hora=' + Date.now();
+            });
+        }
 
-                        const suscriptores = await response.json();
-
-                        // Si de verdad está vacía, avisamos
-                        if (suscriptores.length === 0) {
-                            alert("Aún no tienes suscriptores en tu lista.");
-                            return;
-                        }
-
-                        // Armamos el archivo Excel (CSV)
-                        let csvContent = "ID,Correo Electronico,Fecha de Registro\n"; 
-                        
-                        suscriptores.forEach(fila => {
-                            csvContent += `${fila.id},${fila.email},${fila.fecha}\n`;
-                        });
-
-                        // Forzamos la descarga del archivo mágicamente
-                        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-                        const url = URL.createObjectURL(blob);
-                        
-                        const link = document.createElement("a");
-                        link.setAttribute("href", url);
-                        link.setAttribute("download", "Lista_Correos_SocietaDiCalcio.csv");
-                        document.body.appendChild(link);
-                        link.click();
-                        document.body.removeChild(link); 
-
-                    } catch (error) {
-                        console.error("Error al descargar la lista:", error);
-                        alert("Hubo un error al intentar descargar los correos.");
-                    }
-                });
-            }
-
-            // Ejecutar las funciones al cargar la página
-            cargarInventario();
-            cargarVentas();
-        });
+        // Ejecutar las funciones al cargar la página (Limpias y sin envolturas problemáticas)
+        cargarInventario();
+        cargarVentas();
     </script>
 </body>
 </html>

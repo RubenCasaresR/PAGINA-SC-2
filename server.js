@@ -196,14 +196,31 @@ app.post('/api/checkout', (req, res) => {
 // ======= PANEL DE ADMINISTRACIÓN ========== //
 // ========================================== //
 
-// Descargar la lista de correos del Newsletter
-app.get('/api/admin/suscriptores', (req, res) => {
+// ========================================== //
+// ====== DESCARGAR EXCEL DIRECTO =========== //
+// ========================================== //
+app.get('/api/admin/descargar-csv', (req, res) => {
     db.all("SELECT * FROM suscriptores ORDER BY fecha DESC", [], (err, rows) => {
         if (err) {
             console.error("🚨 Error al obtener suscriptores:", err.message);
-            return res.status(500).json({ error: err.message });
+            return res.status(500).send("Error del servidor");
         }
-        res.json(rows);
+        
+        // Si no hay nadie, mostramos alerta y lo regresamos al panel
+        if (rows.length === 0) {
+            return res.send("<script>alert('Aún no tienes suscriptores en tu lista.'); window.history.back();</script>");
+        }
+
+        // Armamos el Excel directamente en el cerebro del servidor
+        let csv = "ID,Correo Electronico,Fecha de Registro\n";
+        rows.forEach(fila => {
+            csv += `${fila.id},${fila.email},${fila.fecha}\n`;
+        });
+
+        // Forzamos la descarga infalible en el navegador
+        res.header('Content-Type', 'text/csv');
+        res.attachment('Lista_Correos_SocietaDiCalcio.csv');
+        return res.send(csv);
     });
 });
 
