@@ -89,17 +89,25 @@ app.post('/api/crear-pago', async (req, res) => {
 // ========================================== //
 app.post('/api/newsletter', (req, res) => {
     const { email } = req.body;
-    if (!email) return res.status(400).json({ success: false, error: "Correo requerido" });
+    if (!email) {
+        return res.status(400).json({ success: false, error: "Correo requerido" });
+    }
 
     const sql = "INSERT INTO suscriptores (email) VALUES (?)";
+    
     db.run(sql, [email], function(err) {
         if (err) {
+            // Si el error es porque el correo ya existe
             if (err.message.includes("UNIQUE")) {
                 return res.json({ success: false, error: "¡Este correo ya está en el club!" });
             }
+            // Para cualquier otro error de la base de datos
+            console.error("🚨 Error al guardar correo:", err.message);
             return res.status(500).json({ success: false, error: "Error del servidor." });
         }
-        res.json({ success: true, message: "¡Bienvenido a la Società Di Calcio!" });
+        
+        // Si todo sale bien, respondemos con éxito
+        return res.json({ success: true, message: "¡Bienvenido a la Società Di Calcio!" });
     });
 });
 // ========================================== //
