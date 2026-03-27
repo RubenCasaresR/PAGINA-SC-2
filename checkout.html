@@ -196,6 +196,9 @@
                 direccion: direccionFisica
             };
 
+            // Guardamos al cliente temporalmente para el recibo final
+            localStorage.setItem('clientePendiente', JSON.stringify(cliente));
+
             const carrito = JSON.parse(localStorage.getItem('shoppingCart')) || [];
             if(carrito.length === 0) {
                 alert("Tu carrito está vacío.");

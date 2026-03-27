@@ -72,10 +72,37 @@
 
     <script src="cart.js"></script>
     <script>
-        // Este pequeño script genera un número de orden aleatorio para darle realismo
         document.addEventListener('DOMContentLoaded', () => {
-            const randomNumber = Math.floor(10000 + Math.random() * 90000); // Genera número de 5 dígitos
+            // 1. Genera número de orden visual
+            const randomNumber = Math.floor(10000 + Math.random() * 90000); 
             document.getElementById('order-number').innerText = '#SDC-' + randomNumber;
+
+            // 2. EL MOTOR: Revisar si Mercado Pago nos mandó la señal de "aprobado"
+            const urlParams = new URLSearchParams(window.location.search);
+            const status = urlParams.get('status');
+
+            // Si el pago fue un éxito, enviamos el recibo
+            if (status === 'approved') {
+                const carrito = JSON.parse(localStorage.getItem('shoppingCart'));
+                const cliente = JSON.parse(localStorage.getItem('clientePendiente'));
+
+                if (carrito && cliente) {
+                    // Le ordenamos al servidor mandar el correo de lujo
+                    fetch('/api/enviar-recibo', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ carrito: carrito, cliente: cliente })
+                    }).then(() => {
+                        // Limpiamos la memoria para que el carrito vuelva a quedar vacío
+                        localStorage.removeItem('shoppingCart');
+                        localStorage.removeItem('clientePendiente');
+                        
+                        // Si tienes una función en cart.js que actualiza el número del carrito, la llamamos:
+                        if (typeof renderCart === 'function') renderCart();
+                        if (typeof updateCartCount === 'function') updateCartCount();
+                    }).catch(error => console.error("Error al enviar recibo:", error));
+                }
+            }
         });
     </script>
 </body>
