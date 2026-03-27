@@ -300,7 +300,8 @@
             if (btnDescargarCorreos) {
                 btnDescargarCorreos.addEventListener('click', async () => {
                     try {
-                        const response = await fetch('/api/admin/suscriptores');
+                        // El "?nocache" le hace creer al navegador que es una petición nueva y lo obliga a traer la lista fresca
+                        const response = await fetch('/api/admin/suscriptores?nocache=' + new Date().getTime());
                         const suscriptores = await response.json();
 
                         if (suscriptores.length === 0) {
