@@ -1,6 +1,17 @@
 const express = require('express');
 const path = require('path');
 const sqlite3 = require('sqlite3').verbose(); 
+const nodemailer = require('nodemailer'); // <-- INYECCIÓN 1
+
+// --- CONFIGURACIÓN DEL CARTERO VIRTUAL (HOTMAIL) ---
+const transporter = nodemailer.createTransport({
+    service: 'hotmail', // <-- El cambio clave está aquí
+    auth: {
+        user: 'societadicalcio@hotmail.com', // Pon tu correo real aquí
+        pass: 'odtjlcrgjpxgfszu', // La clave que sacaremos ens el Paso 2
+    }
+});
+ 
 
 const app = express();
 
@@ -173,6 +184,7 @@ app.post('/api/checkout', (req, res) => {
             return res.status(500).json({ success: false, error: err.message });
         }
 
+        // Restar del inventario
         carrito.forEach(item => {
             const sqlSelect = "SELECT stock FROM productos WHERE id = ?";
             db.get(sqlSelect, [item.id], (err, row) => {
@@ -186,6 +198,64 @@ app.post('/api/checkout', (req, res) => {
                     }
                 }
             });
+        });
+
+        // ========================================== //
+        // 📧 CREACIÓN Y ENVÍO DEL CORREO DE COMPRA   //
+        // ========================================== //
+        let listaHTML = '';
+        carrito.forEach(item => {
+            listaHTML += `
+                <li style="margin-bottom: 10px; border-bottom: 1px solid #eee; padding-bottom: 10px;">
+                    <strong>${item.quantity}x</strong> ${item.name} (Talla: <strong>${item.size}</strong>) <br>
+                    <span style="color: #555;">$${(item.price * item.quantity).toFixed(2)} MXN</span>
+                </li>`;
+        });
+
+        const mailOptions = {
+            from: '"Società Di Calcio" <tu_correo_de_la_tienda@gmail.com>',
+            to: cliente.email,
+            subject: 'Confirmación de tu pedido ⚽ - Società Di Calcio',
+            html: `
+                <div style="font-family: 'Helvetica Neue', Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden;">
+                    <div style="background-color: #000; padding: 20px; text-align: center;">
+                        <img src="https://societadicalcio.onrender.com/logo-fondo-verde.png" alt="Società Di Calcio" style="max-width: 120px; border-radius: 50%;">
+                    </div>
+                    
+                    <div style="padding: 30px;">
+                        <h2 style="color: #000; text-transform: uppercase; letter-spacing: 1px;">¡Gracias por tu compra, ${cliente.nombre}!</h2>
+                        <p style="color: #555; font-size: 16px; line-height: 1.5;">Hemos recibido tu orden y ya estamos preparando tus prendas para el envío. Aquí tienes el resumen de tu estilo:</p>
+                        
+                        <div style="background-color: #f9f9f9; padding: 20px; border-radius: 6px; margin: 25px 0;">
+                            <h3 style="margin-top: 0; border-bottom: 2px solid #000; padding-bottom: 10px; text-transform: uppercase; font-size: 14px;">Resumen de tu Orden</h3>
+                            <ul style="list-style: none; padding: 0; margin: 0;">
+                                ${listaHTML}
+                            </ul>
+                            <div style="margin-top: 15px; padding-top: 15px; border-top: 2px solid #000; font-size: 18px; font-weight: bold; text-align: right;">
+                                Total: $${total.toFixed(2)} MXN
+                            </div>
+                        </div>
+
+                        <div style="background-color: #f9f9f9; padding: 20px; border-radius: 6px;">
+                            <h3 style="margin-top: 0; border-bottom: 2px solid #000; padding-bottom: 10px; text-transform: uppercase; font-size: 14px;">Dirección de Envío 📍</h3>
+                            <p style="color: #333; margin: 0; font-size: 15px; line-height: 1.5;">${cliente.direccion}</p>
+                        </div>
+                    </div>
+
+                    <div style="background-color: #f4f4f4; padding: 20px; text-align: center; color: #777; font-size: 12px;">
+                        <p>Si tienes alguna pregunta sobre tu orden, simplemente responde a este correo.</p>
+                        <p><strong>Società Di Calcio</strong> | Vistiendo la pasión.</p>
+                    </div>
+                </div>
+            `
+        };
+
+        transporter.sendMail(mailOptions, (error, info) => {
+            if (error) {
+                console.error("🚨 Error al enviar el correo al cliente:", error);
+            } else {
+                console.log("✅ Correo de confirmación enviado a:", cliente.email);
+            }
         });
 
         res.json({ success: true, message: "¡Orden registrada con éxito!" });
