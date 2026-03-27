@@ -1,5 +1,3 @@
-// product.js
-
 document.addEventListener('DOMContentLoaded', async () => {
     const params = new URLSearchParams(window.location.search);
     const productId = params.get('product');
@@ -21,7 +19,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             return;
         }
 
-        // Traducimos las columnas de SQL a las variables que tu diseño ya usa
         const product = {
             id: productoBD.id,
             name: productoBD.nombre,
@@ -36,7 +33,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             stock: productoBD.stock
         };
 
-        // Descargamos el catálogo para la sección de "Productos Relacionados"
         const resRelacionados = await fetch('/api/productos');
         const catalogoCompleto = await resRelacionados.json();
         const products = {}; 
@@ -45,31 +41,28 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
 
         // ======================================================= //
-        // 2. LÓGICA VISUAL Y MULTIMEDIA (FOTOS Y VIDEOS)          //
+        // 2. LÓGICA VISUAL Y TEXTOS                               //
         // ======================================================= //
         
-        // Llenar la información básica
         document.getElementById('product-name').innerText = product.name;
         
         let priceDisplay = `$${product.price.toFixed(2)}`;
         if (product.oldPrice) {
             priceDisplay = `<span class="old-price">$${product.oldPrice.toFixed(2)}</span> $${product.price.toFixed(2)}`;
         }
-        
         if (product.status === 'coming_soon') {
             priceDisplay = ''; 
         }
         document.getElementById('product-price').innerHTML = priceDisplay;
-        
         document.getElementById('product-description').innerText = product.description;
         document.getElementById('product-composition').innerText = product.composition;
         document.title = `${product.name} - Societa Di Calcio`;
 
         // ======================================================= //
-        // 2. LÓGICA DE GALERÍA EDITORIAL (FOTOS APILADAS)         //
+        // 3. GALERÍA EDITORIAL LADO IZQUIERDO                     //
         // ======================================================= //
         const galleryContainer = document.getElementById('editorial-gallery-container');
-        galleryContainer.innerHTML = ''; // Limpiar por seguridad
+        galleryContainer.innerHTML = ''; 
 
         if (product.images && product.images.length > 0) {
             product.images.forEach(mediaSrc => {
@@ -87,57 +80,21 @@ document.addEventListener('DOMContentLoaded', async () => {
                     elementoMultimedia = document.createElement('img');
                     elementoMultimedia.src = mediaSrc;
                     elementoMultimedia.alt = product.name;
-                    elementoMultimedia.loading = "lazy"; // Para que cargue rápido
+                    elementoMultimedia.loading = "lazy"; 
                 }
                 galleryContainer.appendChild(elementoMultimedia);
             });
         }
 
-        // Pintar el primer elemento al cargar la página
-        if (product.images && product.images.length > 0) {
-            actualizarMedioPrincipal(product.images[0]);
-        }
-
-        // Crear las miniaturas (Thumbnails)
-        if (product.images) {
-            product.images.forEach((mediaSrc, index) => {
-                const esVideo = mediaSrc.toLowerCase().endsWith('.mp4');
-                let thumb;
-
-                if (esVideo) {
-                    thumb = document.createElement('video');
-                    thumb.src = mediaSrc;
-                    thumb.muted = true; // El thumbnail de video debe estar mudo
-                } else {
-                    thumb = document.createElement('img');
-                    thumb.src = mediaSrc;
-                }
-
-                thumb.classList.add('thumbnail');
-                if (index === 0) thumb.classList.add('active');
-
-                thumb.addEventListener('click', () => {
-                    actualizarMedioPrincipal(mediaSrc);
-                    document.querySelectorAll('.thumbnail').forEach(t => t.classList.remove('active'));
-                    thumb.classList.add('active');
-                });
-
-                thumbnailContainer.appendChild(thumb);
-            });
-        }
-
         // ======================================================= //
-        // 3. LÓGICA DE CARRITO, TALLAS Y ZOOM                     //
+        // 4. LÓGICA DE CARRITO Y TALLAS                           //
         // ======================================================= //
-
-        // REFERENCIAS A LOS BOTONES
         const tallasBtns = document.querySelectorAll('.tallas button');
         const urgencyMsg = document.getElementById('urgency-message');
         const addToCartButton = document.querySelector('.btn-comprar');
         const selectorTallasDiv = document.querySelector('.selector-tallas');
         const selectorCantidadDiv = document.querySelector('.selector-cantidad');
 
-        // LÓGICA DE BLOQUEO "PRÓXIMAMENTE"
         if (product.status === 'coming_soon') {
             if(selectorTallasDiv) selectorTallasDiv.style.display = 'none';
             if(selectorCantidadDiv) selectorCantidadDiv.style.display = 'none';
@@ -152,14 +109,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                 addToCartButton.style.border = "none";
             }
         } else {
-            // Selección de talla y Lógica de Escasez
             tallasBtns.forEach(btn => {
                 btn.addEventListener('click', () => {
                     tallasBtns.forEach(b => b.classList.remove('selected'));
                     btn.classList.add('selected');
 
                     const selectedSize = btn.innerText;
-                    // Proteger por si la talla no existe en el registro
                     const stockAvailable = product.stock[selectedSize] || 0; 
 
                     if (urgencyMsg && addToCartButton) {
@@ -191,7 +146,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 });
             });
 
-            // Selector de cantidad
             const decreaseBtn = document.getElementById('decrease-quantity');
             const increaseBtn = document.getElementById('increase-quantity');
             const quantityValue = document.getElementById('quantity-value');
@@ -209,7 +163,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 });
             }
 
-            // Botón Añadir al Carrito
             if (addToCartButton) {
                 addToCartButton.addEventListener('click', () => {
                     if(addToCartButton.disabled) return; 
@@ -222,15 +175,15 @@ document.addEventListener('DOMContentLoaded', async () => {
                     const selectedSize = selectedSizeBtn.innerText;
                     const quantity = parseInt(quantityValue.innerText);
                     
-                    // Al carrito siempre mandamos la foto 1, aunque sea video para que no se rompa la vista del cajero
                     const imagenCarrito = product.images[0].toLowerCase().endsWith('.mp4') && product.images.length > 1 ? product.images[1] : product.images[0];
-
                     addToCart(productId, product.name, product.price, imagenCarrito, quantity, selectedSize);
                 });
             }
         } 
 
-        // Cargar Productos Relacionados
+        // ======================================================= //
+        // 5. PRODUCTOS RELACIONADOS                               //
+        // ======================================================= //
         const relatedContainer = document.querySelector('#related-products .product-grid');
         if (relatedContainer && product.related) {
             product.related.forEach(relatedId => {
@@ -245,7 +198,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                         relatedPriceDisplay = `<span style="color: #ff8c00; font-weight: 700; font-size: 0.9rem; text-transform: uppercase;">Próximamente</span>`;
                     }
 
-                    // Prevenir que un video rompa los productos relacionados
                     const imgPrincipal = relatedProduct.images[0].toLowerCase().endsWith('.mp4') ? 'logo SC sin fondo.png' : relatedProduct.images[0];
                     const imgHover = relatedProduct.images.length > 1 && !relatedProduct.images[1].toLowerCase().endsWith('.mp4') ? relatedProduct.images[1] : imgPrincipal;
 
@@ -265,14 +217,14 @@ document.addEventListener('DOMContentLoaded', async () => {
                     relatedContainer.innerHTML += card;
                 }
             });
-        }  
+        }
 
     } catch (error) {
         console.error("🚨 Error cargando el producto:", error);
         mostrarError();
     }
 
-    // Panel Desplegable de Guía de Tallas
+    // Panel de Guía de Tallas
     const guiaTallasBtn = document.getElementById('guia-tallas-btn');
     const guiaTallasPanel = document.getElementById('guia-tallas-panel');
     const closePanelBtn = document.querySelector('.close-panel-btn');

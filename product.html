@@ -6,7 +6,7 @@
     <title>Producto - Societa Di Calcio</title>
     <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
 <body>
 
@@ -25,68 +25,65 @@
         </div>
     </header>
 
-    <main class="product-page-main editorial-layout">
-        <div class="editorial-gallery" id="editorial-gallery-container">
-            </div>
-
-        <div class="product-info-details editorial-info">
-            <h1 id="product-name">Nombre del Producto</h1>
-            <p class="price" id="product-price">$0.00</p>
-            
-            <div class="selector-tallas">
-                <p><strong>Talla:</strong></p>
-                <div class="tallas">
-                    <button>XS</button>
-                    <button>S</button>
-                    <button>M</button>
-                    <button>L</button>
-                    <button>XL</button>
+    <main class="product-page-main">
+        
+        <section class="editorial-layout">
+            <div class="editorial-gallery" id="editorial-gallery-container">
                 </div>
 
-                <p id="urgency-message" class="urgency-message hidden"></p>
+            <div class="product-info-details editorial-info">
+                <h1 id="product-name">Cargando...</h1>
+                <p class="price" id="product-price">$0.00</p>
+                
+                <div class="selector-tallas">
+                    <p><strong>Talla:</strong></p>
+                    <div class="tallas">
+                        <button>XS</button>
+                        <button>S</button>
+                        <button>M</button>
+                        <button>L</button>
+                        <button>XL</button>
+                    </div>
 
-                <button id="guia-tallas-btn" class="guia-tallas-toggle-btn">Guía de Tallas</button>
+                    <p id="urgency-message" class="urgency-message hidden"></p>
+                    <button id="guia-tallas-btn" class="guia-tallas-toggle-btn">Guía de Tallas</button>
 
-                <div id="guia-tallas-panel" class="guia-tallas-panel">
-                    <button class="close-panel-btn">&times;</button>
-                    <h4>Guía de Tallas (Oversized)</h4>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Talla</th>
-                                <th>Pecho (cm)</th>
-                                <th>Largo (cm)</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr><td>XS</td><td>46</td><td>66</td></tr>
-                            <tr><td>S</td><td>48</td><td>68</td></tr>
-                            <tr><td>M</td><td>54</td><td>70</td></tr>
-                            <tr><td>L</td><td>56</td><td>73</td></tr>
-                            <tr><td>XL</td><td>60</td><td>75</td></tr>
-                        </tbody>
-                    </table>
+                    <div id="guia-tallas-panel" class="guia-tallas-panel">
+                        <button class="close-panel-btn">&times;</button>
+                        <h4>Guía de Tallas (Oversized)</h4>
+                        <table>
+                            <thead>
+                                <tr><th>Talla</th><th>Pecho (cm)</th><th>Largo (cm)</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr><td>XS</td><td>46</td><td>66</td></tr>
+                                <tr><td>S</td><td>48</td><td>68</td></tr>
+                                <tr><td>M</td><td>54</td><td>70</td></tr>
+                                <tr><td>L</td><td>56</td><td>73</td></tr>
+                                <tr><td>XL</td><td>60</td><td>75</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="selector-cantidad">
+                    <p><strong>Cantidad:</strong></p>
+                    <div class="quantity-input">
+                        <button id="decrease-quantity">-</button>
+                        <span id="quantity-value">1</span>
+                        <button id="increase-quantity">+</button>
+                    </div>
+                </div>
+
+                <button class="btn btn-comprar">Añadir al Carrito</button>
+
+                <div class="product-extra-info">
+                    <p id="product-description"></p>
+                    <h3>Composición y Cuidado</h3>
+                    <p id="product-composition"></p>
                 </div>
             </div>
-
-            <div class="selector-cantidad">
-                <p><strong>Cantidad:</strong></p>
-                <div class="quantity-input">
-                    <button id="decrease-quantity">-</button>
-                    <span id="quantity-value">1</span>
-                    <button id="increase-quantity">+</button>
-                </div>
-            </div>
-
-            <button class="btn btn-comprar">Añadir al Carrito</button>
-
-            <div class="product-extra-info">
-                <p id="product-description">Aquí va la descripción del producto.</p>
-                <h3>Composición y Cuidado</h3>
-                <p id="product-composition">100% Algodón. Lavar a máquina con agua fría...</p>
-            </div>
-        </div>
-    </main>
+        </section>
 
         <section id="related-products" class="collections-section">
             <h2>También te podría gustar</h2>
@@ -119,17 +116,17 @@
             </div>
         </div>
         <div class="footer-bottom">
-        <p>&copy; 2026 Societa Di Calcio. Todos los derechos reservados.</p>
-        
-        <div class="payment-methods">
-            <img src="https://http2.mlstatic.com/frontend-assets/mp-web-navigation/ui-navigation/5.19.5/mercadopago/logo__small.png" alt="Mercado Pago" class="mp-logo">
-            <div class="card-icons">
-                <i class="fab fa-cc-visa"></i>
-                <i class="fab fa-cc-mastercard"></i>
-                <i class="fab fa-cc-amex"></i>
+            <p>&copy; 2026 Societa Di Calcio. Todos los derechos reservados.</p>
+            <div class="payment-methods">
+                <img src="https://http2.mlstatic.com/frontend-assets/mp-web-navigation/ui-navigation/5.19.5/mercadopago/logo__small.png" alt="Mercado Pago" class="mp-logo">
+                <div class="card-icons">
+                    <i class="fab fa-cc-visa"></i>
+                    <i class="fab fa-cc-mastercard"></i>
+                    <i class="fab fa-cc-amex"></i>
+                </div>
             </div>
         </div>
-    </div>
+    </footer>
 
     <div class="cart-overlay" id="cart-overlay"></div>
     <div class="cart-drawer" id="cart-drawer">
@@ -137,17 +134,13 @@
             <h2>Tu Carrito</h2>
             <button class="close-cart-btn" id="close-cart-btn">&times;</button>
         </div>
-        
         <div class="shipping-progress-container">
             <p id="shipping-message">Calculando envío...</p>
             <div class="progress-bar-bg">
                 <div class="progress-bar-fill" id="shipping-progress-fill"></div>
             </div>
         </div>
-
-        <div class="cart-drawer-items" id="cart-drawer-items">
-            </div>
-
+        <div class="cart-drawer-items" id="cart-drawer-items"></div>
         <div class="cart-drawer-footer">
             <div class="drawer-summary-row">
                 <span>Subtotal</span>
