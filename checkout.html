@@ -221,13 +221,13 @@
                     window.location.href = datosMP.link_de_pago; 
                 } else {
                     alert("Error al conectar con la terminal bancaria.");
-                    btn.innerText = "Proceder al Pago Seguro";
+                    btn.innerText = "Proceder al Pago";
                     btn.disabled = false;
                 }
             } catch(error) {
                 console.error("Error:", error);
                 alert("Hubo un problema procesando tu orden.");
-                btn.innerText = "Proceder al Pago Seguro";
+                btn.innerText = "Proceder al Pago";
                 btn.disabled = false;
             }
         });
