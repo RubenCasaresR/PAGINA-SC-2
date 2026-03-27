@@ -118,6 +118,51 @@
             </div>
         </section>
     </main>
+    <section class="newsletter-section">
+        <div class="newsletter-container">
+            <h2>Únete al Club</h2>
+            <p>Recibe acceso anticipado a nuevos drops, promociones exclusivas y noticias de Societa Di Calcio antes que nadie.</p>
+            <form id="newsletter-form" class="newsletter-form">
+                <input type="email" id="newsletter-email" placeholder="Tu correo electrónico" required>
+                <button type="submit" class="btn-newsletter">Suscribirme</button>
+            </form>
+            <p id="newsletter-message" class="newsletter-message"></p>
+        </div>
+    </section>
+
+    <script>
+        document.getElementById('newsletter-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const emailInput = document.getElementById('newsletter-email');
+            const messageEl = document.getElementById('newsletter-message');
+            const btn = document.querySelector('.btn-newsletter');
+            
+            btn.innerText = "Enviando...";
+            btn.disabled = true;
+
+            try {
+                const response = await fetch('/api/newsletter', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: emailInput.value })
+                });
+                
+                const data = await response.json();
+                
+                messageEl.innerText = data.message || data.error;
+                messageEl.className = data.success ? "newsletter-message success" : "newsletter-message error";
+                
+                if (data.success) emailInput.value = ''; // Limpia la cajita si tuvo éxito
+                
+            } catch (error) {
+                messageEl.innerText = "Hubo un error de conexión.";
+                messageEl.className = "newsletter-message error";
+            } finally {
+                btn.innerText = "Suscribirme";
+                btn.disabled = false;
+            }
+        });
+    </script>
     
     <footer id="contacto" class="main-footer">
     <div class="footer-grid">

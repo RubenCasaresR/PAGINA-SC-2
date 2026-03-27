@@ -1584,3 +1584,72 @@ body.no-scroll {
         margin-bottom: 5px; /* Menos espacio en celular */
     }
 }
+/* ========================================== */
+/* DISEÑO PREMIUM DEL NEWSLETTER              */
+/* ========================================== */
+.newsletter-section {
+    background-color: #f9f9f9;
+    padding: 70px 20px;
+    text-align: center;
+    border-top: 1px solid #eaeaea;
+}
+.newsletter-container {
+    max-width: 600px;
+    margin: 0 auto;
+}
+.newsletter-container h2 {
+    font-size: 2rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 15px;
+}
+.newsletter-container p {
+    color: #555;
+    margin-bottom: 30px;
+    font-size: 1rem;
+    line-height: 1.5;
+}
+.newsletter-form {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+.newsletter-form input {
+    flex: 1;
+    padding: 16px;
+    border: 1px solid #ccc;
+    font-family: inherit;
+    font-size: 1rem;
+    max-width: 350px;
+}
+.newsletter-form input:focus {
+    border-color: #000;
+    outline: none;
+}
+.btn-newsletter {
+    padding: 16px 35px;
+    background-color: #000;
+    color: #fff;
+    border: none;
+    font-size: 1rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+.btn-newsletter:hover { background-color: #333; }
+
+.newsletter-message {
+    margin-top: 15px;
+    font-weight: bold;
+    font-size: 0.95rem;
+    height: 20px; /* Evita que la página salte al aparecer el texto */
+}
+.newsletter-message.success { color: #28a745; }
+.newsletter-message.error { color: #d9534f; }
+
+@media (max-width: 600px) {
+    .newsletter-form { flex-direction: column; align-items: stretch; }
+    .newsletter-form input, .btn-newsletter { max-width: 100%; }
+}

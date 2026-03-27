@@ -14,7 +14,12 @@ const db = new sqlite3.Database('./tienda.sqlite', sqlite3.OPEN_READWRITE, (err)
     if (err) console.error("Error al conectar a la BD:", err.message);
     else console.log("📦 Bóveda de datos conectada con éxito.");
 });
-
+// ======= CREAR TABLA DE NEWSLETTER SI NO EXISTE =======
+db.run(`CREATE TABLE IF NOT EXISTS suscriptores (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    email TEXT UNIQUE NOT NULL,
+    fecha DATETIME DEFAULT CURRENT_TIMESTAMP
+)`);
 // Middlewares: Para que el servidor lea los archivos y entienda JSON
 app.use(express.static(path.join(__dirname)));
 app.use(express.json());
@@ -79,6 +84,24 @@ app.post('/api/crear-pago', async (req, res) => {
     }
 });
 
+// ========================================== //
+// ======= RUTA PARA EL NEWSLETTER ========== //
+// ========================================== //
+app.post('/api/newsletter', (req, res) => {
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ success: false, error: "Correo requerido" });
+
+    const sql = "INSERT INTO suscriptores (email) VALUES (?)";
+    db.run(sql, [email], function(err) {
+        if (err) {
+            if (err.message.includes("UNIQUE")) {
+                return res.json({ success: false, error: "¡Este correo ya está en el club!" });
+            }
+            return res.status(500).json({ success: false, error: "Error del servidor." });
+        }
+        res.json({ success: true, message: "¡Bienvenido al club de Societa Di Calcio!" });
+    });
+});
 // ========================================== //
 // ======= LAS RUTAS DE TU INVENTARIO ======= //
 // ========================================== //
