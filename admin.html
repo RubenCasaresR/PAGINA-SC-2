@@ -240,6 +240,10 @@
             }
         }
 
+        <button id="btn-descargar-correos" style="background-color: #28a745; color: white; padding: 12px 20px; font-weight: bold; border: none; cursor: pointer; border-radius: 4px; margin-bottom: 20px; text-transform: uppercase;">
+    <i class="fas fa-file-excel"></i> Descargar Correos
+</button>
+
         // 5. LÓGICA PARA VER LAS VENTAS 
         async function cargarVentas() {
             try {
@@ -281,6 +285,50 @@
 
         cargarInventario();
         cargarVentas();
+
+    // ========================================== //
+// ====== DESCARGAR EXCEL DE CORREOS ======== //
+// ========================================== //
+const btnDescargarCorreos = document.getElementById('btn-descargar-correos');
+
+if (btnDescargarCorreos) {
+    btnDescargarCorreos.addEventListener('click', async () => {
+        try {
+            // 1. Pedirle la lista al servidor
+            const response = await fetch('/api/admin/suscriptores');
+            const suscriptores = await response.json();
+
+            if (suscriptores.length === 0) {
+                alert("Aún no tienes suscriptores en tu lista.");
+                return;
+            }
+
+            // 2. Armar el archivo CSV (Excel)
+            let csvContent = "ID,Correo Electronico,Fecha de Registro\n"; // Títulos de las columnas
+            
+            suscriptores.forEach(fila => {
+                // Separamos los datos por comas y damos un salto de línea
+                csvContent += `${fila.id},${fila.email},${fila.fecha}\n`;
+            });
+
+            // 3. Crear el archivo descargable mágicamente en el navegador
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            
+            // 4. Forzar la descarga
+            const link = document.createElement("a");
+            link.setAttribute("href", url);
+            link.setAttribute("download", "Lista_Correos_SocietaDiCalcio.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link); // Limpiar
+
+        } catch (error) {
+            console.error("Error al descargar la lista:", error);
+            alert("Hubo un error al intentar descargar los correos.");
+        }
+    });
+}
     </script>
 </body>
 </html>

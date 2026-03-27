@@ -188,6 +188,17 @@ app.post('/api/checkout', (req, res) => {
 // ======= PANEL DE ADMINISTRACIÓN ========== //
 // ========================================== //
 
+// Descargar la lista de correos del Newsletter
+app.get('/api/admin/suscriptores', (req, res) => {
+    db.all("SELECT * FROM suscriptores ORDER BY fecha DESC", [], (err, rows) => {
+        if (err) {
+            console.error("🚨 Error al obtener suscriptores:", err.message);
+            return res.status(500).json({ error: err.message });
+        }
+        res.json(rows);
+    });
+});
+
 // Guardar un Nuevo Producto en la Bodega
 app.post('/api/admin/productos', (req, res) => {
     const nuevo = req.body;
@@ -229,6 +240,7 @@ app.delete('/api/admin/productos/:id', (req, res) => {
         res.json({ success: true, message: "Producto eliminado de la bodega correctamente" });
     });
 });
+
 
 // Ver el Libro de Registro (Ventas)
 app.get('/api/admin/ordenes', (req, res) => {
