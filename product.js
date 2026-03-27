@@ -65,40 +65,33 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('product-composition').innerText = product.composition;
         document.title = `${product.name} - Societa Di Calcio`;
 
-        // Lógica de Galería (Fotos y Videos)
-        const mainImageContainer = document.querySelector('.main-image-container');
-        const thumbnailContainer = document.querySelector('.thumbnail-container');
-        thumbnailContainer.innerHTML = ''; // Limpiar por si acaso
+        // ======================================================= //
+        // 2. LÓGICA DE GALERÍA EDITORIAL (FOTOS APILADAS)         //
+        // ======================================================= //
+        const galleryContainer = document.getElementById('editorial-gallery-container');
+        galleryContainer.innerHTML = ''; // Limpiar por seguridad
 
-        // Función para cambiar la imagen/video principal
-        const actualizarMedioPrincipal = (src) => {
-            mainImageContainer.innerHTML = ''; // Limpiar el contenedor principal
-            const esVideo = src.toLowerCase().endsWith('.mp4');
+        if (product.images && product.images.length > 0) {
+            product.images.forEach(mediaSrc => {
+                const esVideo = mediaSrc.toLowerCase().endsWith('.mp4');
+                let elementoMultimedia;
 
-            if (esVideo) {
-                const videoEl = document.createElement('video');
-                videoEl.src = src;
-                videoEl.id = 'main-product-image';
-                videoEl.autoplay = true;
-                videoEl.loop = true;
-                videoEl.muted = true;
-                videoEl.playsInline = true;
-                videoEl.style.width = '100%';
-                videoEl.style.height = 'auto';
-                videoEl.style.objectFit = 'cover';
-                mainImageContainer.appendChild(videoEl);
-            } else {
-                const imgEl = document.createElement('img');
-                imgEl.src = src;
-                imgEl.id = 'main-product-image';
-                imgEl.alt = product.name;
-                imgEl.style.width = '100%';
-                imgEl.style.height = 'auto';
-                imgEl.style.objectFit = 'cover';
-                imgEl.style.transition = 'transform 0.2s ease-out';
-                mainImageContainer.appendChild(imgEl);
-            }
-        };
+                if (esVideo) {
+                    elementoMultimedia = document.createElement('video');
+                    elementoMultimedia.src = mediaSrc;
+                    elementoMultimedia.autoplay = true;
+                    elementoMultimedia.loop = true;
+                    elementoMultimedia.muted = true;
+                    elementoMultimedia.playsInline = true;
+                } else {
+                    elementoMultimedia = document.createElement('img');
+                    elementoMultimedia.src = mediaSrc;
+                    elementoMultimedia.alt = product.name;
+                    elementoMultimedia.loading = "lazy"; // Para que cargue rápido
+                }
+                galleryContainer.appendChild(elementoMultimedia);
+            });
+        }
 
         // Pintar el primer elemento al cargar la página
         if (product.images && product.images.length > 0) {
@@ -272,53 +265,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     relatedContainer.innerHTML += card;
                 }
             });
-        }
-
-        // LÓGICA DE ZOOM MANUAL (Modificada para ignorar videos)
-        const zoomContainer = document.querySelector('.main-image-container');
-
-        if (zoomContainer) {
-            let isZoomed = false;
-
-            const panImage = (e, mainMedia) => {
-                if (!isZoomed || mainMedia.tagName !== 'IMG') return; 
-                const rect = zoomContainer.getBoundingClientRect();
-                const x = ((e.clientX - rect.left) / rect.width) * 100;
-                const y = ((e.clientY - rect.top) / rect.height) * 100;
-                mainMedia.style.transformOrigin = `${x}% ${y}%`;
-            };
-
-            zoomContainer.addEventListener('click', (e) => {
-                const mainMedia = document.getElementById('main-product-image');
-                if (!mainMedia || mainMedia.tagName !== 'IMG') return; // Si es video, cancelamos el zoom
-
-                isZoomed = !isZoomed;
-                if (isZoomed) {
-                    mainMedia.style.transform = 'scale(2)';
-                    mainMedia.style.cursor = 'zoom-out';
-                    panImage(e, mainMedia); 
-                } else {
-                    mainMedia.style.transform = 'scale(1)';
-                    mainMedia.style.transformOrigin = 'center center';
-                    mainMedia.style.cursor = 'zoom-in';
-                }
-            });
-
-            zoomContainer.addEventListener('mousemove', (e) => {
-                const mainMedia = document.getElementById('main-product-image');
-                if (mainMedia) panImage(e, mainMedia);
-            });
-
-            zoomContainer.addEventListener('mouseleave', () => {
-                const mainMedia = document.getElementById('main-product-image');
-                if (!mainMedia || mainMedia.tagName !== 'IMG') return;
-                
-                isZoomed = false;
-                mainMedia.style.transform = 'scale(1)';
-                mainMedia.style.transformOrigin = 'center center';
-                mainMedia.style.cursor = 'zoom-in';
-            });
-        }
+        }  
 
     } catch (error) {
         console.error("🚨 Error cargando el producto:", error);

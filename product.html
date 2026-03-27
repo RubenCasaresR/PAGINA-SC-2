@@ -25,74 +25,68 @@
         </div>
     </header>
 
-    <main class="product-page-main">
-        <section class="product-detail-layout">
-            <div class="product-gallery">
-                <div class="thumbnail-container">
-                    </div>
-                <div class="main-image-container">
-                    <img src="" alt="Producto principal" id="main-product-image">
+    <main class="product-page-main editorial-layout">
+        <div class="editorial-gallery" id="editorial-gallery-container">
+            </div>
+
+        <div class="product-info-details editorial-info">
+            <h1 id="product-name">Nombre del Producto</h1>
+            <p class="price" id="product-price">$0.00</p>
+            
+            <div class="selector-tallas">
+                <p><strong>Talla:</strong></p>
+                <div class="tallas">
+                    <button>XS</button>
+                    <button>S</button>
+                    <button>M</button>
+                    <button>L</button>
+                    <button>XL</button>
+                </div>
+
+                <p id="urgency-message" class="urgency-message hidden"></p>
+
+                <button id="guia-tallas-btn" class="guia-tallas-toggle-btn">Guía de Tallas</button>
+
+                <div id="guia-tallas-panel" class="guia-tallas-panel">
+                    <button class="close-panel-btn">&times;</button>
+                    <h4>Guía de Tallas (Oversized)</h4>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Talla</th>
+                                <th>Pecho (cm)</th>
+                                <th>Largo (cm)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>XS</td><td>46</td><td>66</td></tr>
+                            <tr><td>S</td><td>48</td><td>68</td></tr>
+                            <tr><td>M</td><td>54</td><td>70</td></tr>
+                            <tr><td>L</td><td>56</td><td>73</td></tr>
+                            <tr><td>XL</td><td>60</td><td>75</td></tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
 
-            <div class="product-info-details">
-                <h1 id="product-name">Nombre del Producto</h1>
-                <p class="price" id="product-price">$0.00</p>
-                
-                <div class="selector-tallas">
-                    <p><strong>Talla:</strong></p>
-                    <div class="tallas">
-                        <button>XS</button>
-                        <button>S</button>
-                        <button>M</button>
-                        <button>L</button>
-                        <button>XL</button>
-                    </div>
-
-                    <p id="urgency-message" class="urgency-message hidden"></p>
-
-                    <button id="guia-tallas-btn" class="guia-tallas-toggle-btn">Guía de Tallas</button>
-
-                    <div id="guia-tallas-panel" class="guia-tallas-panel">
-                        <button class="close-panel-btn">&times;</button>
-                        <h4>Guía de Tallas (Oversized)</h4>
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Talla</th>
-                                    <th>Pecho (cm)</th>
-                                    <th>Largo (cm)</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr><td>XS</td><td>46</td><td>66</td></tr>
-                                <tr><td>S</td><td>48</td><td>68</td></tr>
-                                <tr><td>M</td><td>54</td><td>70</td></tr>
-                                <tr><td>L</td><td>56</td><td>73</td></tr>
-                                <tr><td>XL</td><td>60</td><td>75</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <div class="selector-cantidad">
-                    <p><strong>Cantidad:</strong></p>
-                    <div class="quantity-input">
-                        <button id="decrease-quantity">-</button>
-                        <span id="quantity-value">1</span>
-                        <button id="increase-quantity">+</button>
-                    </div>
-                </div>
-
-                <button class="btn btn-comprar">Añadir al Carrito</button>
-
-                <div class="product-extra-info">
-                    <p id="product-description">Aquí va la descripción del producto.</p>
-                    <h3>Composición y Cuidado</h3>
-                    <p id="product-composition">100% Algodón. Lavar a máquina con agua fría...</p>
+            <div class="selector-cantidad">
+                <p><strong>Cantidad:</strong></p>
+                <div class="quantity-input">
+                    <button id="decrease-quantity">-</button>
+                    <span id="quantity-value">1</span>
+                    <button id="increase-quantity">+</button>
                 </div>
             </div>
-        </section>
+
+            <button class="btn btn-comprar">Añadir al Carrito</button>
+
+            <div class="product-extra-info">
+                <p id="product-description">Aquí va la descripción del producto.</p>
+                <h3>Composición y Cuidado</h3>
+                <p id="product-composition">100% Algodón. Lavar a máquina con agua fría...</p>
+            </div>
+        </div>
+    </main>
 
         <section id="related-products" class="collections-section">
             <h2>También te podría gustar</h2>
