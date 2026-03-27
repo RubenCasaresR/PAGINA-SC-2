@@ -300,21 +300,34 @@
             if (btnDescargarCorreos) {
                 btnDescargarCorreos.addEventListener('click', async () => {
                     try {
-                        // El "?nocache" le hace creer al navegador que es una petición nueva y lo obliga a traer la lista fresca
-                        const response = await fetch('/api/admin/suscriptores?nocache=' + new Date().getTime());
+                        // 👇 EL TRUCO MILITAR ANTIBLOQUEO 👇
+                        // Le pegamos la hora exacta al enlace y le prohibimos usar la memoria
+                        const urlFresca = '/api/admin/suscriptores?hora=' + new Date().getTime();
+                        const response = await fetch(urlFresca, {
+                            method: 'GET',
+                            headers: {
+                                'Cache-Control': 'no-cache, no-store, must-revalidate',
+                                'Pragma': 'no-cache',
+                                'Expires': '0'
+                            }
+                        });
+
                         const suscriptores = await response.json();
 
+                        // Si de verdad está vacía, avisamos
                         if (suscriptores.length === 0) {
                             alert("Aún no tienes suscriptores en tu lista.");
                             return;
                         }
 
+                        // Armamos el archivo Excel (CSV)
                         let csvContent = "ID,Correo Electronico,Fecha de Registro\n"; 
                         
                         suscriptores.forEach(fila => {
                             csvContent += `${fila.id},${fila.email},${fila.fecha}\n`;
                         });
 
+                        // Forzamos la descarga del archivo mágicamente
                         const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
                         const url = URL.createObjectURL(blob);
                         
