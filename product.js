@@ -182,11 +182,28 @@ document.addEventListener('DOMContentLoaded', async () => {
         } 
 
         // ======================================================= //
-        // 5. PRODUCTOS RELACIONADOS                               //
+        // 5. PRODUCTOS RELACIONADOS (CON INTELIGENCIA AUTOMÁTICA) //
         // ======================================================= //
         const relatedContainer = document.querySelector('#related-products .product-grid');
-        if (relatedContainer && product.related) {
-            product.related.forEach(relatedId => {
+        
+        if (relatedContainer) {
+            // 1. Revisamos si tienes productos relacionados guardados
+            let listaSugerencias = product.related || [];
+
+            // 2. LA MAGIA: Si la lista está vacía, agarramos 4 al azar del catálogo
+            if (listaSugerencias.length === 0) {
+                // Sacamos todas las playeras MENOS la que el cliente ya está viendo
+                const otrasPlayeras = catalogoCompleto.filter(p => p.id !== product.id);
+                
+                // Revolvemos las playeras al azar (como barajar cartas)
+                otrasPlayeras.sort(() => 0.5 - Math.random());
+                
+                // Tomamos las primeras 4 que salieron
+                listaSugerencias = otrasPlayeras.slice(0, 4).map(p => p.id);
+            }
+
+            // 3. Pintamos las tarjetas en la pantalla
+            listaSugerencias.forEach(relatedId => {
                 const relatedProduct = products[relatedId];
                 if(relatedProduct){
                     let relatedPriceDisplay = `$${relatedProduct.price.toFixed(2)}`;
