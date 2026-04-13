@@ -3,193 +3,133 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Società Di Calcio | Premium Streetwear</title>
+    <title>Societa Di Calcio</title>
     <link rel="icon" href="logo-fondo-verde.png" type="image/png">
-    
     <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     
-    <link href="https://fonts.googleapis.com/css2?family=Helvetica+Neue:wght@400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
-    
-    <style>
-        /* Tipografía y colores base */
-        body { font-family: 'Helvetica Neue', Arial, sans-serif; background-color: #ffffff; color: #000000; margin: 0; padding: 0; }
-        a { text-decoration: none; color: #000; }
-        
-        /* Announcement Bar Ultra Minimalista */
-        .announcement-bar { background-color: #000; color: #fff; text-align: center; padding: 10px; font-size: 0.75rem; letter-spacing: 2px; text-transform: uppercase; }
-        .announcement-bar a { color: #fff; text-decoration: underline; margin-left: 10px; }
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://societadicalcio.onrender.com/">
+    <meta property="og:title" content="Societa Di Calcio | Tienda Oficial">
+    <meta property="og:description" content="Ropa inspirada en la pasión del fútbol. Descubre nuestra nueva colección clásica y eleva tu estilo diario.">
+    <meta property="og:image" content="https://societadicalcio.onrender.com/logo-fondo-beige.png">
 
-        /* Header Transparente/Blanco */
-        .main-header { display: flex; justify-content: space-between; align-items: center; padding: 15px 30px; border-bottom: 1px solid #eaeaea; background: #fff; position: sticky; top: 0; z-index: 100; }
-        .logo img { max-height: 40px; }
-        .main-nav { display: flex; gap: 20px; }
-        .main-nav a { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; font-weight: bold; }
-        .cart-icon a { font-size: 0.9rem; text-transform: uppercase; font-weight: bold; }
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="https://societadicalcio.onrender.com/">
+    <meta name="twitter:title" content="Societa Di Calcio | Tienda Oficial">
+    <meta name="twitter:description" content="Ropa inspirada en la pasión del fútbol. Descubre nuestra nueva colección clásica y eleva tu estilo diario.">
+    <meta name="twitter:image" content="https://societadicalcio.onrender.com/playera-horizontal-societa-portugal.JPG">
 
-        /* HERO SECTION (Pantalla Completa) */
-        .club-hero { position: relative; width: 100%; height: 85vh; background-color: #f4f4f4; overflow: hidden; display: flex; align-items: center; justify-content: center; }
-        .club-hero img { width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; }
-        .club-hero-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.3); }
-        .club-hero-content { position: relative; z-index: 10; text-align: center; color: #fff; }
-        .club-hero-content p { font-size: 1rem; letter-spacing: 4px; margin-bottom: 10px; text-transform: uppercase; }
-        .club-hero-content h1 { font-size: 4rem; letter-spacing: 5px; margin: 0 0 30px 0; text-transform: uppercase; font-weight: bold; }
-        .btn-club { display: inline-block; background: #fff; color: #000; padding: 15px 40px; font-size: 0.9rem; font-weight: bold; letter-spacing: 2px; text-transform: uppercase; transition: 0.3s; }
-        .btn-club:hover { background: #000; color: #fff; }
-
-        /* Títulos de Sección */
-        .section-header { display: flex; justify-content: space-between; align-items: center; padding: 40px 30px 10px 30px; border-bottom: 1px solid #000; margin-bottom: 20px; }
-        .section-header h2 { font-size: 1.2rem; text-transform: uppercase; letter-spacing: 2px; margin: 0; }
-        .section-header a { font-size: 0.8rem; text-transform: uppercase; text-decoration: underline; }
-
-        /* Carrusel Horizontal (Sliders) */
-        .club-slider { display: flex; overflow-x: auto; gap: 2px; scroll-snap-type: x mandatory; scrollbar-width: none; padding: 0 30px; margin-bottom: 50px; }
-        .club-slider::-webkit-scrollbar { display: none; }
-        .club-card { min-width: 280px; width: 280px; scroll-snap-align: start; display: flex; flex-direction: column; }
-        .club-card-img { width: 100%; aspect-ratio: 3/4; background-color: #f9f9f9; overflow: hidden; position: relative; }
-        .club-card-img img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease; }
-        .club-card:hover .club-card-img img { transform: scale(1.05); }
-        .club-card-info { padding: 15px 0; text-align: left; }
-        .club-card-title { font-size: 0.85rem; font-weight: bold; text-transform: uppercase; margin-bottom: 5px; }
-        .club-card-price { font-size: 0.85rem; color: #555; }
-
-        /* Grid Principal (Para tu JS) */
-        .collections-section { padding: 40px 30px; }
-        .tabs { display: flex; gap: 15px; margin-bottom: 30px; justify-content: center; }
-        .tab-button { background: none; border: none; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; cursor: pointer; color: #888; padding-bottom: 5px; }
-        .tab-button.active { color: #000; border-bottom: 2px solid #000; font-weight: bold; }
-
-        /* Adaptación a Móviles */
-        @media (max-width: 768px) {
-            .club-hero h1 { font-size: 2.5rem; }
-            .section-header { padding: 30px 15px 10px 15px; }
-            .club-slider { padding: 0 15px; gap: 10px; }
-            .club-card { min-width: 220px; width: 220px; }
-            .main-header { padding: 15px; }
-            .tabs { flex-wrap: wrap; justify-content: flex-start; }
-        }
-        
-        /* Newsletter Minimalista */
-        .newsletter-section { background-color: #f9f9f9; padding: 80px 20px; text-align: center; border-top: 1px solid #eaeaea; }
-        .newsletter-section h2 { font-size: 1.5rem; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 15px; }
-        .newsletter-form { max-width: 500px; margin: 0 auto; display: flex; border-bottom: 1px solid #000; padding-bottom: 5px; }
-        .newsletter-form input { border: none; background: none; width: 100%; padding: 10px 0; font-size: 1rem; outline: none; }
-        .btn-newsletter { background: none; border: none; font-weight: bold; text-transform: uppercase; cursor: pointer; padding: 0 10px; }
-    </style>
 </head>
 <body>
-    
     <div class="announcement-bar">
-        🔥 ENVÍO GRATIS EN PEDIDOS MAYORES A $1,500 MXN <a href="#colecciones">COMPRA AHORA</a>
+        <p>🔥 ENVÍO GRATIS EN PEDIDOS MAYORES A $1,500 MXN <a href="#colecciones">COMPRA AHORA</a></p>
     </div>
 
     <header class="main-header">
-        <button class="hamburger-btn" id="hamburger-btn" style="background:none; border:none; font-size:1.2rem; cursor:pointer;">
+        <button class="hamburger-btn" id="hamburger-btn">
             <i class="fas fa-bars"></i>
         </button>
 
         <div class="logo">
-            <img src="logo SC sin fondo.png" alt="Società Di Calcio">
+            <img src="logo SC sin fondo.png" alt="Logo de la Marca">
         </div>
 
         <nav class="main-nav" id="main-nav">
-            <button class="close-menu-btn" id="close-menu-btn" style="display:none;">&times;</button>
-            <a href="#new-in">Novedades</a>
+            <button class="close-menu-btn" id="close-menu-btn">&times;</button>
+            <a href="#novedades">Novedades</a>
             <a href="#colecciones">Colecciones</a>
-            <a href="#nosotros">La Marca</a>
+            <a href="#nosotros">Nosotros</a>
             <a href="#contacto">Contacto</a>
         </nav>
 
         <div class="cart-icon">
-            <a href="#" onclick="openCartDrawer(); return false;">CARRITO <span class="cart-text"></span>(0)</a>
+            <a href="carrito.html">🛒 <span class="cart-text"></span>(0)</a>
         </div>
     </header>
 
     <main>
-        <section class="club-hero">
-            <img src="playera-horizontal-societa-portugal.JPG" alt="Campaña Società Di Calcio">
-            <div class="club-hero-overlay"></div>
-            <div class="club-hero-content">
-                <p>Now Live</p>
-                <h1>SS26 | DROP ONE</h1>
-                <a href="#colecciones" class="btn-club">Ver Colección</a>
+        <section class="lookbook-section">
+            <div class="lookbook-banner">
+                <img src="playera-horizontal-societa-portugal.JPG" alt="Campaña Societa Di Calcio" class="banner-img">
+                <div class="banner-overlay">
+                    <h2>Nueva Colección</h2>
+                    <a href="#colecciones" class="btn btn-blanco">Explorar</a>
+                </div>
+            </div>
+
+            <div class="lookbook-grid">
+                <a href="product.html?product=ronaldo-classic" class="lookbook-item">
+                    <img src="esquina-de-porteria.JPG" alt="Look 1" loading="lazy">
+                    <div class="lookbook-info"></div>
+                </a>
+                <a href="product.html?product=ronaldo-classic" class="lookbook-item">
+                    <img src="tipografia-societa-playera.JPG" alt="Look 2" loading="lazy">
+                    <div class="lookbook-info"></div>
+                </a>
+                <a href="product.html?product=ronaldo-classic" class="lookbook-item">
+                    <img src="Playera Espalda Agachado.JPG" alt="Look 3" loading="lazy">
+                    <div class="lookbook-info"></div>
+                </a>
+                <a href="product.html?product=ronaldo-classic" class="lookbook-item">
+                    <img src="Bolsas SC.JPG" alt="Look 4" loading="lazy">
+                    <div class="lookbook-info"></div>
+                </a>
+            </div>
+        </section>
+        
+        <section id="novedades" class="hero-section">
+            <div class="hero-text">
+                <h1>Nuevas Tendencias</h1>
+                <p>Descubre los próximos lanzamientos de nuestra colección.</p>
+                <a href="#colecciones" class="btn">Ver Colección</a>
+            </div>
+            <div class="hero-images">
+                <a href="#" id="hero-link-1">
+                    <img src="23.png" alt="Novedad 1" id="hero-img-1" loading="lazy">
+                </a>
+                <a href="#" id="hero-link-2">
+                    <img src="24.png" alt="Novedad 2" class="img-destacada" id="hero-img-2" loading="lazy">
+                </a>
+                <a href="#" id="hero-link-3">
+                    <img src="42.png" alt="Novedad 3" id="hero-img-3" loading="lazy">
+                </a>
             </div>
         </section>
 
-        <section id="new-in">
-            <div class="section-header">
-                <h2>NEW IN</h2>
-                <a href="#colecciones">View All</a>
-            </div>
-            
-            <div class="club-slider">
-                <a href="product.html?product=ronaldo-classic" class="club-card">
-                    <div class="club-card-img">
-                        <img src="23.png" alt="Novedad 1" loading="lazy">
-                    </div>
-                    <div class="club-card-info">
-                        <div class="club-card-title">Società Classic T-Shirt</div>
-                        <div class="club-card-price">$650.00 MXN</div>
-                    </div>
-                </a>
-                <a href="product.html?product=ronaldo-classic" class="club-card">
-                    <div class="club-card-img">
-                        <img src="24.png" alt="Novedad 2" loading="lazy">
-                    </div>
-                    <div class="club-card-info">
-                        <div class="club-card-title">Portugal Retro Jersey</div>
-                        <div class="club-card-price">$800.00 MXN</div>
-                    </div>
-                </a>
-                <a href="product.html?product=ronaldo-classic" class="club-card">
-                    <div class="club-card-img">
-                        <img src="42.png" alt="Novedad 3" loading="lazy">
-                    </div>
-                    <div class="club-card-info">
-                        <div class="club-card-title">Vintage Track Jacket</div>
-                        <div class="club-card-price">$1,200.00 MXN</div>
-                    </div>
-                </a>
-                <a href="product.html?product=ronaldo-classic" class="club-card">
-                    <div class="club-card-img">
-                        <img src="Playera Espalda Agachado.JPG" alt="Novedad 4" loading="lazy">
-                    </div>
-                    <div class="club-card-info">
-                        <div class="club-card-title">Capitano Hoodie</div>
-                        <div class="club-card-price">$950.00 MXN</div>
-                    </div>
-                </a>
+        <section id="nosotros" class="about-section">
+            <div class="about-content">
+                <img src="LOGO.png" alt="Logo de la Marca" class="about-logo" loading="lazy">
+                <h2>¿Quiénes somos?</h2>
+                <p>Società Di Calcio nació de la pasión por el fútbol y la moda. Creemos que la ropa es más que una simple prenda; es una forma de expresar quién eres. Cada diseño está inspirado en momentos icónicos del deporte, combinando la nostalgia del pasado con la simplicidad del diseño moderno. Usamos materiales de alta calidad para crear piezas cómodas y con estilo que puedes usar dentro y fuera de la cancha.</p>
             </div>
         </section>
 
         <section id="colecciones" class="collections-section">
-            <div class="section-header" style="margin-bottom: 30px; border-bottom: none; padding-left: 0;">
-                <h2>ALL PRODUCTS</h2>
-            </div>
-            
+            <h2>Colecciones</h2>
             <div class="tabs">
                 <button class="tab-button active" onclick="filterSelection('all')">Todo</button>
                 <button class="tab-button" onclick="filterSelection('novedades-cat')">Novedades</button>
                 <button class="tab-button" onclick="filterSelection('descuentos')">Descuentos</button>
                 <button class="tab-button" onclick="filterSelection('must-have')">Must Have</button>
             </div>
-            
             <div class="product-grid">
             </div>
         </section>
-
-        <section class="newsletter-section">
-            <h2>Únete a la Società</h2>
-            <p style="color: #666; font-size: 0.9rem; margin-bottom: 30px;">Acceso anticipado a nuevos drops y promociones exclusivas.</p>
-            
-            <form id="newsletter-form" class="newsletter-form">
-                <input type="email" id="newsletter-email" placeholder="TU CORREO ELECTRÓNICO" required>
-                <button type="submit" class="btn-newsletter">Suscribirse</button>
-            </form>
-            <p id="newsletter-message" style="margin-top: 15px; font-weight: bold;"></p>
-        </section>
     </main>
-    
+    <section class="newsletter-section">
+        <div class="newsletter-container">
+            <h2>Únete a la Società</h2>
+            <p>Recibe acceso anticipado a nuevos drops, promociones exclusivas y noticias de la Società Di Calcio antes que nadie.</p>
+            <form id="newsletter-form" class="newsletter-form">
+                <input type="email" id="newsletter-email" placeholder="Tu correo electrónico" required>
+                <button type="submit" class="btn-newsletter">Suscribirme</button>
+            </form>
+            <p id="newsletter-message" class="newsletter-message"></p>
+        </div>
+    </section>
+
     <script>
         document.getElementById('newsletter-form').addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -197,7 +137,7 @@
             const messageEl = document.getElementById('newsletter-message');
             const btn = document.querySelector('.btn-newsletter');
             
-            btn.innerText = "ENVIANDO...";
+            btn.innerText = "Enviando...";
             btn.disabled = true;
 
             try {
@@ -210,68 +150,80 @@
                 const data = await response.json();
                 
                 messageEl.innerText = data.message || data.error;
-                messageEl.style.color = data.success ? "#28a745" : "#dc3545";
+                messageEl.className = data.success ? "newsletter-message success" : "newsletter-message error";
                 
-                if (data.success) emailInput.value = ''; 
+                if (data.success) emailInput.value = ''; // Limpia la cajita si tuvo éxito
                 
             } catch (error) {
                 messageEl.innerText = "Hubo un error de conexión.";
-                messageEl.style.color = "#dc3545";
+                messageEl.className = "newsletter-message error";
             } finally {
-                btn.innerText = "SUSCRIBIRSE";
+                btn.innerText = "Suscribirme";
                 btn.disabled = false;
             }
         });
     </script>
     
-    <footer id="contacto" class="main-footer" style="background: #000; color: #fff; padding: 60px 30px; text-align: left;">
-        <div class="footer-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 40px;">
-            <div class="footer-column">
-                <h4 style="text-transform: uppercase; letter-spacing: 2px; margin-bottom: 20px;">Società Di Calcio</h4>
-                <p style="color: #aaa; font-size: 0.85rem; line-height: 1.6;">Ropa inspirada en la pasión del fútbol, diseñada para el día a día.</p>
-            </div>
-            <div class="footer-column">
-                <h4 style="text-transform: uppercase; letter-spacing: 2px; margin-bottom: 20px;">Soporte</h4>
-                <ul style="list-style: none; padding: 0; margin: 0;">
-                    <li style="margin-bottom: 10px;"><a href="faq.html" style="color: #aaa; font-size: 0.85rem;">Preguntas Frecuentes</a></li>
-                    <li style="margin-bottom: 10px;"><a href="returns.html" style="color: #aaa; font-size: 0.85rem;">Devoluciones</a></li>
-                    <li><a href="terms.html" style="color: #aaa; font-size: 0.85rem;">Términos y Condiciones</a></li>
-                </ul>
-            </div>
-            <div class="footer-column">
-                <h4 style="text-transform: uppercase; letter-spacing: 2px; margin-bottom: 20px;">Síguenos</h4>
-                <div class="social-media" style="display: flex; gap: 15px;">
-                    <a href="https://www.instagram.com/societadicalcio?igsh=MWM4NjZhbXh6ZDVkaQ==" target="_blank" style="color: #fff; font-size: 1.2rem;"><i class="fab fa-instagram"></i></a>
-                    <a href="https://www.tiktok.com/@societadicalcio?_t=ZS-90L4HyP5Aud&_r=1" target="_blank" style="color: #fff; font-size: 1.2rem;"><i class="fab fa-tiktok"></i></a>
-                </div>
+    <footer id="contacto" class="main-footer">
+    <div class="footer-grid">
+        <div class="footer-column">
+            <h4>Società Di Calcio</h4>
+            <p>Ropa inspirada en la pasión del fútbol, diseñada para el día a día.</p>
+        </div>
+        <div class="footer-column">
+            <h4>Soporte</h4>
+            <ul>
+                <li><a href="faq.html">Preguntas Frecuentes</a></li>
+                <li><a href="returns.html">Políticas de Devolución</a></li>
+                <li><a href="terms.html">Términos y Condiciones</a></li>
+            </ul>
+        </div>
+        <div class="footer-column">
+            <h4>Síguenos</h4>
+            <div class="social-media">
+                <a href="https://www.instagram.com/societadicalcio?igsh=MWM4NjZhbXh6ZDVkaQ==" target="_blank"><i class="fab fa-instagram"></i></a>
+                <a href="https://www.tiktok.com/@societadicalcio?_t=ZS-90L4HyP5Aud&_r=1" target="_blank"><i class="fab fa-tiktok"></i></a>
+                <a href="#" target="_blank"><i class="fab fa-facebook"></i></a>
             </div>
         </div>
-        <div class="footer-bottom" style="border-top: 1px solid #333; margin-top: 40px; padding-top: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
-            <p style="color: #666; font-size: 0.8rem; margin: 0;">&copy; 2026 Società Di Calcio.</p>
-            <div class="payment-methods" style="color: #aaa; font-size: 1.5rem; display: flex; gap: 10px;">
+    </div>
+   <div class="footer-bottom">
+        <p>&copy; 2026 Società Di Calcio. Todos los derechos reservados.</p>
+        
+        <div class="payment-methods">
+            <img src="https://http2.mlstatic.com/frontend-assets/mp-web-navigation/ui-navigation/5.19.5/mercadopago/logo__small.png" alt="Mercado Pago" class="mp-logo">
+            <div class="card-icons">
                 <i class="fab fa-cc-visa"></i>
                 <i class="fab fa-cc-mastercard"></i>
                 <i class="fab fa-cc-amex"></i>
             </div>
         </div>
-    </footer>
+    </div>
 
-    <div class="cart-overlay" id="cart-overlay"></div>
+   <div class="cart-overlay" id="cart-overlay"></div>
     <div class="cart-drawer" id="cart-drawer">
         <div class="cart-drawer-header">
-            <h2>TU CARRITO</h2>
+            <h2>Tu Carrito</h2>
             <button class="close-cart-btn" id="close-cart-btn">&times;</button>
         </div>
+        
         <div class="shipping-progress-container">
             <p id="shipping-message">Calculando envío...</p>
-            <div class="progress-bar-bg"><div class="progress-bar-fill" id="shipping-progress-fill"></div></div>
-        </div>
-        <div class="cart-drawer-items" id="cart-drawer-items"></div>
-        <div class="cart-drawer-footer">
-            <div class="drawer-summary-row" style="display:flex; justify-content:space-between; font-weight:bold; margin-bottom: 15px;">
-                <span>Subtotal</span><span id="drawer-subtotal">$0.00</span>
+            <div class="progress-bar-bg">
+                <div class="progress-bar-fill" id="shipping-progress-fill"></div>
             </div>
-            <button class="btn btn-checkout-drawer" id="btn-checkout-drawer" onclick="window.location.href='checkout.html'" style="width:100%; padding:15px; background:#000; color:#fff; border:none; text-transform:uppercase; font-weight:bold; cursor:pointer;">Proceder al Pago</button>
+        </div>
+
+        <div class="cart-drawer-items" id="cart-drawer-items">
+            </div>
+
+        <div class="cart-drawer-footer">
+            <div class="drawer-summary-row">
+                <span>Subtotal</span>
+                <span id="drawer-subtotal">$0.00</span>
+            </div>
+            <p class="shipping-note">Impuestos y envío calculados en el checkout.</p>
+            <button class="btn btn-checkout-drawer" id="btn-checkout-drawer" onclick="window.location.href='checkout.html'">Proceder al Pago</button>
         </div>
     </div>
     
