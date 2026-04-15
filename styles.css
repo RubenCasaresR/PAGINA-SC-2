@@ -1735,3 +1735,50 @@ body.no-scroll {
         .header-logo { justify-self: center; }
         .header-utils { justify-self: end; }
     }
+    /* --- HEADER FLOTANTE Y TRANSPARENTE --- */
+.club-header {
+    position: fixed; /* Lo fijamos arriba */
+    top: 34px; /* Se coloca debajo de la barra negra (ajusta si tu barra mide distinto) */
+    left: 0;
+    width: 100%;
+    z-index: 1000;
+    background-color: transparent; /* Empieza invisible */
+    border-bottom: 1px solid transparent; 
+    transition: background-color 0.4s ease, border-bottom 0.4s ease, top 0.4s ease;
+    box-sizing: border-box;
+}
+
+/* --- CLASE QUE ACTIVA EL COLOR (Se activa con JS) --- */
+.club-header.header-scrolled {
+    background-color: #ffffff; /* Se vuelve blanco al bajar */
+    border-bottom: 1px solid #f2f2f2;
+    top: 0; /* Si quieres que al bajar tape la barra negra para dar más espacio */
+}
+
+/* --- HERO SECTION FULL SCREEN --- */
+.hero-section {
+    position: relative;
+    width: 100%;
+    height: 100vh; /* Ocupa el 100% de la altura de la pantalla */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.hero-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* La imagen se estira sin deformarse */
+    z-index: 1;
+}
+
+.hero-content {
+    position: relative;
+    z-index: 10;
+    text-align: center;
+    color: #fff;
+}
