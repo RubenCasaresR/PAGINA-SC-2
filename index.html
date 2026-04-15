@@ -1,53 +1,78 @@
-<!DOCTYPE html>
+CTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Societa Di Calcio</title>
+    <title>Società Di Calcio | Premium Streetwear</title>
     <link rel="icon" href="logo-fondo-verde.png" type="image/png">
     <link rel="stylesheet" href="styles.css">
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://societadicalcio.onrender.com/">
-    <meta property="og:title" content="Societa Di Calcio | Tienda Oficial">
-    <meta property="og:description" content="Ropa inspirada en la pasión del fútbol. Descubre nuestra nueva colección clásica y eleva tu estilo diario.">
-    <meta property="og:image" content="https://societadicalcio.onrender.com/logo-fondo-beige.png">
-
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:url" content="https://societadicalcio.onrender.com/">
-    <meta name="twitter:title" content="Societa Di Calcio | Tienda Oficial">
-    <meta name="twitter:description" content="Ropa inspirada en la pasión del fútbol. Descubre nuestra nueva colección clásica y eleva tu estilo diario.">
-    <meta name="twitter:image" content="https://societadicalcio.onrender.com/playera-horizontal-societa-portugal.JPG">
-
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">   
 </head>
 <body>
+
+ <header>
     <div class="announcement-bar">
-        <p>🔥 ENVÍO GRATIS EN PEDIDOS MAYORES A $1,500 MXN <a href="#colecciones">COMPRA AHORA</a></p>
+        <div class="marquee">
+            <span>SOCIETÀ DI CALCIO | DROP ONE NOW LIVE | ENVÍO GRATIS EN PEDIDOS MAYORES A $1,500 MXN | SOCIETÀ DI CALCIO | DROP ONE NOW LIVE | ENVÍO GRATIS EN PEDIDOS MAYORES A $1,500 MXN |</span>
+            <span>SOCIETÀ DI CALCIO | DROP ONE NOW LIVE | ENVÍO GRATIS EN PEDIDOS MAYORES A $1,500 MXN | SOCIETÀ DI CALCIO | DROP ONE NOW LIVE | ENVÍO GRATIS EN PEDIDOS MAYORES A $1,500 MXN |</span>
+        </div>
     </div>
 
-    <header class="main-header">
-        <button class="hamburger-btn" id="hamburger-btn">
-            <i class="fas fa-bars"></i>
-        </button>
-
-        <div class="logo">
-            <img src="logo SC sin fondo.png" alt="Logo de la Marca">
+    <div class="header-main-row">
+        <div class="header-search">
+            <button id="hamburger-btn" class="mobile-only" style="background:none; border:none; padding:0; cursor:pointer;">
+                <i class="fas fa-bars" style="font-size: 18px;"></i>
+            </button>
+            <a href="#" class="desktop-only"><i class="fas fa-search"></i> SEARCH</a>
         </div>
 
-        <nav class="main-nav" id="main-nav">
-            <button class="close-menu-btn" id="close-menu-btn">&times;</button>
-            <a href="#novedades">Novedades</a>
-            <a href="#colecciones">Colecciones</a>
-            <a href="#nosotros">Nosotros</a>
-            <a href="#contacto">Contacto</a>
-        </nav>
-
-        <div class="cart-icon">
-            <a href="carrito.html">🛒 <span class="cart-text"></span>(0)</a>
+        <div class="header-logo">
+            <a href="index.html">
+                <img src="logo SC sin fondo.png" alt="Società Di Calcio">
+            </a>
         </div>
-    </header>
+
+        <div class="header-utils">
+            <div class="desktop-only" style="display:flex; gap:20px;">
+                <a href="/account">ACCOUNT</a>
+                <a href="#" onclick="openCartDrawer(); return false;">CART (<span class="cart-text">0</span>)</a>
+            </div>
+            <div class="header-utils-mobile mobile-only">
+                <a href="#"><i class="fas fa-search"></i></a>
+                <a href="#" onclick="openCartDrawer(); return false;"><i class="fas fa-shopping-bag"></i></a>
+            </div>
+        </div>
+    </div>
+
+    <nav class="header-nav-row desktop-only">
+        <a href="#new-arrivals">NEW ARRIVALS</a>
+        <a href="#products">PRODUCTS</a>
+        <a href="#best-selling">BEST SELLING</a>
+        <a href="#shipping">SHIPPING & RETURNS</a>
+        <a href="#brand">THE BRAND</a>
+        <a href="#size-guide">SIZE GUIDE</a>
+    </nav>
+</header>
+
+    <nav class="main-nav" id="main-nav" style="display:none;">
+        <button class="close-menu-btn" id="close-menu-btn">&times;</button>
+        <a href="#new-arrivals">NEW ARRIVALS</a>
+        <a href="#products">PRODUCTS</a>
+        <a href="#best-selling">BEST SELLING</a>
+        <a href="#nosotros">THE BRAND</a>
+    </nav>
+
+    <nav class="main-nav" id="main-nav" style="display:none; position:fixed; top:0; left:0; height:100%; background:#fff; z-index:1000; flex-direction:column; padding:40px; box-shadow: 2px 0 10px rgba(0,0,0,0.1);">
+        <button class="close-menu-btn" id="close-menu-btn" style="position:absolute; top:20px; right:20px; background:none; border:none; font-size:2rem; cursor:pointer;">&times;</button>
+        <a href="#novedades" style="font-family:'Inter', sans-serif; font-size:1.2rem; font-weight:600; text-transform:uppercase; margin-bottom:20px; color:#000; text-decoration:none;">Novedades</a>
+        <a href="#colecciones" style="font-family:'Inter', sans-serif; font-size:1.2rem; font-weight:600; text-transform:uppercase; margin-bottom:20px; color:#000; text-decoration:none;">Colecciones</a>
+        <a href="#nosotros" style="font-family:'Inter', sans-serif; font-size:1.2rem; font-weight:600; text-transform:uppercase; margin-bottom:20px; color:#000; text-decoration:none;">Nosotros</a>
+        <a href="#contacto" style="font-family:'Inter', sans-serif; font-size:1.2rem; font-weight:600; text-transform:uppercase; margin-bottom:20px; color:#000; text-decoration:none;">Contacto</a>
+    </nav>
 
     <main>
         <section class="lookbook-section">
