@@ -128,12 +128,11 @@ function activarCarrusel(productos) {
 }
 // Sensor de Scroll para Header Transparente
 window.addEventListener('scroll', function() {
-    const navContainer = document.getElementById('nav-container');
-    
-    // Si bajamos más de 34px (lo que mide la barra negra), el header se vuelve blanco y fijo
+    const nav = document.getElementById('nav-container');
+    // Si bajamos más de 34px (altura de la barra negra), activamos el fondo blanco
     if (window.scrollY > 34) {
-        navContainer.classList.add('scrolled');
+        nav.classList.add('scrolled');
     } else {
-        navContainer.classList.remove('scrolled');
+        nav.classList.remove('scrolled');
     }
 });

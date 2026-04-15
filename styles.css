@@ -1735,61 +1735,76 @@ body.no-scroll {
         .header-logo { justify-self: center; }
         .header-utils { justify-self: end; }
     }
-    /* --- CONFIGURACIÓN DEL HEADER (FLOTANTE SOBRE EL HERO) --- */
+    /* --- LIMPIEZA TOTAL DE LÍNEAS Y BORDES --- */
+.nav-container, .header-main-row, .header-nav-row, .club-header {
+    border: none !important;
+    box-shadow: none !important;
+    background-color: transparent !important;
+}
+
+/* --- HEADER FLOTANTE (NIVEL 2 Y 3) --- */
 .nav-container {
-    position: absolute; /* Clave para que flote sobre la imagen */
-    top: 34px; /* Se alinea debajo de la barra negra */
+    position: absolute; /* Flota sobre la imagen Hero */
+    top: 34px; /* Se ajusta debajo de la barra negra */
     left: 0;
     width: 100%;
     z-index: 1000;
-    background-color: transparent !important;
-    border: none !important; /* Eliminamos cualquier borde del contenedor */
-    transition: all 0.4s ease;
+    transition: background-color 0.4s ease;
 }
 
-/* Clase que se activa al bajar la página */
+/* Cuando bajamos la página, el header se vuelve blanco */
 .nav-container.scrolled {
     position: fixed;
     top: 0;
     background-color: #ffffff !important;
-    border-bottom: 1px solid #f2f2f2 !important;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    border-bottom: 1px solid #f2f2f2 !important; /* Solo aparece la línea al hacer scroll */
 }
 
-/* --- ELIMINAR LA LÍNEA DEL NIVEL 3 --- */
-.header-nav-row {
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    gap: 30px;
-    padding: 10px 0 25px 0;
-    background-color: transparent !important;
-    border-bottom: none !important; /* AQUÍ ELIMINAMOS LA LÍNEA QUE RESALTABA */
+/* Cambiar color de links: Blancos sobre la foto, Negros en el fondo blanco */
+.nav-container a, .nav-container i, .nav-container button {
+    color: #ffffff; /* Inicialmente blancos para resaltar sobre la foto */
+    transition: color 0.4s ease;
 }
 
-/* --- HERO SECTION (CORRECCIÓN DE POSICIÓN) --- */
+.nav-container.scrolled a, .nav-container.scrolled i, .nav-container.scrolled button {
+    color: #000000 !important; /* Negros cuando el header es blanco */
+}
+
+/* --- HERO SECTION: PANTALLA COMPLETA --- */
 .hero-section {
-    position: absolute; /* Arrancamos la sección del flujo normal */
-    top: 0; /* Empieza en el borde superior absoluto */
-    left: 0;
+    position: relative;
     width: 100%;
-    height: 100vh; /* Ocupa toda la ventana del navegador */
-    z-index: 1; /* Queda por debajo del header (z-index 1000) */
+    height: 100vh; /* Ocupa toda la altura de la ventana */
     margin: 0;
     padding: 0;
+    overflow: hidden;
+    background-color: #000; /* Fondo de respaldo mientras carga */
 }
 
 .hero-image {
     width: 100%;
     height: 100%;
-    object-fit: cover; /* Asegura que la imagen llene el espacio sin deformarse */
+    object-fit: cover; /* Clave: Llena todo el espacio sin deformarse */
     display: block;
 }
 
-/* Espaciador para que el contenido de abajo no se encime con el Hero */
-.content-wrapper {
-    margin-top: 100vh; /* Empuja el resto de la página hacia abajo */
+.hero-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 10;
+    background: rgba(0,0,0,0.1); /* Oscurece un poco la foto para leer el texto */
+}
+
+/* --- FIX PARA EL CONTENIDO DE ABAJO --- */
+#new-arrivals, #colecciones, .product-grid {
     position: relative;
-    z-index: 2;
-    background: #fff;
+    z-index: 20;
+    background-color: #fff; /* Asegura que lo de abajo tape el final del Hero */
 }
