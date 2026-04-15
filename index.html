@@ -14,77 +14,56 @@
 </head>
 <body>
 
- <header>
+<body>
     <div class="announcement-bar">
         <div class="marquee">
-            <span>SOCIETÀ DI CALCIO | DROP ONE NOW LIVE | ENVÍO GRATIS EN PEDIDOS MAYORES A $1,500 MXN | SOCIETÀ DI CALCIO | DROP ONE NOW LIVE | ENVÍO GRATIS EN PEDIDOS MAYORES A $1,500 MXN |</span>
-            <span>SOCIETÀ DI CALCIO | DROP ONE NOW LIVE | ENVÍO GRATIS EN PEDIDOS MAYORES A $1,500 MXN | SOCIETÀ DI CALCIO | DROP ONE NOW LIVE | ENVÍO GRATIS EN PEDIDOS MAYORES A $1,500 MXN |</span>
+            <span>SOCIETÀ DI CALCIO | DROP ONE NOW LIVE | ENVÍO GRATIS EN PEDIDOS MAYORES A $1,500 MXN | SOCIETÀ DI CALCIO |</span>
+            <span>SOCIETÀ DI CALCIO | DROP ONE NOW LIVE | ENVÍO GRATIS EN PEDIDOS MAYORES A $1,500 MXN | SOCIETÀ DI CALCIO |</span>
         </div>
     </div>
 
-    <div class="header-main-row">
-        <div class="header-search">
-            <button id="hamburger-btn" class="mobile-only" style="background:none; border:none; padding:0; cursor:pointer;">
-                <i class="fas fa-bars" style="font-size: 18px;"></i>
-            </button>
-            <a href="#" class="desktop-only"><i class="fas fa-search"></i> SEARCH</a>
-        </div>
-
-        <div class="header-logo">
-            <a href="index.html">
-                <img src="logo SC sin fondo.png" alt="Società Di Calcio">
-            </a>
-        </div>
-
-        <div class="header-utils">
-            <div class="desktop-only" style="display:flex; gap:20px;">
-                <a href="/account">ACCOUNT</a>
-                <a href="#" onclick="openCartDrawer(); return false;">CART (<span class="cart-text">0</span>)</a>
+    <div class="nav-container" id="nav-container">
+        <header class="header-main-row">
+            <div class="header-search">
+                <button id="hamburger-btn" class="mobile-only"><i class="fas fa-bars"></i></button>
+                <a href="#" class="desktop-only"><i class="fas fa-search"></i> SEARCH</a>
             </div>
-            <div class="header-utils-mobile mobile-only">
-                <a href="#"><i class="fas fa-search"></i></a>
-                <a href="#" onclick="openCartDrawer(); return false;"><i class="fas fa-shopping-bag"></i></a>
+            <div class="header-logo">
+                <a href="index.html"><img src="logo SC sin fondo.png" alt="Logo"></a>
             </div>
-        </div>
+            <div class="header-utils">
+                <div class="desktop-only" style="display:flex; gap:20px;">
+                    <a href="/account">ACCOUNT</a>
+                    <a href="#" onclick="openCartDrawer(); return false;">CART (<span class="cart-text">0</span>)</a>
+                </div>
+                <div class="mobile-only" style="gap:15px; align-items:center;">
+                    <a href="#"><i class="fas fa-search"></i></a>
+                    <a href="#" onclick="openCartDrawer(); return false;"><i class="fas fa-shopping-bag"></i></a>
+                </div>
+            </div>
+        </header>
+
+        <nav class="header-nav-row desktop-only">
+            <a href="#new-arrivals">NEW ARRIVALS</a>
+            <a href="#products">PRODUCTS</a>
+            <a href="#best-selling">BEST SELLING</a>
+            <a href="#shipping">SHIPPING & RETURNS</a>
+            <a href="#brand">THE BRAND</a>
+            <a href="#size-guide">SIZE GUIDE</a>
+        </nav>
     </div>
 
-    <nav class="header-nav-row desktop-only">
-        <a href="#new-arrivals">NEW ARRIVALS</a>
-        <a href="#products">PRODUCTS</a>
-        <a href="#best-selling">BEST SELLING</a>
-        <a href="#shipping">SHIPPING & RETURNS</a>
-        <a href="#brand">THE BRAND</a>
-        <a href="#size-guide">SIZE GUIDE</a>
-    </nav>
-</header>
-
-    <nav class="main-nav" id="main-nav" style="display:none;">
-        <button class="close-menu-btn" id="close-menu-btn">&times;</button>
-        <a href="#new-arrivals">NEW ARRIVALS</a>
-        <a href="#products">PRODUCTS</a>
-        <a href="#best-selling">BEST SELLING</a>
-        <a href="#nosotros">THE BRAND</a>
-    </nav>
-
-    <nav class="main-nav" id="main-nav" style="display:none; position:fixed; top:0; left:0; height:100%; background:#fff; z-index:1000; flex-direction:column; padding:40px; box-shadow: 2px 0 10px rgba(0,0,0,0.1);">
-        <button class="close-menu-btn" id="close-menu-btn" style="position:absolute; top:20px; right:20px; background:none; border:none; font-size:2rem; cursor:pointer;">&times;</button>
-        <a href="#novedades" style="font-family:'Inter', sans-serif; font-size:1.2rem; font-weight:600; text-transform:uppercase; margin-bottom:20px; color:#000; text-decoration:none;">Novedades</a>
-        <a href="#colecciones" style="font-family:'Inter', sans-serif; font-size:1.2rem; font-weight:600; text-transform:uppercase; margin-bottom:20px; color:#000; text-decoration:none;">Colecciones</a>
-        <a href="#nosotros" style="font-family:'Inter', sans-serif; font-size:1.2rem; font-weight:600; text-transform:uppercase; margin-bottom:20px; color:#000; text-decoration:none;">Nosotros</a>
-        <a href="#contacto" style="font-family:'Inter', sans-serif; font-size:1.2rem; font-weight:600; text-transform:uppercase; margin-bottom:20px; color:#000; text-decoration:none;">Contacto</a>
-    </nav>
-
-    <main>     
-    <section class="hero-section">
-        <img src="playera-horizontal-societa-portugal.JPG" alt="SS26 Campaign" class="hero-image">
+    <main>
+        <section class="hero-section">
+            <img src="playera-horizontal-societa-portugal.JPG" alt="SS26" class="hero-image">
+            <div class="hero-overlay">
+                <h1 style="font-size: clamp(2.5rem, 8vw, 4.5rem); letter-spacing: 5px; text-transform: uppercase; font-weight: 700;">SS26 | DROP ONE</h1>
+                <a href="#new-arrivals" style="background: #fff; color: #000; padding: 15px 40px; font-weight: 700; text-decoration: none; font-size: 11px; letter-spacing: 2px; margin-top: 20px;">VIEW COLLECTION</a>
+            </div>
+        </section>
         
-        <div class="hero-content">
-            <p style="letter-spacing: 3px; font-size: 12px; font-weight: 600; text-transform: uppercase;">Now Live</p>
-            <h1 style="font-size: clamp(2rem, 8vw, 4rem); letter-spacing: 5px; font-weight: 700; margin: 10px 0 30px 0;">SS26 | DROP ONE</h1>
-            <a href="#all-products" style="background:#fff; color:#000; padding:15px 40px; text-decoration:none; font-size:11px; font-weight:700; letter-spacing:2px; text-transform:uppercase;">View Collection</a>
-        </div>
-    </section>
-</main>
+        </main>
+</body>
         
         <section id="novedades" class="hero-section">
             <div class="hero-text">

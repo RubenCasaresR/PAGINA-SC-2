@@ -1735,50 +1735,68 @@ body.no-scroll {
         .header-logo { justify-self: center; }
         .header-utils { justify-self: end; }
     }
-    /* --- HEADER FLOTANTE Y TRANSPARENTE --- */
-.club-header {
-    position: fixed; /* Lo fijamos arriba */
-    top: 34px; /* Se coloca debajo de la barra negra (ajusta si tu barra mide distinto) */
+    /* --- CONFIGURACIÓN DEL HEADER (NIVEL 2 Y 3) --- */
+.nav-container {
+    position: absolute; /* Empieza flotando sobre la Hero */
+    top: 34px; /* Se coloca justo debajo de la barra negra */
     left: 0;
     width: 100%;
     z-index: 1000;
-    background-color: transparent; /* Empieza invisible */
-    border-bottom: 1px solid transparent; 
-    transition: background-color 0.4s ease, border-bottom 0.4s ease, top 0.4s ease;
-    box-sizing: border-box;
+    background-color: transparent;
+    transition: all 0.4s ease;
 }
 
-/* --- CLASE QUE ACTIVA EL COLOR (Se activa con JS) --- */
-.club-header.header-scrolled {
-    background-color: #ffffff; /* Se vuelve blanco al bajar */
+/* Clase que se activa al hacer Scroll (La activa el JS) */
+.nav-container.scrolled {
+    position: fixed;
+    top: 0;
+    background-color: #ffffff;
     border-bottom: 1px solid #f2f2f2;
-    top: 0; /* Si quieres que al bajar tape la barra negra para dar más espacio */
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
 }
 
-/* --- HERO SECTION FULL SCREEN --- */
+/* Ajustes de los niveles dentro del contenedor flotante */
+.header-main-row, .header-nav-row {
+    background-color: transparent !important; /* Forzamos transparencia inicial */
+}
+
+/* --- HERO SECTION (FULL SCREEN) --- */
 .hero-section {
     position: relative;
     width: 100%;
-    height: 100vh; /* Ocupa el 100% de la altura de la pantalla */
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    height: 100vh; /* 100% de la altura de la pantalla */
     overflow: hidden;
+    margin-top: 0;
 }
 
 .hero-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Mantiene la proporción de la imagen */
+    display: block;
+}
+
+.hero-overlay {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    object-fit: cover; /* La imagen se estira sin deformarse */
-    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: rgba(0,0,0,0.1); /* Sutil capa para que resalten los textos */
+    color: #fff;
+    text-align: center;
+    z-index: 10;
 }
 
-.hero-content {
-    position: relative;
-    z-index: 10;
-    text-align: center;
-    color: #fff;
+/* Re-aseguramos el centrado del Nivel 3 */
+.header-nav-row {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    padding: 10px 0 20px 0;
 }
