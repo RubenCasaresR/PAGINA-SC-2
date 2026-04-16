@@ -1742,69 +1742,101 @@ body.no-scroll {
     background-color: transparent !important;
 }
 
-/* --- HEADER FLOTANTE (NIVEL 2 Y 3) --- */
+/* --- CONFIGURACIÓN MAESTRA DEL HEADER --- */
 .nav-container {
-    position: absolute; /* Flota sobre la imagen Hero */
-    top: 34px; /* Se ajusta debajo de la barra negra */
+    position: absolute; /* Flota sobre la Hero */
+    top: 34px; /* Debajo de la barra negra */
     left: 0;
     width: 100%;
     z-index: 1000;
-    transition: background-color 0.4s ease;
+    background-color: transparent !important;
+    border: none !important; /* Eliminamos la línea resaltada */
+    transition: all 0.4s ease;
 }
 
-/* Cuando bajamos la página, el header se vuelve blanco */
+/* Estado del Header al bajar (Scroll) */
 .nav-container.scrolled {
     position: fixed;
     top: 0;
     background-color: #ffffff !important;
-    border-bottom: 1px solid #f2f2f2 !important; /* Solo aparece la línea al hacer scroll */
+    border-bottom: 1px solid #f2f2f2 !important; /* La línea solo aparece al bajar */
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
 }
 
-/* Cambiar color de links: Blancos sobre la foto, Negros en el fondo blanco */
-.nav-container a, .nav-container i, .nav-container button {
-    color: #ffffff; /* Inicialmente blancos para resaltar sobre la foto */
-    transition: color 0.4s ease;
+/* --- FIX DEL LOGO PARA MÓVIL Y ESCRITORIO --- */
+.header-logo {
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
-.nav-container.scrolled a, .nav-container.scrolled i, .nav-container.scrolled button {
-    color: #000000 !important; /* Negros cuando el header es blanco */
+.header-logo img {
+    height: 30px; /* Tamaño ideal tipo Club 1984 */
+    width: auto;
+    display: block;
+    /* TRUCO: Si tu logo es negro, esto lo vuelve blanco sobre la foto */
+    filter: brightness(0) invert(1); 
+    transition: filter 0.4s ease;
 }
 
-/* --- HERO SECTION: PANTALLA COMPLETA --- */
+/* Cuando el header se vuelve blanco, el logo vuelve a ser negro */
+.nav-container.scrolled .header-logo img {
+    filter: none; 
+}
+
+/* --- ELIMINAR LÍNEA DEL NIVEL 3 --- */
+.header-nav-row {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    padding: 10px 0 25px 0;
+    border: none !important; /* Limpieza absoluta */
+}
+
+/* --- HERO SECTION: PANTALLA COMPLETA REAL --- */
 .hero-section {
     position: relative;
     width: 100%;
-    height: 100vh; /* Ocupa toda la altura de la ventana */
+    height: 100vh; /* Ocupa toda la pantalla */
     margin: 0;
     padding: 0;
     overflow: hidden;
-    background-color: #000; /* Fondo de respaldo mientras carga */
 }
 
 .hero-image {
     width: 100%;
     height: 100%;
-    object-fit: cover; /* Clave: Llena todo el espacio sin deformarse */
-    display: block;
-}
-
-.hero-overlay {
+    object-fit: cover; /* La imagen se ajusta sin deformarse */
     position: absolute;
     top: 0;
     left: 0;
-    width: 100%;
+}
+
+.hero-overlay {
+    position: relative;
+    z-index: 10;
     height: 100%;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    z-index: 10;
-    background: rgba(0,0,0,0.1); /* Oscurece un poco la foto para leer el texto */
+    background: rgba(0,0,0,0.15); /* Capa sutil para resaltar el logo blanco */
 }
 
-/* --- FIX PARA EL CONTENIDO DE ABAJO --- */
-#new-arrivals, #colecciones, .product-grid {
-    position: relative;
-    z-index: 20;
-    background-color: #fff; /* Asegura que lo de abajo tape el final del Hero */
+/* --- RESPONSIVE MÓVIL --- */
+@media (max-width: 1024px) {
+    .nav-container {
+        top: 34px; /* Mantenemos espacio para la barra negra */
+    }
+    .header-main-row {
+        display: grid;
+        grid-template-columns: 1fr 2fr 1fr; /* Damos más espacio al logo central */
+        padding: 10px 20px;
+        align-items: center;
+    }
+    .header-logo img {
+        height: 25px; /* Un poco más pequeño en móvil para elegancia */
+        margin: 0 auto;
+    }
 }
