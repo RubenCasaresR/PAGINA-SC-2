@@ -1742,88 +1742,104 @@ body.no-scroll {
     background-color: transparent !important;
 }
 
-/* --- CONFIGURACIÓN MAESTRA DEL HEADER --- */
+/* --- HEADER TRANSPARENTE Y LIMPIO --- */
 .nav-container {
-    position: absolute; /* Flota sobre la Hero */
-    top: 34px; /* Debajo de la barra negra */
+    position: absolute;
+    top: 34px; /* Se apoya bajo la barra negra */
     left: 0;
     width: 100%;
     z-index: 1000;
-    background-color: transparent !important;
-    border: none !important; /* Eliminamos la línea resaltada */
+    background: transparent !important;
+    border: none !important;
     transition: all 0.4s ease;
 }
 
-/* Estado del Header al bajar (Scroll) */
+/* Solo aparece la línea y el fondo blanco al bajar */
 .nav-container.scrolled {
     position: fixed;
     top: 0;
     background-color: #ffffff !important;
-    border-bottom: 1px solid #f2f2f2 !important; /* La línea solo aparece al bajar */
-    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    border-bottom: 1px solid #f2f2f2 !important;
 }
 
-/* --- FIX DEL LOGO PARA MÓVIL Y ESCRITORIO --- */
-.header-logo {
-    display: flex;
-    justify-content: center;
-    align-items: center;
+/* Tipografía y Colores de los Links */
+.nav-container a, .nav-container i, .nav-container button {
+    color: #ffffff; /* Blancos sobre la foto */
+    text-decoration: none;
+    transition: color 0.4s ease;
 }
 
-.header-logo img {
-    height: 30px; /* Tamaño ideal tipo Club 1984 */
-    width: auto;
-    display: block;
-    /* TRUCO: Si tu logo es negro, esto lo vuelve blanco sobre la foto */
-    filter: brightness(0) invert(1); 
-    transition: filter 0.4s ease;
+.nav-container.scrolled a, .nav-container.scrolled i, .nav-container.scrolled button {
+    color: #000000 !important; /* Negros al bajar */
 }
 
-/* Cuando el header se vuelve blanco, el logo vuelve a ser negro */
-.nav-container.scrolled .header-logo img {
-    filter: none; 
-}
-
-/* --- ELIMINAR LÍNEA DEL NIVEL 3 --- */
+/* El Nivel 3 sin líneas y centrado */
 .header-nav-row {
     width: 100%;
     display: flex;
     justify-content: center;
     gap: 30px;
     padding: 10px 0 25px 0;
-    border: none !important; /* Limpieza absoluta */
+    border: none !important;
 }
 
-/* --- HERO SECTION: PANTALLA COMPLETA REAL --- */
+/* --- LOGO DINÁMICO --- */
+#main-logo {
+    height: 30px;
+    width: auto;
+    filter: brightness(0) invert(1); /* Lo vuelve blanco sobre la foto */
+    transition: filter 0.4s ease;
+}
+
+.nav-container.scrolled #main-logo {
+    filter: none; /* Vuelve a su color original (negro) al bajar */
+}
+
+/* --- HERO SECTION --- */
 .hero-section {
     position: relative;
     width: 100%;
-    height: 100vh; /* Ocupa toda la pantalla */
-    margin: 0;
-    padding: 0;
+    height: 100vh;
     overflow: hidden;
 }
 
 .hero-image {
     width: 100%;
     height: 100%;
-    object-fit: cover; /* La imagen se ajusta sin deformarse */
-    position: absolute;
-    top: 0;
-    left: 0;
+    object-fit: cover;
 }
 
 .hero-overlay {
-    position: relative;
-    z-index: 10;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
     height: 100%;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    background: rgba(0,0,0,0.15); /* Capa sutil para resaltar el logo blanco */
+    background: rgba(0,0,0,0.15); /* Sutil capa para que el texto resalte */
 }
 
+.hero-title {
+    color: white;
+    font-size: clamp(2rem, 8vw, 4rem);
+    letter-spacing: 5px;
+    text-transform: uppercase;
+    font-weight: 700;
+}
+
+.hero-btn {
+    background: #fff;
+    color: #000;
+    padding: 15px 40px;
+    font-weight: 700;
+    text-decoration: none;
+    font-size: 11px;
+    letter-spacing: 2px;
+    margin-top: 20px;
+}
 /* --- RESPONSIVE MÓVIL --- */
 @media (max-width: 1024px) {
     .nav-container {
