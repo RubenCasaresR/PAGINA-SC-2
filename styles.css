@@ -1640,18 +1640,6 @@ body.no-scroll {
 }
 .btn-newsletter:hover { background-color: #333; }
 
-.newsletter-message {
-    margin-top: 15px;
-    font-weight: bold;
-    font-size: 0.95rem;
-    height: 20px; /* Evita que la página salte al aparecer el texto */
-}
-.newsletter-message.success { color: #28a745; }
-.newsletter-message.error { color: #d9534f; }
 
-@media (max-width: 600px) {
-    .newsletter-form { flex-direction: column; align-items: stretch; }
-    .newsletter-form input, .btn-newsletter { max-width: 100%; }
-}
 
   
