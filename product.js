@@ -175,7 +175,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     const selectedSize = selectedSizeBtn.innerText;
                     const quantity = parseInt(quantityValue.innerText);
                     
-                    const imagenCarrito = product.images[0].toLowerCase().endsWith('.mp4') && product.images.length > 1 ? product.images[1] : product.images[0];
+                   const imagenCarrito = product.images.find(img => !img.toLowerCase().endsWith('.mp4')) || 'logo SC sin fondo.png';
                     addToCart(productId, product.name, product.price, imagenCarrito, quantity, selectedSize);
                 });
             }
