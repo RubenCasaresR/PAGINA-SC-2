@@ -17,7 +17,8 @@ const db = new sqlite3.Database('./tienda.sqlite', (err) => {
 const COLUMNAS_NUEVAS = [
     { nombre: 'estado', definicion: "TEXT DEFAULT 'pendiente'" },
     { nombre: 'mp_payment_id', definicion: 'TEXT' },
-    { nombre: 'external_reference', definicion: 'TEXT' }
+    { nombre: 'external_reference', definicion: 'TEXT' },
+    { nombre: 'envio', definicion: 'REAL DEFAULT 0' }
 ];
 
 db.all("PRAGMA table_info(ordenes)", (err, filas) => {

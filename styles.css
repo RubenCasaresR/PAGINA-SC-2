@@ -213,6 +213,15 @@ a:hover {
     gap: 40px;
 }
 
+/* Tarjetas que se filtran por colección */
+.filterDiv {
+    display: none;
+}
+
+.filterDiv.show {
+    display: block;
+}
+
 .product-card {
     cursor: pointer;
     text-align: left;

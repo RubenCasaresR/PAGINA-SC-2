@@ -58,10 +58,14 @@ function renderizarCuadricula(productos) {
         const foto1 = arrayFotos[0] || 'logo SC sin fondo.png'; // Foto principal
         const foto2 = arrayFotos.length > 1 ? arrayFotos[1] : foto1; // Segunda foto (o repite la 1 si solo hay una)
 
+        // 6. Clase de filtro según la categoría real del producto
+        const categoriasValidas = ['novedades-cat', 'descuentos', 'must-have'];
+        const claseFiltro = categoriasValidas.includes(producto.categoria) ? producto.categoria : 'novedades-cat';
+
         // Creamos la tarjeta HTML
         const cardHTML = `
             <a href="${linkDestino}" class="product-card-link ${esProximamente ? 'proximamente-link' : ''}">
-                <div class="product-card filterDiv novedades-cat ${esProximamente ? 'is-coming-soon' : ''}">
+                <div class="product-card filterDiv ${claseFiltro} ${esProximamente ? 'is-coming-soon' : ''}">
                     <div class="product-image-container">
                         <img src="${foto1}" alt="${producto.nombre}" class="main-img" loading="lazy">
                         <img src="${foto2}" alt="${producto.nombre}" class="hover-img" loading="lazy">
@@ -76,6 +80,13 @@ function renderizarCuadricula(productos) {
             </a>`;
         productGrid.innerHTML += cardHTML;
     });
+
+    // Refresca el filtro activo para que las tarjetas nuevas sean visibles
+    if (typeof filterSelection === 'function') {
+        const activo = document.querySelector('.tabs .tab-button.active');
+        const categoria = activo ? activo.getAttribute('onclick').match(/'([^']+)'/)[1] : 'all';
+        filterSelection(categoria);
+    }
 }
 
 // ======================================================= //

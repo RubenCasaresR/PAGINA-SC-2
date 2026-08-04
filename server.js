@@ -4,6 +4,7 @@ const crypto = require('crypto');
 const sqlite3 = require('sqlite3').verbose(); 
 const nodemailer = require('nodemailer'); 
 const rateLimit = require('express-rate-limit');
+const helmet = require('helmet');
 const { MercadoPagoConfig, Preference } = require('mercadopago');
 
 // ========================================== //
@@ -11,6 +12,14 @@ const { MercadoPagoConfig, Preference } = require('mercadopago');
 // ========================================== //
 const PORT = process.env.PORT || 3000;
 const SITE_URL = process.env.SITE_URL || `http://localhost:${PORT}`;
+
+// --- CONFIGURACIÓN DE ENVÍO (misma regla que muestra el frontend) ---
+const FREE_SHIPPING_THRESHOLD = 1500.00;
+const STANDARD_SHIPPING_COST = 99.00;
+
+function calcularEnvio(subtotal) {
+    return subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : STANDARD_SHIPPING_COST;
+}
 
 // --- CONFIGURACIÓN DEL CARTERO VIRTUAL (GMAIL) ---
 const transporter = nodemailer.createTransport({
@@ -22,6 +31,13 @@ const transporter = nodemailer.createTransport({
 });
 
 const app = express();
+
+// Cabeceras de seguridad (X-Frame-Options, HSTS, nosniff, etc.)
+// CSP desactivado porque la tienda usa scripts y estilos inline.
+app.use(helmet({
+    contentSecurityPolicy: false,
+    crossOriginResourcePolicy: { policy: 'cross-origin' }
+}));
 
 // Conexión a la base de datos
 const db = new sqlite3.Database('./tienda.sqlite', sqlite3.OPEN_READWRITE, (err) => {
@@ -267,6 +283,19 @@ app.post('/api/crear-pago', (req, res) => {
             quantity: Number(item.quantity)
         }));
 
+        // El envío se cobra como una línea más, igual que lo que ve el cliente
+        let totalProductos = 0;
+        items.forEach(item => totalProductos += (item.price * item.quantity));
+        const envio = calcularEnvio(totalProductos);
+        if (envio > 0) {
+            articulosBancarios.push({
+                title: "Envío Nacional",
+                unit_price: envio,
+                currency_id: "MXN",
+                quantity: 1
+            });
+        }
+
         const preference = new Preference(client);
 
         try {
@@ -492,14 +521,16 @@ app.post('/api/checkout', (req, res) => {
     validarCarrito(carrito, (error, items) => {
         if (error) return res.status(400).json({ success: false, error: error.error });
 
-        let total = 0;
-        items.forEach(item => total += (item.price * item.quantity));
+        let totalProductos = 0;
+        items.forEach(item => totalProductos += (item.price * item.quantity));
+        const envio = calcularEnvio(totalProductos);
+        const total = totalProductos + envio;
 
         const externalReference = 'SC-' + Date.now() + '-' + crypto.randomBytes(3).toString('hex');
 
-        const sqlInsert = `INSERT INTO ordenes (nombre, email, direccion, total, productos, estado, external_reference) VALUES (?, ?, ?, ?, ?, 'pendiente', ?)`;
+        const sqlInsert = `INSERT INTO ordenes (nombre, email, direccion, total, productos, estado, external_reference, envio) VALUES (?, ?, ?, ?, ?, 'pendiente', ?, ?)`;
         
-        db.run(sqlInsert, [clienteValido.nombre, clienteValido.email, clienteValido.direccion, total, JSON.stringify(items), externalReference], function(err) {
+        db.run(sqlInsert, [clienteValido.nombre, clienteValido.email, clienteValido.direccion, total, JSON.stringify(items), externalReference, envio], function(err) {
             if (err) {
                 console.error("🚨 Error al guardar la orden:", err.message);
                 return res.status(500).json({ success: false, error: "Error al guardar la orden." });
@@ -562,19 +593,22 @@ app.post('/api/enviar-recibo', limitadorRecibo, (req, res) => {
         return res.status(400).json({ error: "Correo del cliente inválido." });
     }
 
-    let total = 0;
+    let totalProductos = 0;
     let listaHTML = '';
     
     carrito.forEach(item => {
         const precio = Number(item.price) || 0;
         const cantidad = Number(item.quantity) || 0;
-        total += (precio * cantidad);
+        totalProductos += (precio * cantidad);
         listaHTML += `
             <li style="margin-bottom: 10px; border-bottom: 1px solid #eee; padding-bottom: 10px;">
                 <strong>${cantidad}x</strong> ${escaparHTML(item.name)} (Talla: <strong>${escaparHTML(item.size)}</strong>) <br>
                 <span style="color: #555;">$${(precio * cantidad).toFixed(2)} MXN</span>
             </li>`;
     });
+
+    const envio = calcularEnvio(totalProductos);
+    const total = totalProductos + envio;
 
     const mailOptions = {
         from: '"Società Di Calcio" <ventas.societadicalcio@gmail.com>',
@@ -591,7 +625,10 @@ app.post('/api/enviar-recibo', limitadorRecibo, (req, res) => {
                     <div style="background-color: #f9f9f9; padding: 20px; border-radius: 6px; margin: 25px 0;">
                         <h3 style="margin-top: 0; border-bottom: 2px solid #000; padding-bottom: 10px; text-transform: uppercase; font-size: 14px;">Resumen de tu Orden</h3>
                         <ul style="list-style: none; padding: 0; margin: 0;">${listaHTML}</ul>
-                        <div style="margin-top: 15px; padding-top: 15px; border-top: 2px solid #000; font-size: 18px; font-weight: bold; text-align: right;">Total: $${total.toFixed(2)} MXN</div>
+                        <div style="margin-top: 15px; padding-top: 15px; border-top: 2px solid #000; font-size: 16px; text-align: right;">
+                            ${envio > 0 ? `<div style="color: #555;">Envío Nacional: $${envio.toFixed(2)} MXN</div>` : '<div style="color: #28a745;">Envío Gratis 🎉</div>'}
+                            <div style="font-size: 18px; font-weight: bold;">Total: $${total.toFixed(2)} MXN</div>
+                        </div>
                     </div>
                     <div style="background-color: #f9f9f9; padding: 20px; border-radius: 6px;">
                         <h3 style="margin-top: 0; border-bottom: 2px solid #000; padding-bottom: 10px; text-transform: uppercase; font-size: 14px;">Dirección de Envío 📍</h3>
