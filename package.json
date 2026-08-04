@@ -4,7 +4,8 @@
   "description": "E-commerce completo con Node.js y SQLite",
   "main": "server.js",
   "scripts": {
-    "start": "node --env-file-if-exists=.env server.js"
+    "start": "node --env-file-if-exists=.env server.js",
+    "migrar": "node migrarDB.js"
   },
   "dependencies": {
     "express": "^4.18.2",

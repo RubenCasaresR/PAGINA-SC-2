@@ -207,16 +207,24 @@
             }
 
             try {
-                await fetch('/api/checkout', {
+                const respuestaOrden = await fetch('/api/checkout', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ carrito: carrito, cliente: cliente })
                 });
+                const datosOrden = await respuestaOrden.json();
+
+                if (!respuestaOrden.ok || !datosOrden.success) {
+                    alert(datosOrden.error || "No se pudo registrar tu orden. Revisa tus datos.");
+                    btn.innerText = "Proceder al Pago";
+                    btn.disabled = false;
+                    return;
+                }
 
                 const respuestaMP = await fetch('/api/crear-pago', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ carrito: carrito })
+                    body: JSON.stringify({ carrito: carrito, externalReference: datosOrden.externalReference })
                 });
                 
                 const datosMP = await respuestaMP.json();
@@ -224,7 +232,7 @@
                 if(datosMP.success) {
                     window.location.href = datosMP.link_de_pago; 
                 } else {
-                    alert("Error al conectar con la terminal bancaria.");
+                    alert(datosMP.error || "Error al conectar con la terminal bancaria.");
                     btn.innerText = "Proceder al Pago";
                     btn.disabled = false;
                 }

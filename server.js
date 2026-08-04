@@ -251,6 +251,12 @@ app.post('/api/crear-pago', (req, res) => {
     const paquete = req.body;
     const carrito = paquete.carrito ? paquete.carrito : paquete;
 
+    // Solo se puede pagar una orden que ya pasó por /api/checkout.
+    const externalReference = typeof paquete.externalReference === 'string' ? paquete.externalReference.trim() : '';
+    if (!externalReference) {
+        return res.status(400).json({ success: false, error: "Falta la referencia de la orden." });
+    }
+
     validarCarrito(carrito, async (error, items) => {
         if (error) return res.status(400).json({ success: false, error: error.error });
 
@@ -267,6 +273,8 @@ app.post('/api/crear-pago', (req, res) => {
             const respuestaBanco = await preference.create({
                 body: {
                     items: articulosBancarios,
+                    external_reference: externalReference,
+                    notification_url: `${SITE_URL}/api/pagos/webhook`,
                     back_urls: {
                         success: `${SITE_URL}/thank-you.html`,
                         failure: `${SITE_URL}/checkout.html`,
@@ -286,6 +294,99 @@ app.post('/api/crear-pago', (req, res) => {
             res.status(500).json({ success: false, error: "El banco no respondió." });
         }
     });
+});
+
+// ========================================== //
+// ===== WEBHOOK DE MERCADO PAGO ============ //
+// ========================================== //
+// Mercado Pago nos avisa aquí cuando cambia el estado de un pago.
+// La firma X-Signature se verifica con HMAC para que nadie pueda
+// fingir un pago aprobado.
+
+function obtenerDataId(req) {
+    if (req.query['data.id']) return req.query['data.id'];
+    if (req.query.data && req.query.data.id) return req.query.data.id;
+    if (req.query.id) return req.query.id;
+    return '';
+}
+
+function verificarFirmaMercadoPago(req) {
+    const xSignature = req.headers['x-signature'];
+    const xRequestId = req.headers['x-request-id'];
+    const secreto = process.env.MERCADOPAGO_CLIENT_SECRET;
+    if (!xSignature || !xRequestId || !secreto) return false;
+
+    let ts = null;
+    let v1 = null;
+    xSignature.split(',').forEach(parte => {
+        const idx = parte.indexOf('=');
+        if (idx === -1) return;
+        const clave = parte.slice(0, idx).trim();
+        const valor = parte.slice(idx + 1).trim();
+        if (clave === 'ts') ts = valor;
+        else if (clave === 'v1') v1 = valor;
+    });
+    if (!ts || !v1) return false;
+
+    const dataId = obtenerDataId(req);
+    const manifiesto = `id:${dataId};request-id:${xRequestId};ts:${ts};`;
+    const esperado = crypto.createHmac('sha256', secreto).update(manifiesto).digest('hex');
+    return esperado === v1;
+}
+
+async function consultarPago(pagoId) {
+    const token = process.env.MERCADOPAGO_ACCESS_TOKEN;
+    const respuesta = await fetch(`https://api.mercadopago.com/v1/payments/${pagoId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+    });
+    if (!respuesta.ok) throw new Error(`Mercado Pago respondió HTTP ${respuesta.status}`);
+    return respuesta.json();
+}
+
+app.get('/api/pagos/webhook', (req, res) => {
+    res.status(200).send('ok');
+});
+
+app.post('/api/pagos/webhook', async (req, res) => {
+    if (!verificarFirmaMercadoPago(req)) {
+        return res.status(401).send('Firma inválida');
+    }
+
+    if ((req.body.type || '') !== 'payment') {
+        return res.status(200).send('ok');
+    }
+
+    const pagoId = String(req.body.data && req.body.data.id ? req.body.data.id : obtenerDataId(req));
+    if (!pagoId) return res.status(200).send('ok');
+
+    try {
+        const pago = await consultarPago(pagoId);
+        const ext = pago.external_reference;
+        if (!ext) return res.status(200).send('ok');
+
+        let estado;
+        if (pago.status === 'approved') estado = 'pagado';
+        else if (pago.status === 'rejected' || pago.status === 'cancelled') estado = 'rechazado';
+        else estado = 'pendiente';
+
+        db.run("UPDATE ordenes SET estado = ?, mp_payment_id = ? WHERE external_reference = ?",
+            [estado, pagoId, ext],
+            function (err) {
+                if (err) {
+                    console.error("🚨 Error al actualizar la orden por webhook:", err.message);
+                    return res.status(500).send('error');
+                }
+                if (this.changes === 0) {
+                    console.warn("⚠️ Webhook recibido para una orden desconocida:", ext);
+                } else {
+                    console.log("✅ Pago actualizado en BD:", ext, "→", estado);
+                }
+                res.status(200).send('ok');
+            });
+    } catch (error) {
+        console.error("🚨 Error consultando el pago en Mercado Pago:", error.message);
+        res.status(500).send('error');
+    }
 });
 
 // ========================================== //
@@ -366,13 +467,26 @@ app.get('/api/productos/:id', (req, res) => {
 // ========================================== //
 // ======= RUTA DE CAJA REGISTRADORA (LOCAL)  //
 // ========================================== //
+function validarDatosCliente(cliente) {
+    if (!cliente || typeof cliente !== 'object') return "Faltan los datos del cliente.";
+    const nombre = typeof cliente.nombre === 'string' ? cliente.nombre.trim() : '';
+    const email = typeof cliente.email === 'string' ? cliente.email.trim().toLowerCase() : '';
+    const direccion = typeof cliente.direccion === 'string' ? cliente.direccion.trim() : '';
+    if (!nombre) return "El nombre es obligatorio.";
+    if (nombre.length < 2 || nombre.length > 120) return "El nombre no tiene un largo válido.";
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) return "El correo del cliente no es válido.";
+    if (!direccion) return "La dirección de envío es obligatoria.";
+    if (direccion.length > 500) return "La dirección es demasiado larga.";
+    return { nombre, email, direccion };
+}
+
 app.post('/api/checkout', (req, res) => {
     const paquete = req.body; 
     const carrito = paquete.carrito ? paquete.carrito : paquete; 
-    const cliente = paquete.cliente;
+    const clienteValido = validarDatosCliente(paquete.cliente);
 
-    if (!cliente || !cliente.nombre || !cliente.email || !cliente.direccion) {
-        return res.status(400).json({ success: false, error: "Faltan los datos del cliente." });
+    if (typeof clienteValido !== 'object') {
+        return res.status(400).json({ success: false, error: clienteValido });
     }
 
     validarCarrito(carrito, (error, items) => {
@@ -381,9 +495,11 @@ app.post('/api/checkout', (req, res) => {
         let total = 0;
         items.forEach(item => total += (item.price * item.quantity));
 
-        const sqlInsert = `INSERT INTO ordenes (nombre, email, direccion, total, productos) VALUES (?, ?, ?, ?, ?)`;
+        const externalReference = 'SC-' + Date.now() + '-' + crypto.randomBytes(3).toString('hex');
+
+        const sqlInsert = `INSERT INTO ordenes (nombre, email, direccion, total, productos, estado, external_reference) VALUES (?, ?, ?, ?, ?, 'pendiente', ?)`;
         
-        db.run(sqlInsert, [cliente.nombre, cliente.email, cliente.direccion, total, JSON.stringify(items)], function(err) {
+        db.run(sqlInsert, [clienteValido.nombre, clienteValido.email, clienteValido.direccion, total, JSON.stringify(items), externalReference], function(err) {
             if (err) {
                 console.error("🚨 Error al guardar la orden:", err.message);
                 return res.status(500).json({ success: false, error: "Error al guardar la orden." });
@@ -406,7 +522,12 @@ app.post('/api/checkout', (req, res) => {
                 });
             });
 
-            res.json({ success: true, message: "¡Orden registrada con éxito!" });
+            res.json({
+                success: true,
+                message: "¡Orden registrada con éxito!",
+                orderId: this.lastID,
+                externalReference
+            });
         });
     });
 });

@@ -344,6 +344,26 @@
         }
 
         // 5. LÓGICA PARA VER LAS VENTAS 
+        function escaparHTMLAdmin(texto) {
+            return String(texto ?? '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        function etiquetaEstado(estado) {
+            const colores = {
+                pagado: '#28a745',
+                pendiente: '#f0ad4e',
+                rechazado: '#d9534f'
+            };
+            const texto = ['pagado', 'pendiente', 'rechazado'].includes(estado) ? estado : 'sin pago';
+            const color = colores[texto] || '#999';
+            return `<span style="background: ${color}; color: #fff; padding: 3px 10px; border-radius: 12px; font-size: 0.8rem; text-transform: uppercase;">${texto}</span>`;
+        }
+
         async function cargarVentas() {
             try {
                 const respuesta = await fetch('/api/admin/ordenes');
@@ -359,17 +379,20 @@
                 ventas.forEach(venta => {
                     let listaArticulos = '';
                     venta.productos.forEach(item => {
-                        listaArticulos += `<li style="margin-bottom: 5px;"><strong>${item.quantity}x</strong> ${item.name} (Talla: ${item.size}) - $${(item.price * item.quantity).toFixed(2)}</li>`;
+                        listaArticulos += `<li style="margin-bottom: 5px;"><strong>${item.quantity}x</strong> ${escaparHTMLAdmin(item.name)} (Talla: ${escaparHTMLAdmin(item.size)}) - $${(item.price * item.quantity).toFixed(2)}</li>`;
                     });
 
                     htmlVentas += `
                     <div style="background: white; padding: 20px; margin-bottom: 20px; border-radius: 8px; border-left: 5px solid #28a745; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
-                        <div style="display: flex; justify-content: space-between; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 10px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 10px;">
                             <strong style="font-size: 1.1rem;">Orden #${venta.id}</strong>
-                            <span style="color: #666;">${new Date(venta.fecha).toLocaleString()}</span>
+                            <div style="text-align: right;">
+                                ${etiquetaEstado(venta.estado)}
+                                <span style="color: #666; display: block; margin-top: 4px;">${new Date(venta.fecha).toLocaleString()}</span>
+                            </div>
                         </div>
-                        <p style="margin: 5px 0;"><strong>👤 Cliente:</strong> ${venta.nombre} (${venta.email})</p>
-                        <p style="margin: 5px 0;"><strong>📍 Dirección:</strong> ${venta.direccion}</p>
+                        <p style="margin: 5px 0;"><strong>👤 Cliente:</strong> ${escaparHTMLAdmin(venta.nombre)} (${escaparHTMLAdmin(venta.email)})</p>
+                        <p style="margin: 5px 0;"><strong>📍 Dirección:</strong> ${escaparHTMLAdmin(venta.direccion)}</p>
                         <p style="margin: 5px 0; color: #28a745;"><strong>💰 Total: $${venta.total.toFixed(2)}</strong></p>
                         <div style="margin-top: 15px; background: #f9f9f9; padding: 10px;">
                             <ul style="margin: 0;">${listaArticulos}</ul>
