@@ -6,6 +6,7 @@ const nodemailer = require('nodemailer');
 const rateLimit = require('express-rate-limit');
 const helmet = require('helmet');
 const { MercadoPagoConfig, Preference } = require('mercadopago');
+const PRODUCTOS_SIEMBRA = require('./datos-siembra.js');
 
 // ========================================== //
 // ======= CONFIGURACIÓN PRINCIPAL ========== //
@@ -112,11 +113,11 @@ function asegurarEsquema(callback) {
             const existentes = new Set(filas.map(fila => fila.name));
             const pendientes = columnas.filter(col => !existentes.has(col.nombre));
 
-            if (pendientes.length === 0) return callback(null);
+            if (pendientes.length === 0) return sembrarProductos();
 
             let indice = 0;
             const aplicar = () => {
-                if (indice >= pendientes.length) return callback(null);
+                if (indice >= pendientes.length) return sembrarProductos();
                 const col = pendientes[indice++];
                 db.run(`ALTER TABLE ordenes ADD COLUMN ${col.nombre} ${col.definicion}`, (e) => {
                     if (e) {
@@ -128,6 +129,42 @@ function asegurarEsquema(callback) {
                 });
             };
             aplicar();
+        });
+    };
+
+    // Siembra el catálogo inicial solo cuando la tabla 'productos' está vacía.
+    const sembrarProductos = () => {
+        db.get("SELECT COUNT(*) AS total FROM productos", (err, fila) => {
+            if (err) {
+                console.error("🚨 Error contando productos:", err.message);
+                return callback(err);
+            }
+            if (fila.total > 0) return callback(null);
+
+            const sql = `INSERT INTO productos
+                (id, nombre, precio, oldPrice, categoria, status, descripcion, composicion, imagenes, related, stock)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+
+            let indice = 0;
+            const insertarSiguiente = () => {
+                if (indice >= PRODUCTOS_SIEMBRA.length) {
+                    console.log(`🌱 Catálogo inicial sembrado (${PRODUCTOS_SIEMBRA.length} productos).`);
+                    return callback(null);
+                }
+                const p = PRODUCTOS_SIEMBRA[indice++];
+                db.run(sql, [
+                    p.id, p.nombre, p.precio, p.oldPrice, p.categoria, p.status,
+                    p.descripcion, p.composicion,
+                    JSON.stringify(p.imagenes), JSON.stringify(p.related), JSON.stringify(p.stock)
+                ], (e) => {
+                    if (e) {
+                        console.error("🚨 Error sembrando producto '" + p.id + "':", e.message);
+                        return callback(e);
+                    }
+                    insertarSiguiente();
+                });
+            };
+            insertarSiguiente();
         });
     };
 
