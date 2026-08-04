@@ -29,11 +29,34 @@
         /* Estilo para el botón de Excel */
         .btn-excel { background-color: #28a745; color: white; padding: 12px 20px; font-weight: bold; border: none; cursor: pointer; border-radius: 4px; text-transform: uppercase; width: 100%; font-size: 16px; transition: background 0.3s;}
         .btn-excel:hover { background-color: #218838; }
+
+        /* Estilo para la pantalla de acceso */
+        .login-screen { display: flex; justify-content: center; align-items: center; min-height: 80vh; }
+        .login-box { background-color: white; max-width: 400px; width: 100%; padding: 30px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); text-align: center; }
+        .login-box h1 { font-size: 22px; margin-bottom: 10px; }
+        .login-box p { color: #777; margin-bottom: 25px; font-size: 14px; }
+        .btn-logout { width: auto; padding: 8px 15px; font-size: 14px; }
     </style>
 </head>
 <body>
 
-    <div class="admin-container">
+    <div id="login-screen" class="login-screen" style="display:none;">
+        <div class="login-box">
+            <h1>🔐 Acceso Restringido</h1>
+            <p>Panel de administración de Società Di Calcio</p>
+            <div class="form-group">
+                <label>Contraseña de Administrador</label>
+                <input type="password" id="login-password" autocomplete="current-password">
+            </div>
+            <button class="btn-guardar" id="btn-login" style="margin-top: 10px;">Entrar al Panel</button>
+            <div id="login-error" class="mensaje"></div>
+        </div>
+    </div>
+
+    <div class="admin-container" id="admin-panel" style="display:none;">
+        <div style="text-align: right; margin-bottom: 20px;">
+            <button class="btn-eliminar btn-logout" id="btn-logout">🚪 Cerrar Sesión</button>
+        </div>
         <h1>⚙️ Ingreso de Nueva Mercancía</h1>
         <form id="form-nuevo-producto">
             <div class="form-group">
@@ -93,6 +116,74 @@
     </div>
 
     <script>
+        const loginScreen = document.getElementById('login-screen');
+        const adminPanel = document.getElementById('admin-panel');
+        const loginError = document.getElementById('login-error');
+
+        function mostrarLogin() {
+            if (loginScreen) loginScreen.style.display = 'flex';
+            if (adminPanel) adminPanel.style.display = 'none';
+        }
+
+        function mostrarPanel() {
+            if (loginScreen) loginScreen.style.display = 'none';
+            if (adminPanel) adminPanel.style.display = 'block';
+            cargarInventario();
+            cargarVentas();
+        }
+
+        // Al cargar la página, preguntamos al servidor si ya hay sesión activa
+        (async function verificarSesion() {
+            try {
+                const respuesta = await fetch('/api/admin/verificar');
+                const datos = await respuesta.json();
+                if (datos.autenticado) mostrarPanel();
+                else mostrarLogin();
+            } catch (error) {
+                mostrarLogin();
+            }
+        })();
+
+        // Login
+        document.getElementById('btn-login').addEventListener('click', async () => {
+            const password = document.getElementById('login-password').value;
+            loginError.style.display = 'none';
+            try {
+                const respuesta = await fetch('/api/admin/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password: password })
+                });
+                const datos = await respuesta.json();
+                if (datos.success) {
+                    mostrarPanel();
+                } else {
+                    loginError.style.display = 'block';
+                    loginError.className = 'mensaje';
+                    loginError.style.backgroundColor = '#f8d7da';
+                    loginError.style.color = '#721c24';
+                    loginError.innerText = '🔒 ' + (datos.error || 'Contraseña incorrecta.');
+                }
+            } catch (error) {
+                loginError.style.display = 'block';
+                loginError.style.backgroundColor = '#f8d7da';
+                loginError.style.color = '#721c24';
+                loginError.innerText = 'Error de conexión con el servidor.';
+            }
+        });
+
+        document.getElementById('login-password').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') document.getElementById('btn-login').click();
+        });
+
+        // Logout
+        document.getElementById('btn-logout').addEventListener('click', async () => {
+            try {
+                await fetch('/api/admin/logout', { method: 'POST' });
+            } catch (error) {}
+            mostrarLogin();
+        });
+
         // 1. LÓGICA PARA AGREGAR PRODUCTO
         document.getElementById('form-nuevo-producto').addEventListener('submit', async (e) => {
             e.preventDefault(); 
@@ -303,9 +394,7 @@
             });
         }
 
-        // Ejecutar las funciones al cargar la página (Limpias y sin envolturas problemáticas)
-        cargarInventario();
-        cargarVentas();
+        // Ejecutar las funciones al cargar la página (Las pantallas las decide el servidor)
     </script>
 </body>
 </html>

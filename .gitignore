@@ -79,6 +79,11 @@ web_modules/
 .env.production.local
 .env.local
 
+# Bases de datos (contienen datos de clientes, NUNCA subirlas)
+*.sqlite
+*.sqlite3
+*.db
+
 # parcel-bundler cache (https://parceljs.org/)
 .cache
 .parcel-cache
