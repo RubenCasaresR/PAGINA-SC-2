@@ -40,17 +40,99 @@ app.use(helmet({
 }));
 
 // Conexión a la base de datos
-const db = new sqlite3.Database('./tienda.sqlite', sqlite3.OPEN_READWRITE, (err) => {
+// En Render, la ruta viene del disco persistente (DB_PATH).
+const DB_PATH = process.env.DB_PATH || path.join(__dirname, 'tienda.sqlite');
+const db = new sqlite3.Database(DB_PATH, sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE, (err) => {
     if (err) console.error("Error al conectar a la BD:", err.message);
-    else console.log("📦 Bóveda de datos conectada con éxito.");
+    else console.log("📦 Bóveda de datos conectada con éxito:", DB_PATH);
 });
 
-// ======= CREAR TABLA DE NEWSLETTER SI NO EXISTE =======
-db.run(`CREATE TABLE IF NOT EXISTS suscriptores (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    email TEXT UNIQUE NOT NULL,
-    fecha DATETIME DEFAULT CURRENT_TIMESTAMP
-)`);
+// ========================================== //
+// ======= ESQUEMA Y MIGRACIONES ============ //
+// ========================================== //
+// Idempotente: se ejecuta en cada arranque y solo agrega lo que falta.
+function asegurarEsquema(callback) {
+    // Tablas base (no se tocan si ya existen)
+    const crearTablas = [
+        `CREATE TABLE IF NOT EXISTS suscriptores (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            email TEXT UNIQUE NOT NULL,
+            fecha DATETIME DEFAULT CURRENT_TIMESTAMP
+        )`,
+        `CREATE TABLE IF NOT EXISTS productos (
+            id TEXT PRIMARY KEY,
+            nombre TEXT,
+            precio REAL,
+            oldPrice REAL,
+            categoria TEXT,
+            status TEXT,
+            descripcion TEXT,
+            composicion TEXT,
+            imagenes TEXT,
+            related TEXT,
+            stock TEXT
+        )`,
+        `CREATE TABLE IF NOT EXISTS ordenes (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            nombre TEXT,
+            email TEXT,
+            direccion TEXT,
+            total REAL,
+            fecha DATETIME DEFAULT CURRENT_TIMESTAMP,
+            productos TEXT
+        )`
+    ];
+
+    let indiceTablas = 0;
+    const crearSiguiente = () => {
+        if (indiceTablas >= crearTablas.length) return migrarColumnas();
+        const sql = crearTablas[indiceTablas++];
+        db.run(sql, (err) => {
+            if (err) {
+                console.error("🚨 Error creando tabla:", err.message);
+                return callback(err);
+            }
+            crearSiguiente();
+        });
+    };
+
+    const migrarColumnas = () => {
+        db.all("PRAGMA table_info(ordenes)", (err2, filas) => {
+            if (err2) {
+                console.error("🚨 Error leyendo el esquema de 'ordenes':", err2.message);
+                return callback(err2);
+            }
+
+            const columnas = [
+                { nombre: 'estado', definicion: "TEXT DEFAULT 'pendiente'" },
+                { nombre: 'mp_payment_id', definicion: 'TEXT' },
+                { nombre: 'external_reference', definicion: 'TEXT' },
+                { nombre: 'envio', definicion: 'REAL DEFAULT 0' }
+            ];
+            const existentes = new Set(filas.map(fila => fila.name));
+            const pendientes = columnas.filter(col => !existentes.has(col.nombre));
+
+            if (pendientes.length === 0) return callback(null);
+
+            let indice = 0;
+            const aplicar = () => {
+                if (indice >= pendientes.length) return callback(null);
+                const col = pendientes[indice++];
+                db.run(`ALTER TABLE ordenes ADD COLUMN ${col.nombre} ${col.definicion}`, (e) => {
+                    if (e) {
+                        console.error("🚨 Error migrando la columna '" + col.nombre + "':", e.message);
+                        return callback(e);
+                    }
+                    console.log("📦 Migración: columna '" + col.nombre + "' agregada a 'ordenes'.");
+                    aplicar();
+                });
+            };
+            aplicar();
+        });
+    };
+
+    crearSiguiente();
+}
 
 // ========================================== //
 // ====== SEGURIDAD: ARCHIVOS BLOQUEADOS ==== //
@@ -751,7 +833,13 @@ app.put('/api/admin/productos/:id/actualizar', requiereAdmin, (req, res) => {
     });
 });
 
-// Encender el servidor
-app.listen(PORT, () => {
-    console.log(`🚀 Servidor de Societa Di Calcio corriendo en el puerto ${PORT}`);
+// Encender el servidor (solo cuando el esquema está listo)
+asegurarEsquema((err) => {
+    if (err) {
+        console.error("🚨 No se pudo preparar la base de datos. El servidor no arrancará:", err.message);
+        process.exit(1);
+    }
+    app.listen(PORT, () => {
+        console.log(`🚀 Servidor de Societa Di Calcio corriendo en el puerto ${PORT}`);
+    });
 });
