@@ -233,6 +233,20 @@ a:hover {
     transform: translateY(-10px);
 }
 
+/* Estado oculto del carrusel (se alterna solo con clases, sin estilo inline) */
+.hero-images img.img-oculta {
+    opacity: 0;
+}
+
+/* Íconos SVG locales (sprite icons.svg) */
+.icon {
+    width: 1em;
+    height: 1em;
+    fill: currentColor;
+    vertical-align: -0.125em;
+    display: inline-block;
+}
+
 .hero-images .img-destacada {
     transform: scale(1.1);
 }
@@ -386,6 +400,73 @@ a:hover {
     text-decoration: line-through;
     color: var(--gris-claro);
     margin-right: 10px;
+}
+
+/* ========================================= */
+/* ====== COLLAGE DE CAMPAÑA (INDEX) ======= */
+/* ========================================= */
+.collage-section {
+    padding: 80px 0;
+    text-align: center;
+    background-color: var(--blanco);
+}
+
+.collage-section h2 {
+    margin-bottom: 0;
+}
+
+.collage-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-auto-rows: clamp(150px, 24vw, 260px);
+    gap: 16px;
+    margin: 40px 0 0;
+}
+
+.collage-item {
+    position: relative;
+    display: block;
+    border-radius: 0;
+    overflow: hidden;
+    box-shadow: var(--sombra-sm);
+    transition: box-shadow var(--transicion);
+}
+
+.collage-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.5s ease;
+}
+
+.collage-item:hover {
+    box-shadow: var(--sombra-md);
+}
+
+.collage-item:hover img {
+    transform: scale(1.06);
+}
+
+.collage-item--grande { grid-column: 1 / 3; grid-row: 1 / 3; }
+.collage-item--alto { grid-column: 3; grid-row: 1 / 3; }
+.collage-item:nth-child(4) { grid-column: 4; grid-row: 2; }
+.collage-item--ancho { grid-column: 1 / 3; grid-row: 3; }
+
+/* Collage en móvil: mosaico compacto de 2 columnas */
+@media (max-width: 700px) {
+    .collage-grid {
+        grid-template-columns: repeat(2, 1fr);
+        grid-auto-rows: 150px;
+    }
+    .collage-item--grande,
+    .collage-item--ancho {
+        grid-column: span 2;
+        grid-row: span 1;
+    }
+    .collage-item--alto {
+        grid-row: span 1;
+    }
 }
 
 /* Footer (antes de la reestructuración) */

@@ -128,12 +128,10 @@ function renderizarCuadricula(productos) {
 // ======= LÓGICA DEL CARRUSEL DINÁMICO ================== //
 // ======================================================= //
 function activarCarrusel(productos) {
-    if (!document.querySelector('.hero-images') || productos.length === 0) return;
+    const contenedor = document.querySelector('.hero-images');
+    if (!contenedor || productos.length === 0) return;
 
-    // Para el carrusel usamos los productos que llegaron del servidor
-    const featuredProducts = productos; 
-
-    // Solo activamos si hay al menos 1 producto (repetimos la foto si hay menos de 3 para que no se rompa)
+    const featuredProducts = productos;
     const linkElements = [
         document.getElementById('hero-link-1'),
         document.getElementById('hero-link-2'),
@@ -144,31 +142,57 @@ function activarCarrusel(productos) {
         document.getElementById('hero-img-2'),
         document.getElementById('hero-img-3')
     ];
+    const cantidad = imgElements.length;
+
+    // Precargamos las imágenes del carrusel una sola vez para que cada giro
+    // no descargue de nuevo las fotos (causa de tirones y tráfico extra).
+    const precargadas = new Set();
+    featuredProducts.forEach(producto => {
+        if (producto.imagen && !precargadas.has(producto.imagen)) {
+            const img = new Image();
+            img.src = producto.imagen;
+            precargadas.add(producto.imagen);
+        }
+    });
 
     let currentIndex = 0;
 
-    function changeImages() {
-        imgElements.forEach(img => {
-            img.style.opacity = '0';
-            img.classList.remove("img-destacada");
-        });
-        
-        setTimeout(() => {
-            for (let i = 0; i < linkElements.length; i++) {
-                const productIndex = (currentIndex + i) % featuredProducts.length;
-                const product = featuredProducts[productIndex];
-                
-                if(linkElements[i] && imgElements[i]) {
-                    linkElements[i].href = `product.html?product=${escaparHTML(product.id)}`;
-                    imgElements[i].src = escaparHTML(product.imagen);
-                }
+    function pintar() {
+        for (let i = 0; i < cantidad; i++) {
+            const producto = featuredProducts[(currentIndex + i) % featuredProducts.length];
+            if (linkElements[i]) {
+                linkElements[i].href = `product.html?product=${escaparHTML(producto.id)}`;
             }
-            if(imgElements[1]) imgElements[1].classList.add("img-destacada");
-            imgElements.forEach(img => { if(img) img.style.opacity = '1' });
+            if (imgElements[i]) {
+                imgElements[i].src = producto.imagen;
+                imgElements[i].classList.toggle('img-destacada', i === 1);
+            }
+        }
+    }
+
+    function alternar() {
+        if (!tabVisible || !heroVisible) return;
+        imgElements.forEach(img => img.classList.add('img-oculta'));
+        setTimeout(() => {
             currentIndex = (currentIndex + 1) % featuredProducts.length;
+            pintar();
+            void imgElements[0].offsetWidth; // Reinicia la transición de opacidad
+            imgElements.forEach(img => img.classList.remove('img-oculta'));
         }, 800);
     }
-    
-    changeImages();
-    setInterval(changeImages, 4000);
+
+    // Pausa cuando la pestaña no está visible o el hero sale de pantalla.
+    let tabVisible = true;
+    let heroVisible = true;
+    document.addEventListener('visibilitychange', () => {
+        tabVisible = !document.hidden;
+    });
+    if ('IntersectionObserver' in window) {
+        new IntersectionObserver(([entrada]) => {
+            heroVisible = entrada.isIntersecting;
+        }, { threshold: 0.1 }).observe(contenedor);
+    }
+
+    pintar();
+    setInterval(alternar, 4000);
 }

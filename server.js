@@ -5,6 +5,7 @@ const sqlite3 = require('sqlite3').verbose();
 const nodemailer = require('nodemailer'); 
 const rateLimit = require('express-rate-limit');
 const helmet = require('helmet');
+const compression = require('compression');
 const { MercadoPagoConfig, Preference } = require('mercadopago');
 const PRODUCTOS_SIEMBRA = require('./datos-siembra.js');
 
@@ -250,6 +251,9 @@ app.use((req, res, next) => {
 // El servidor debe entender JSON desde el principio para las rutas de auth
 app.use(express.json());
 
+// Compresión gzip/brotli de respuestas de texto (CSS, JS, HTML).
+app.use(compression());
+
 // ========================================== //
 // ====== SEGURIDAD: LÍMITE DE PETICIONES === //
 // ========================================== //
@@ -357,12 +361,26 @@ app.get('/api/admin/verificar', (req, res) => {
 });
 
 // Middlewares: Para que el servidor lea los archivos del sitio
-app.use(express.static(path.join(__dirname)));
-
-// Página principal
+// Los HTML no se cachean (siempre frescos en desarrollo); el resto de
+// estáticos (imágenes, CSS, JS) se cachea 30 días con ETag.
+app.use((req, res, next) => {
+    if (/\.html?$/i.test(req.path)) {
+        res.setHeader('Cache-Control', 'no-cache');
+    }
+    next();
+});
+// Página principal (registrada ANTES de express.static para que el HTML
+// no reciba la caché de 30 días de los estáticos)
 app.get('/', (req, res) => {
+    res.setHeader('Cache-Control', 'no-cache');
     res.sendFile(path.join(__dirname, 'index.html'));
 });
+
+app.use(express.static(path.join(__dirname), {
+    maxAge: '30d',
+    etag: true,
+    lastModified: true
+}));
 
 // ========================================== //
 // ===== VALIDACIÓN SERVIDA DEL CARRITO ===== //

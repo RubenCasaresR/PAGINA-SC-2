@@ -54,3 +54,16 @@ Estado: `Completado` | `Pendiente` | `Parcial`.
 | Checkout | Google Fonts + Playfair + nota de seguridad `.secure-note` bajo el botón; estilos de ítems con tokens. | `checkout.html`, `checkout.css` | Completado |
 | Admin | Limpieza total de inline `style=` (login/panel, lista inventario/ventas, botones, topbar) movidos a clases (`.admin-topbar`, `.admin-lista`, `.admin-cargando`, `.inventario-card*`, `.venta-card*`, `.etiqueta-estado*`); `etiquetaEstado()` genera clases en vez de colores inline; botón guardar verde pino y radios unificados. | `admin.html`, `admin.css`, `admin.js` | Completado |
 | Verificación | `npm test` 10/10; smoke test: las 9 páginas + 3 CSS responden 200 con CSP. Únicos `style=` restantes: template de email de `server.js` (correcto para clientes de correo). Sin `onclick=`/`javascript:`/scripts inline. | — | Completado |
+
+---
+
+## 2026-08-06 — Optimización de rendimiento (imágenes, caché, carrusel, video, íconos)
+
+| Fase | Descripción | Archivos | Estatus |
+|------|-------------|----------|---------|
+| F1 Imágenes | `sharp` (devDependency) + script `npm run imagenes` (`optimizar-imagenes.js`). Respaldó 28 originales a `_origen-imagenes/` (gitignored) y las redimensionó por uso (banner 1600px, lookbook/collage/galería 1000px, carrusel 700px, logos ≤400px), JPEG q78 mozjpeg progressive, PNG con palette. Se sobreescribieron los mismos nombres (ninguna referencia cambia). Resultado: **41.34 MB → 4.15 MB (−90%)**. Se restauró `Playera negra FRENTE.png` desde el respaldo (la optimización lo agrandaba). | `optimizar-imagenes.js`, `package.json`, `_origen-imagenes/` | Completado |
+| F2 Servidor | `compression` (1.8.1) con `app.use(compression())`; `express.static` con `maxAge: '30d'`, ETag y Last-Modified; los HTML se sirven `no-cache` (middleware + ruta `/` registrada ANTES del estático para que no herede la caché de 30 días). | `server.js` | Completado |
+| F3 Carrusel | `activarCarrusel()` reescrita: precarga las imágenes del hero con `new Image()` (se descargan una sola vez, no cada ciclo), transición con clase `.img-oculta` (nada de `style.opacity` inline), pausa cuando la pestaña no está visible o el hero sale de pantalla (`visibilitychange` + IntersectionObserver), alterna cada 4s. | `index-loader.js`, `styles.css` | Completado |
+| F4 Video | El video de producto usa `preload="metadata"`, `poster` con la primera imagen y ya NO arranca en autoplay: se reproduce en silencio solo cuando es visible y pausa al salir de pantalla (IntersectionObserver). | `product.js` | Completado |
+| F5 Íconos | Eliminada Font Awesome de los 9 HTML (CDN ~96 KB por página) y sustituida por sprite local `icons.svg` con los 10 íconos usados (trazos oficiales de FA 6.5.2): hamburguesa, Excel, check, candado, Instagram, TikTok, Facebook, Visa, Mastercard, Amex. Reemplazo `<i class="fa-…">` → `<svg class="icon"><use href="icons.svg#i-…">`. Base `.icon` (1em, fill currentColor) en `styles.css` y `admin.css`. | `icons.svg`, 9 HTML, `styles.css`, `admin.css` | Completado |
+| F6 Verificación | `npm test` 10/10; smoke test: 10 páginas/recursos + `/api/productos` responden 200; `styles.css` e `/` servidos con gzip; estáticos con `Cache-Control: public, max-age=30d`; HTML con `no-cache`. Servidor Node reiniciado con los cambios. | — | Completado |

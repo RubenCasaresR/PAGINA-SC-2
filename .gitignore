@@ -84,6 +84,9 @@ web_modules/
 *.sqlite3
 *.db
 
+# Respaldos de imágenes originales (optimización local)
+_origen-imagenes/
+
 # parcel-bundler cache (https://parceljs.org/)
 .cache
 .parcel-cache

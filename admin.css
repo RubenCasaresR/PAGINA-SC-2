@@ -31,6 +31,9 @@ hr { margin: 40px 0; border: none; border-top: 2px dashed #ccc; }
 .btn-excel { background-color: #28a745; color: white; padding: 12px 20px; font-weight: bold; border: none; cursor: pointer; border-radius: 6px; text-transform: uppercase; width: 100%; font-size: 16px; transition: background 0.3s;}
 .btn-excel:hover { background-color: #218838; }
 
+/* Íconos SVG locales (sprite icons.svg) */
+.icon { width: 1em; height: 1em; fill: currentColor; vertical-align: -0.125em; display: inline-block; }
+
 /* Estilo para la pantalla de acceso */
 .login-screen { display: flex; justify-content: center; align-items: center; min-height: 80vh; }
 .login-box { background-color: white; max-width: 400px; width: 100%; padding: 30px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); text-align: center; }

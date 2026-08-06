@@ -79,6 +79,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         galleryContainer.innerHTML = ''; 
 
         if (product.images && product.images.length > 0) {
+            const primerImagen = product.images.find(media => !/\.mp4$/i.test(media)) || 'logo SC sin fondo.png';
+
             product.images.forEach(mediaSrc => {
                 const esVideo = mediaSrc.toLowerCase().endsWith('.mp4');
                 let elementoMultimedia;
@@ -86,10 +88,21 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (esVideo) {
                     elementoMultimedia = document.createElement('video');
                     elementoMultimedia.src = mediaSrc;
-                    elementoMultimedia.autoplay = true;
+                    elementoMultimedia.poster = primerImagen;
+                    elementoMultimedia.preload = 'metadata';
                     elementoMultimedia.loop = true;
                     elementoMultimedia.muted = true;
                     elementoMultimedia.playsInline = true;
+                    // Solo se reproduce cuando es visible; pausa al salir de pantalla.
+                    if ('IntersectionObserver' in window) {
+                        new IntersectionObserver(([entrada]) => {
+                            if (entrada.isIntersecting) {
+                                elementoMultimedia.play().catch(() => {});
+                            } else {
+                                elementoMultimedia.pause();
+                            }
+                        }, { threshold: 0.4 }).observe(elementoMultimedia);
+                    }
                 } else {
                     elementoMultimedia = document.createElement('img');
                     elementoMultimedia.src = mediaSrc;
