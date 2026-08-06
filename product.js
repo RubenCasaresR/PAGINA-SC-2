@@ -1,3 +1,13 @@
+// Escapa texto antes de inyectarlo en el HTML para evitar XSS.
+function escaparHTML(texto) {
+    return String(texto == null ? '' : texto)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
     const params = new URLSearchParams(window.location.search);
     const productId = params.get('product');
@@ -12,6 +22,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         // 1. CONEXIÓN AL SERVIDOR (EL PROBADOR)                   //
         // ======================================================= //
         const respuesta = await fetch(`/api/productos/${productId}`);
+        if (!respuesta.ok) {
+            mostrarError();
+            return;
+        }
         const productoBD = await respuesta.json();
 
         if (productoBD.error) {
@@ -218,15 +232,20 @@ document.addEventListener('DOMContentLoaded', async () => {
                     const imgPrincipal = relatedProduct.images[0].toLowerCase().endsWith('.mp4') ? 'logo SC sin fondo.png' : relatedProduct.images[0];
                     const imgHover = relatedProduct.images.length > 1 && !relatedProduct.images[1].toLowerCase().endsWith('.mp4') ? relatedProduct.images[1] : imgPrincipal;
 
+                    const nombreSeguro = escaparHTML(relatedProduct.name);
+                    const idSeguro = escaparHTML(relatedId);
+                    const imgPrincipalSegura = escaparHTML(imgPrincipal);
+                    const imgHoverSegura = escaparHTML(imgHover);
+
                     const card = `
-                        <a href="product.html?product=${relatedId}" class="product-card-link">
+                        <a href="product.html?product=${idSeguro}" class="product-card-link">
                             <div class="product-card">
                                 <div class="product-image-container">
-                                    <img src="${imgPrincipal}" alt="${relatedProduct.name}" class="main-img" loading="lazy">
-                                    <img src="${imgHover}" alt="${relatedProduct.name}" class="hover-img" loading="lazy">
+                                    <img src="${imgPrincipalSegura}" alt="${nombreSeguro}" class="main-img" loading="lazy">
+                                    <img src="${imgHoverSegura}" alt="${nombreSeguro}" class="hover-img" loading="lazy">
                                 </div>
                                 <div class="product-info">
-                                    <h3>${relatedProduct.name}</h3>
+                                    <h3>${nombreSeguro}</h3>
                                     <p class="price">${relatedPriceDisplay}</p>
                                 </div>
                             </div>

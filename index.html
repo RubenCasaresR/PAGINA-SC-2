@@ -5,21 +5,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Societa Di Calcio</title>
     <link rel="icon" href="logo-fondo-verde.png" type="image/png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
     <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     
     <meta property="og:type" content="website">
-    <meta property="og:url" content="https://societadicalcio.onrender.com/">
+    <meta property="og:url" content="https://societadicalcio.com/">
     <meta property="og:title" content="Societa Di Calcio | Tienda Oficial">
     <meta property="og:description" content="Ropa inspirada en la pasión del fútbol. Descubre nuestra nueva colección clásica y eleva tu estilo diario.">
-    <meta property="og:image" content="https://societadicalcio.onrender.com/logo-fondo-beige.png">
+    <meta property="og:image" content="https://societadicalcio.com/logo-fondo-beige.png">
 
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:url" content="https://societadicalcio.onrender.com/">
+    <meta name="twitter:url" content="https://societadicalcio.com/">
     <meta name="twitter:title" content="Societa Di Calcio | Tienda Oficial">
     <meta name="twitter:description" content="Ropa inspirada en la pasión del fútbol. Descubre nuestra nueva colección clásica y eleva tu estilo diario.">
-    <meta name="twitter:image" content="https://societadicalcio.onrender.com/playera-horizontal-societa-portugal.JPG">
+    <meta name="twitter:image" content="https://societadicalcio.com/playera-horizontal-societa-portugal.JPG">
 
 </head>
 <body>
@@ -52,7 +55,7 @@
     <main>
         <section class="lookbook-section">
             <div class="lookbook-banner">
-                <img src="playera-horizontal-societa-portugal.JPG" alt="Campaña Societa Di Calcio" class="banner-img">
+                <img src="playera-horizontal-societa-portugal.JPG" alt="Campaña Societa Di Calcio" class="banner-img" fetchpriority="high">
                 <div class="banner-overlay">
                     <h2>Nueva Colección</h2>
                     <a href="#colecciones" class="btn btn-blanco">Explorar</a>
@@ -109,10 +112,10 @@
         <section id="colecciones" class="collections-section">
             <h2>Colecciones</h2>
             <div class="tabs">
-                <button class="tab-button active" onclick="filterSelection('all')">Todo</button>
-                <button class="tab-button" onclick="filterSelection('novedades-cat')">Novedades</button>
-                <button class="tab-button" onclick="filterSelection('descuentos')">Descuentos</button>
-                <button class="tab-button" onclick="filterSelection('must-have')">Must Have</button>
+                <button class="tab-button active" data-categoria="all">Todo</button>
+                <button class="tab-button" data-categoria="novedades-cat">Novedades</button>
+                <button class="tab-button" data-categoria="descuentos">Descuentos</button>
+                <button class="tab-button" data-categoria="must-have">Must Have</button>
             </div>
             <div class="product-grid">
             </div>
@@ -130,40 +133,6 @@
         </div>
     </section>
 
-    <script>
-        document.getElementById('newsletter-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const emailInput = document.getElementById('newsletter-email');
-            const messageEl = document.getElementById('newsletter-message');
-            const btn = document.querySelector('.btn-newsletter');
-            
-            btn.innerText = "Enviando...";
-            btn.disabled = true;
-
-            try {
-                const response = await fetch('/api/newsletter', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email: emailInput.value })
-                });
-                
-                const data = await response.json();
-                
-                messageEl.innerText = data.message || data.error;
-                messageEl.className = data.success ? "newsletter-message success" : "newsletter-message error";
-                
-                if (data.success) emailInput.value = ''; // Limpia la cajita si tuvo éxito
-                
-            } catch (error) {
-                messageEl.innerText = "Hubo un error de conexión.";
-                messageEl.className = "newsletter-message error";
-            } finally {
-                btn.innerText = "Suscribirme";
-                btn.disabled = false;
-            }
-        });
-    </script>
-    
     <footer id="contacto" class="main-footer">
     <div class="footer-grid">
         <div class="footer-column">
@@ -223,10 +192,11 @@
                 <span id="drawer-subtotal">$0.00</span>
             </div>
             <p class="shipping-note">Impuestos y envío calculados en el checkout.</p>
-            <button class="btn btn-checkout-drawer" id="btn-checkout-drawer" onclick="window.location.href='checkout.html'">Proceder al Pago</button>
+            <button class="btn btn-checkout-drawer" id="btn-checkout-drawer">Proceder al Pago</button>
         </div>
     </div>
     
+    <script src="newsletter.js"></script>
     <script src="index-loader.js"></script>
     <script src="scripts.js"></script>
     <script src="cart.js"></script>

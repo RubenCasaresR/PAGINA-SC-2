@@ -4,11 +4,22 @@
 const FREE_SHIPPING_THRESHOLD = 1500.00;
 const STANDARD_SHIPPING_COST = 99.00;
 
+// Escapa texto antes de inyectarlo en el HTML para evitar XSS.
+function escaparHTML(texto) {
+    return String(texto == null ? '' : texto)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     updateCartIcon();
     setupCartDrawer();
     setupHamburgerMenu();
     renderCheckoutSummary(); // <--- AGREGAMOS ESTA LÍNEA
+    loadCartItems(); // Para la página dedicada del carrito (carrito.html)
 });
 
 // ================================================= //
@@ -32,6 +43,24 @@ function setupCartDrawer() {
     // Cerrar el Drawer al hacer clic en la X o en el fondo oscuro
     if (closeBtn) closeBtn.addEventListener('click', closeCartDrawer);
     if (cartOverlay) cartOverlay.addEventListener('click', closeCartDrawer);
+
+    // Delegación de eventos: los botones generados dinámicamente (drawer y
+    // carrito) ya no usan atributos onclick inline (requisito de la CSP).
+    document.addEventListener('click', (e) => {
+        const boton = e.target.closest('[data-accion]');
+        if (!boton) return;
+        const idProducto = boton.getAttribute('data-id');
+        const talla = boton.getAttribute('data-talla');
+        const accion = boton.getAttribute('data-accion');
+        if (accion === 'sumar') changeQuantityDrawer(idProducto, talla, 1);
+        else if (accion === 'restar') changeQuantityDrawer(idProducto, talla, -1);
+        else if (accion === 'quitar') removeItemDrawer(idProducto, talla);
+    });
+
+    // Botón "Proceder al Pago" del drawer (antes usaba onclick inline).
+    document.querySelectorAll('#btn-checkout-drawer').forEach(btn => {
+        btn.addEventListener('click', procesarPago);
+    });
 }
 
 function openCartDrawer() {
@@ -111,20 +140,24 @@ function renderCartDrawer() {
         
         const itemElement = document.createElement('div');
         itemElement.classList.add('drawer-item');
+        const nombreSeguro = escaparHTML(item.name);
+        const tallaSegura = escaparHTML(item.size || 'Única');
+        const idSeguro = escaparHTML(item.id);
+        const imagenSegura = escaparHTML(item.image);
         itemElement.innerHTML = `
-            <img src="${item.image}" alt="${item.name}" class="drawer-item-img">
+            <img src="${imagenSegura}" alt="${nombreSeguro}" class="drawer-item-img">
             <div class="drawer-item-details">
-                <h4>${item.name}</h4>
-                <span class="drawer-item-size">Talla: ${item.size || 'Única'}</span>
+                <h4>${nombreSeguro}</h4>
+                <span class="drawer-item-size">Talla: ${tallaSegura}</span>
                 <p class="drawer-item-price">$${item.price.toFixed(2)}</p>
                 
                 <div class="drawer-controls-row">
                     <div class="drawer-quantity-controls">
-                        <button onclick="changeQuantityDrawer('${item.id}', '${item.size}', -1)">-</button>
+                        <button data-accion="restar" data-id="${idSeguro}" data-talla="${tallaSegura}">-</button>
                         <span>${item.quantity}</span>
-                        <button onclick="changeQuantityDrawer('${item.id}', '${item.size}', 1)">+</button>
+                        <button data-accion="sumar" data-id="${idSeguro}" data-talla="${tallaSegura}">+</button>
                     </div>
-                    <button class="drawer-item-remove" onclick="removeItemDrawer('${item.id}', '${item.size}')">Quitar</button>
+                    <button class="drawer-item-remove" data-accion="quitar" data-id="${idSeguro}" data-talla="${tallaSegura}">Quitar</button>
                 </div>
             </div>
         `;
@@ -250,11 +283,14 @@ function renderCheckoutSummary() {
         
         const itemDiv = document.createElement('div');
         itemDiv.classList.add('summary-item');
+        const nombreSeguro = escaparHTML(item.name);
+        const tallaSegura = escaparHTML(item.size || 'Única');
+        const imagenSegura = escaparHTML(item.image);
         itemDiv.innerHTML = `
-            <img src="${item.image}" alt="${item.name}">
+            <img src="${imagenSegura}" alt="${nombreSeguro}">
             <div style="flex-grow: 1;">
-                <h4 style="margin: 0; font-size: 0.95rem;">${item.name}</h4>
-                <p style="margin: 0; font-size: 0.8rem; color: #666;">Talla: ${item.size} | Cantidad: ${item.quantity}</p>
+                <h4 style="margin: 0; font-size: 0.95rem;">${nombreSeguro}</h4>
+                <p style="margin: 0; font-size: 0.8rem; color: #666;">Talla: ${tallaSegura} | Cantidad: ${item.quantity}</p>
             </div>
             <span style="font-weight: bold;">$${(item.price * item.quantity).toFixed(2)}</span>
         `;
@@ -282,6 +318,70 @@ function renderCheckoutSummary() {
     }
 
     // Calcular y mostrar el Total Final
+    const total = subtotal + shippingCost;
+    if (totalEl) totalEl.innerText = `$${total.toFixed(2)}`;
+}
+
+// ========================================== //
+// ===== PÁGINA DEDICADA (carrito.html) ===== //
+// ========================================== //
+
+// Dibuja el carrito completo en la página dedicada y actualiza el resumen.
+function loadCartItems() {
+    const container = document.querySelector('.cart-items-container');
+    const subtotalEl = document.getElementById('summary-subtotal');
+    const shippingEl = document.getElementById('summary-shipping');
+    const totalEl = document.getElementById('summary-total');
+
+    if (!container) return;
+
+    const cart = JSON.parse(localStorage.getItem('shoppingCart')) || [];
+
+    if (cart.length === 0) {
+        container.innerHTML = '<p style="text-align: center; margin: 20px 0;">Tu carrito está vacío. <a href="index.html">Seguir comprando</a></p>';
+        if (subtotalEl) subtotalEl.innerText = '$0.00';
+        if (shippingEl) shippingEl.innerText = '$0.00';
+        if (totalEl) totalEl.innerText = '$0.00';
+        return;
+    }
+
+    container.innerHTML = '';
+    let subtotal = 0;
+
+    cart.forEach(item => {
+        subtotal += (item.price * item.quantity);
+
+        const itemDiv = document.createElement('div');
+        itemDiv.classList.add('cart-item');
+        const nombreSeguro = escaparHTML(item.name);
+        const tallaSegura = escaparHTML(item.size || 'Única');
+        const idSeguro = escaparHTML(item.id);
+        const imagenSegura = escaparHTML(item.image);
+        itemDiv.innerHTML = `
+            <img src="${imagenSegura}" alt="${nombreSeguro}">
+            <div class="cart-item-details">
+                <h4>${nombreSeguro}</h4>
+                <p>Talla: ${tallaSegura} | Cantidad: ${item.quantity}</p>
+                <button class="drawer-item-remove" data-accion="quitar" data-id="${idSeguro}" data-talla="${tallaSegura}">Quitar</button>
+            </div>
+            <span class="cart-item-price">$${(item.price * item.quantity).toFixed(2)}</span>
+        `;
+        container.appendChild(itemDiv);
+    });
+
+    if (subtotalEl) subtotalEl.innerText = `$${subtotal.toFixed(2)}`;
+
+    const shippingCost = subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : STANDARD_SHIPPING_COST;
+    if (shippingEl) {
+        if (shippingCost === 0) {
+            shippingEl.innerText = '¡Envío Gratis!';
+            shippingEl.style.color = '#28a745';
+        } else {
+            shippingEl.innerText = `$${shippingCost.toFixed(2)}`;
+            shippingEl.style.color = 'inherit';
+        }
+    }
+
     const total = subtotal + shippingCost;
     if (totalEl) totalEl.innerText = `$${total.toFixed(2)}`;
 }

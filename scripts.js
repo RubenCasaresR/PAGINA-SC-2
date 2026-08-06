@@ -17,5 +17,8 @@ for (var i = 0; i < btns.length; i++) {
             current[0].className = current[0].className.replace(" active", "");
         }
         this.className += " active";
+        // La categoría se lee de un atributo data (sin onclick inline, para la CSP)
+        var categoria = this.getAttribute('data-categoria') || 'all';
+        filterSelection(categoria);
     });
 }

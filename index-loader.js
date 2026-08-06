@@ -5,6 +5,16 @@ document.addEventListener('DOMContentLoaded', () => {
     cargarVitrinaDesdeServidor();
 });
 
+// Escapa texto antes de inyectarlo en el HTML para evitar XSS.
+function escaparHTML(texto) {
+    return String(texto == null ? '' : texto)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
 // ======================================================= //
 // ======= CONEXIÓN A LA BASE DE DATOS (EL FETCH) ======== //
 // ======================================================= //
@@ -12,6 +22,9 @@ async function cargarVitrinaDesdeServidor() {
     try {
         // 1. Le pedimos los datos al servidor Node.js
         const respuesta = await fetch('/api/productos');
+        if (!respuesta.ok) {
+            throw new Error("El servidor respondió HTTP " + respuesta.status);
+        }
         const productosBackend = await respuesta.json();
         
         console.log("📦 Inventario recibido del servidor:", productosBackend);
@@ -50,7 +63,7 @@ function renderizarCuadricula(productos) {
         const priceDisplay = esProximamente ? `<span class="coming-soon-text">Lanzamiento Oficial</span>` : `$${producto.precio.toFixed(2)}`;
 
         // 4. Link bloqueado si no hay stock
-        const linkDestino = esProximamente ? 'javascript:void(0)' : `product.html?product=${producto.id}`;
+        const linkDestino = esProximamente ? '#' : `product.html?product=${escaparHTML(producto.id)}`;
 
         // 5. MAGIA PARA LAS DOS FOTOS (Principal y la que aparece al pasar el mouse)
         // Revisamos si el producto tiene la nueva lista de imágenes, si no, usamos la vieja
@@ -62,18 +75,23 @@ function renderizarCuadricula(productos) {
         const categoriasValidas = ['novedades-cat', 'descuentos', 'must-have'];
         const claseFiltro = categoriasValidas.includes(producto.categoria) ? producto.categoria : 'novedades-cat';
 
+        // Nombre y fotos escapados para que un dato malicioso no rompa el HTML
+        const nombreSeguro = escaparHTML(producto.nombre);
+        const foto1Segura = escaparHTML(foto1);
+        const foto2Segura = escaparHTML(foto2);
+
         // Creamos la tarjeta HTML
         const cardHTML = `
             <a href="${linkDestino}" class="product-card-link ${esProximamente ? 'proximamente-link' : ''}">
                 <div class="product-card filterDiv ${claseFiltro} ${esProximamente ? 'is-coming-soon' : ''}">
                     <div class="product-image-container">
-                        <img src="${foto1}" alt="${producto.nombre}" class="main-img" loading="lazy">
-                        <img src="${foto2}" alt="${producto.nombre}" class="hover-img" loading="lazy">
+                        <img src="${foto1Segura}" alt="${nombreSeguro}" class="main-img" loading="lazy">
+                        <img src="${foto2Segura}" alt="${nombreSeguro}" class="hover-img" loading="lazy">
                         
                         ${esProximamente ? '<div class="coming-soon-overlay"><span>Próximamente</span></div>' : ''}
                     </div>
                     <div class="product-info">
-                        <h3>${producto.nombre}</h3>
+                        <h3>${nombreSeguro}</h3>
                         <p class="price">${priceDisplay}</p>
                     </div>
                 </div>
@@ -84,7 +102,7 @@ function renderizarCuadricula(productos) {
     // Refresca el filtro activo para que las tarjetas nuevas sean visibles
     if (typeof filterSelection === 'function') {
         const activo = document.querySelector('.tabs .tab-button.active');
-        const categoria = activo ? activo.getAttribute('onclick').match(/'([^']+)'/)[1] : 'all';
+        const categoria = activo ? (activo.getAttribute('data-categoria') || 'all') : 'all';
         filterSelection(categoria);
     }
 }
@@ -124,8 +142,8 @@ function activarCarrusel(productos) {
                 const product = featuredProducts[productIndex];
                 
                 if(linkElements[i] && imgElements[i]) {
-                    linkElements[i].href = `product.html?product=${product.id}`;
-                    imgElements[i].src = product.imagen;
+                    linkElements[i].href = `product.html?product=${escaparHTML(product.id)}`;
+                    imgElements[i].src = escaparHTML(product.imagen);
                 }
             }
             if(imgElements[1]) imgElements[1].classList.add("img-destacada");

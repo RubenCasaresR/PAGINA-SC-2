@@ -14,6 +14,33 @@ const PRODUCTOS_SIEMBRA = require('./datos-siembra.js');
 const PORT = process.env.PORT || 3000;
 const SITE_URL = process.env.SITE_URL || `http://localhost:${PORT}`;
 
+// --- VALIDACIÓN DE CONFIGURACIÓN AL ARRANQUE ---
+// Detecta secretos faltantes o que aún tienen el valor de ejemplo.
+const VALORES_PLACEHOLDER = ['CAMBIA_ESTA_CLAVE', 'CAMBIA_ESTE_TOKEN', 'CAMBIA_ESTE_CLIENT_SECRET', 'CAMBIA_ESTA_CONTRASENA_ADMIN'];
+
+function verificarConfiguracion() {
+    const claves = [
+        { nombre: 'ADMIN_PASSWORD', variable: process.env.ADMIN_PASSWORD, importancia: 'ALTA' },
+        { nombre: 'MERCADOPAGO_ACCESS_TOKEN', variable: process.env.MERCADOPAGO_ACCESS_TOKEN, importancia: 'ALTA' },
+        { nombre: 'MERCADOPAGO_CLIENT_SECRET', variable: process.env.MERCADOPAGO_CLIENT_SECRET, importancia: 'ALTA' },
+        { nombre: 'GMAIL_USER', variable: process.env.GMAIL_USER, importancia: 'MEDIA' },
+        { nombre: 'GMAIL_APP_PASSWORD', variable: process.env.GMAIL_APP_PASSWORD, importancia: 'MEDIA' },
+        { nombre: 'SITE_URL', variable: process.env.SITE_URL, importancia: 'MEDIA' }
+    ];
+    let ok = true;
+    claves.forEach(c => {
+        const valor = String(c.variable || '').trim();
+        if (!valor) {
+            console.error(`⚠️  ${c.nombre} no está configurada (importancia ${c.importancia}).`);
+            ok = false;
+        } else if (VALORES_PLACEHOLDER.includes(valor)) {
+            console.error(`⚠️  ${c.nombre} tiene el valor de ejemplo (importancia ${c.importancia}). ¡Cámbialo antes de producción!`);
+            ok = false;
+        }
+    });
+    return ok;
+}
+
 // --- CONFIGURACIÓN DE ENVÍO (misma regla que muestra el frontend) ---
 const FREE_SHIPPING_THRESHOLD = 1500.00;
 const STANDARD_SHIPPING_COST = 99.00;
@@ -33,10 +60,23 @@ const transporter = nodemailer.createTransport({
 
 const app = express();
 
-// Cabeceras de seguridad (X-Frame-Options, HSTS, nosniff, etc.)
-// CSP desactivado porque la tienda usa scripts y estilos inline.
+// Cabeceras de seguridad (X-Frame-Options, HSTS, nosniff, CSP, etc.)
+// CSP activo: script-src 'self' (sin inline scripts ni onclick). Se mantiene
+// 'unsafe-inline' solo en estilos por los atributos style="" heredados.
 app.use(helmet({
-    contentSecurityPolicy: false,
+    contentSecurityPolicy: {
+        directives: {
+            defaultSrc: ["'self'"],
+            scriptSrc: ["'self'"],
+            styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com', 'https://cdnjs.cloudflare.com'],
+            fontSrc: ["'self'", 'https://fonts.gstatic.com', 'https://cdnjs.cloudflare.com', 'data:'],
+            imgSrc: ["'self'", 'data:', 'https://http2.mlstatic.com'],
+            connectSrc: ["'self'"],
+            objectSrc: ["'none'"],
+            frameAncestors: ["'none'"],
+            upgradeInsecureRequests: []
+        }
+    },
     crossOriginResourcePolicy: { policy: 'cross-origin' }
 }));
 
@@ -45,7 +85,10 @@ app.use(helmet({
 const DB_PATH = process.env.DB_PATH || path.join(__dirname, 'tienda.sqlite');
 const db = new sqlite3.Database(DB_PATH, sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE, (err) => {
     if (err) console.error("Error al conectar a la BD:", err.message);
-    else console.log("📦 Bóveda de datos conectada con éxito:", DB_PATH);
+    else {
+        console.log("📦 Bóveda de datos conectada con éxito:", DB_PATH);
+        db.run('PRAGMA busy_timeout = 5000');
+    }
 });
 
 // ========================================== //
@@ -108,16 +151,18 @@ function asegurarEsquema(callback) {
                 { nombre: 'estado', definicion: "TEXT DEFAULT 'pendiente'" },
                 { nombre: 'mp_payment_id', definicion: 'TEXT' },
                 { nombre: 'external_reference', definicion: 'TEXT' },
-                { nombre: 'envio', definicion: 'REAL DEFAULT 0' }
+                { nombre: 'envio', definicion: 'REAL DEFAULT 0' },
+                { nombre: 'idempotency_key', definicion: 'TEXT' },
+                { nombre: 'recibo_enviado', definicion: 'INTEGER DEFAULT 0' }
             ];
             const existentes = new Set(filas.map(fila => fila.name));
             const pendientes = columnas.filter(col => !existentes.has(col.nombre));
 
-            if (pendientes.length === 0) return sembrarProductos();
+            if (pendientes.length === 0) return crearIndiceIdempotencia();
 
             let indice = 0;
             const aplicar = () => {
-                if (indice >= pendientes.length) return sembrarProductos();
+                if (indice >= pendientes.length) return crearIndiceIdempotencia();
                 const col = pendientes[indice++];
                 db.run(`ALTER TABLE ordenes ADD COLUMN ${col.nombre} ${col.definicion}`, (e) => {
                     if (e) {
@@ -129,6 +174,17 @@ function asegurarEsquema(callback) {
                 });
             };
             aplicar();
+        });
+    };
+
+    // Índice único para evitar órdenes duplicadas cuando el cliente reintenta el checkout.
+    const crearIndiceIdempotencia = () => {
+        db.run('CREATE UNIQUE INDEX IF NOT EXISTS idx_ordenes_idempotencia ON ordenes(idempotency_key)', (e) => {
+            if (e) {
+                console.error("🚨 Error creando índice de idempotencia:", e.message);
+                return callback(e);
+            }
+            sembrarProductos();
         });
     };
 
@@ -178,13 +234,6 @@ function asegurarEsquema(callback) {
 const ARCHIVOS_BLOQUEADOS = [
     '/tienda.sqlite',
     '/server.js',
-    '/database.js',
-    '/setupDB.js',
-    '/poblarDB.js',
-    '/upgradeDB.js',
-    '/crearOrdenes.js',
-    '/arreglarFoto.js',
-    '/migrarDB.js',
     '/package.json',
     '/package-lock.json',
     '/.env'
@@ -324,6 +373,9 @@ function validarCarrito(carrito, callback) {
     if (!Array.isArray(carrito) || carrito.length === 0) {
         return callback({ error: "El carrito llegó vacío o dañado." }, null);
     }
+    if (carrito.length > 20) {
+        return callback({ error: "El carrito tiene demasiados artículos." }, null);
+    }
 
     const itemsValidados = [];
     let indice = 0;
@@ -349,7 +401,7 @@ function validarCarrito(carrito, callback) {
             }
 
             const cantidad = Number(item.quantity);
-            if (!Number.isInteger(cantidad) || cantidad < 1) {
+            if (!Number.isInteger(cantidad) || cantidad < 1 || cantidad > 10) {
                 return callback({ error: `Cantidad inválida para "${row.nombre}".` }, null);
             }
             if (stock[item.size] === undefined) {
@@ -376,24 +428,94 @@ function validarCarrito(carrito, callback) {
 }
 
 // ========================================== //
+// ====== INVENTARIO TRANSACCIONAL ========== //
+// ========================================== //
+// Las actualizaciones de stock se hacen dentro de una transacción para que
+// dos compradores simultáneos no puedan quedarse con la misma última pieza.
+function enTransaccion(trabajo, callback) {
+    db.run('BEGIN IMMEDIATE', (err) => {
+        if (err) return callback(err);
+        trabajo((error) => {
+            if (error) return db.run('ROLLBACK', () => callback(error));
+            db.run('COMMIT', (ce) => callback(ce));
+        });
+    });
+}
+
+function ajustarStock(items, factor, callback) {
+    enTransaccion((fin) => {
+        let indice = 0;
+        const siguiente = () => {
+            if (indice >= items.length) return fin(null);
+            const item = items[indice++];
+            db.get("SELECT stock FROM productos WHERE id = ?", [item.id], (err, row) => {
+                if (err) return fin(err);
+                if (!row) return fin(new Error("Producto no encontrado: " + item.id));
+                let stock;
+                try { stock = JSON.parse(row.stock); } catch (e) { return fin(new Error("Inventario corrupto.")); }
+                if (stock[item.size] === undefined) return fin(new Error("Talla " + item.size + " no disponible."));
+                if (factor < 0 && stock[item.size] < item.quantity) return fin(new Error("Stock insuficiente."));
+                stock[item.size] += factor * item.quantity;
+                if (stock[item.size] < 0) stock[item.size] = 0;
+                db.run("UPDATE productos SET stock = ? WHERE id = ?", [JSON.stringify(stock), item.id], (ue) => {
+                    if (ue) return fin(ue);
+                    siguiente();
+                });
+            });
+        };
+        siguiente();
+    }, callback);
+}
+
+function decrementarStock(items, callback) { ajustarStock(items, -1, callback); }
+function restaurarStock(items, callback) { ajustarStock(items, +1, callback); }
+
+function buscarOrdenPorReferencia(ref, callback) {
+    db.get("SELECT * FROM ordenes WHERE external_reference = ?", [ref], (err, row) => callback(err, row));
+}
+
+// ========================================== //
 // ======= CAJERO DE MERCADO PAGO =========== //
 // ========================================== //
 // Tu llave maestra vive en las variables de entorno (.env)
 const client = new MercadoPagoConfig({ accessToken: process.env.MERCADOPAGO_ACCESS_TOKEN });
 
 // Ruta para generar el ticket de cobro
-app.post('/api/crear-pago', (req, res) => {
-    const paquete = req.body;
-    const carrito = paquete.carrito ? paquete.carrito : paquete;
+// Solo se puede pagar una orden que ya pasó por /api/checkout: la preferencia
+// se construye con los artículos y precios guardados en la base de datos,
+// nunca con el carrito que manda el navegador.
+const limitadorCrearPago = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 30,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { success: false, error: 'Demasiadas solicitudes. Inténtalo más tarde.' }
+});
 
-    // Solo se puede pagar una orden que ya pasó por /api/checkout.
+app.post('/api/crear-pago', limitadorCrearPago, (req, res) => {
+    const paquete = req.body;
+
     const externalReference = typeof paquete.externalReference === 'string' ? paquete.externalReference.trim() : '';
     if (!externalReference) {
         return res.status(400).json({ success: false, error: "Falta la referencia de la orden." });
     }
 
-    validarCarrito(carrito, async (error, items) => {
-        if (error) return res.status(400).json({ success: false, error: error.error });
+    buscarOrdenPorReferencia(externalReference, (err, orden) => {
+        if (err) {
+            console.error("🚨 Error consultando la orden:", err.message);
+            return res.status(500).json({ success: false, error: "Error del servidor." });
+        }
+        if (!orden) {
+            return res.status(400).json({ success: false, error: "La orden no existe. Vuelve a intentar el pago." });
+        }
+
+        let items;
+        try { items = JSON.parse(orden.productos); } catch (e) {
+            return res.status(500).json({ success: false, error: "Los datos de la orden están dañados." });
+        }
+        if (!Array.isArray(items) || items.length === 0) {
+            return res.status(400).json({ success: false, error: "La orden no tiene artículos." });
+        }
 
         const articulosBancarios = items.map(item => ({
             title: item.name + " (Talla: " + item.size + ")",
@@ -403,9 +525,7 @@ app.post('/api/crear-pago', (req, res) => {
         }));
 
         // El envío se cobra como una línea más, igual que lo que ve el cliente
-        let totalProductos = 0;
-        items.forEach(item => totalProductos += (item.price * item.quantity));
-        const envio = calcularEnvio(totalProductos);
+        const envio = Number(orden.envio) || 0;
         if (envio > 0) {
             articulosBancarios.push({
                 title: "Envío Nacional",
@@ -417,30 +537,28 @@ app.post('/api/crear-pago', (req, res) => {
 
         const preference = new Preference(client);
 
-        try {
-            const respuestaBanco = await preference.create({
-                body: {
-                    items: articulosBancarios,
-                    external_reference: externalReference,
-                    notification_url: `${SITE_URL}/api/pagos/webhook`,
-                    back_urls: {
-                        success: `${SITE_URL}/thank-you.html`,
-                        failure: `${SITE_URL}/checkout.html`,
-                        pending: `${SITE_URL}/checkout.html`
-                    },
-                    shipments: {
-                        mode: "not_specified",
-                        local_pickup: false,
-                        cost: 0
-                    }
+        preference.create({
+            body: {
+                items: articulosBancarios,
+                external_reference: externalReference,
+                notification_url: `${SITE_URL}/api/pagos/webhook`,
+                back_urls: {
+                    success: `${SITE_URL}/thank-you.html`,
+                    failure: `${SITE_URL}/checkout.html`,
+                    pending: `${SITE_URL}/checkout.html`
+                },
+                shipments: {
+                    mode: "not_specified",
+                    local_pickup: false,
+                    cost: 0
                 }
-            });
-
+            }
+        }).then((respuestaBanco) => {
             res.json({ success: true, link_de_pago: respuestaBanco.init_point });
-        } catch (error) {
+        }).catch((error) => {
             console.error("🚨 Error en el cajero virtual:", error);
             res.status(500).json({ success: false, error: "El banco no respondió." });
-        }
+        });
     });
 });
 
@@ -517,20 +635,44 @@ app.post('/api/pagos/webhook', async (req, res) => {
         else if (pago.status === 'rejected' || pago.status === 'cancelled') estado = 'rechazado';
         else estado = 'pendiente';
 
-        db.run("UPDATE ordenes SET estado = ?, mp_payment_id = ? WHERE external_reference = ?",
-            [estado, pagoId, ext],
-            function (err) {
-                if (err) {
-                    console.error("🚨 Error al actualizar la orden por webhook:", err.message);
-                    return res.status(500).send('error');
-                }
-                if (this.changes === 0) {
-                    console.warn("⚠️ Webhook recibido para una orden desconocida:", ext);
-                } else {
+        buscarOrdenPorReferencia(ext, (err, orden) => {
+            if (err) {
+                console.error("🚨 Error consultando orden por webhook:", err.message);
+                return res.status(500).send('error');
+            }
+            if (!orden) {
+                console.warn("⚠️ Webhook recibido para una orden desconocida:", ext);
+                return res.status(200).send('ok');
+            }
+
+            const estadoAnterior = orden.estado;
+            if (estadoAnterior === estado) return res.status(200).send('ok');
+
+            db.run("UPDATE ordenes SET estado = ?, mp_payment_id = ? WHERE id = ?",
+                [estado, pagoId, orden.id],
+                function (errUpd) {
+                    if (errUpd) {
+                        console.error("🚨 Error al actualizar la orden por webhook:", errUpd.message);
+                        return res.status(500).send('error');
+                    }
                     console.log("✅ Pago actualizado en BD:", ext, "→", estado);
-                }
-                res.status(200).send('ok');
-            });
+
+                    // Si el pago fue rechazado/cancelado y el inventario seguía reservado,
+                    // lo devolvemos a la tienda. Solo se hace una vez (guarda por estadoAnterior).
+                    if (estado === 'rechazado' && estadoAnterior === 'pendiente') {
+                        let items;
+                        try { items = JSON.parse(orden.productos); } catch (e) { items = null; }
+                        if (Array.isArray(items) && items.length > 0) {
+                            return restaurarStock(items, (errRest) => {
+                                if (errRest) console.error("🚨 Error restaurando inventario:", errRest.message);
+                                else console.log("✅ Inventario restaurado por pago rechazado:", ext);
+                                res.status(200).send('ok');
+                            });
+                        }
+                    }
+                    res.status(200).send('ok');
+                });
+        });
     } catch (error) {
         console.error("🚨 Error consultando el pago en Mercado Pago:", error.message);
         res.status(500).send('error');
@@ -629,14 +771,35 @@ function validarDatosCliente(cliente) {
 }
 
 app.post('/api/checkout', (req, res) => {
-    const paquete = req.body; 
-    const carrito = paquete.carrito ? paquete.carrito : paquete; 
+    const paquete = req.body;
+    const carrito = paquete.carrito ? paquete.carrito : paquete;
     const clienteValido = validarDatosCliente(paquete.cliente);
 
     if (typeof clienteValido !== 'object') {
         return res.status(400).json({ success: false, error: clienteValido });
     }
 
+    // Llave de idempotencia: si el navegador reintenta el checkout, no se crea
+    // una segunda orden ni se descuenta el stock dos veces.
+    const idempotencyKey = typeof paquete.idempotencyKey === 'string' ? paquete.idempotencyKey.trim().slice(0, 64) : '';
+    if (!idempotencyKey) {
+        return res.status(400).json({ success: false, error: "Falta la llave de seguridad de la orden." });
+    }
+
+    // Si esta llave ya generó una orden (reintento del navegador), devolvemos la existente
+    // sin volver a validar el inventario ni descontar stock.
+    db.get("SELECT id, external_reference FROM ordenes WHERE idempotency_key = ?", [idempotencyKey], (errKey, ordenExistente) => {
+        if (errKey) {
+            console.error("🚨 Error consultando la llave de idempotencia:", errKey.message);
+            return res.status(500).json({ success: false, error: "Error del servidor." });
+        }
+        if (ordenExistente) {
+            return res.json({ success: true, message: "Orden ya registrada.", orderId: ordenExistente.id, externalReference: ordenExistente.external_reference });
+        }
+        procesarCheckoutNuevo();
+    });
+
+    function procesarCheckoutNuevo() {
     validarCarrito(carrito, (error, items) => {
         if (error) return res.status(400).json({ success: false, error: error.error });
 
@@ -647,39 +810,41 @@ app.post('/api/checkout', (req, res) => {
 
         const externalReference = 'SC-' + Date.now() + '-' + crypto.randomBytes(3).toString('hex');
 
-        const sqlInsert = `INSERT INTO ordenes (nombre, email, direccion, total, productos, estado, external_reference, envio) VALUES (?, ?, ?, ?, ?, 'pendiente', ?, ?)`;
-        
-        db.run(sqlInsert, [clienteValido.nombre, clienteValido.email, clienteValido.direccion, total, JSON.stringify(items), externalReference, envio], function(err) {
+        const sqlInsert = `INSERT INTO ordenes (nombre, email, direccion, total, productos, estado, external_reference, envio, idempotency_key) VALUES (?, ?, ?, ?, ?, 'pendiente', ?, ?, ?)`;
+
+        db.run(sqlInsert, [clienteValido.nombre, clienteValido.email, clienteValido.direccion, total, JSON.stringify(items), externalReference, envio, idempotencyKey], function(err) {
             if (err) {
+                // El cliente reintentó con la misma llave: devolver la orden ya creada.
+                if (String(err.message).includes('UNIQUE')) {
+                    return db.get("SELECT id, external_reference FROM ordenes WHERE idempotency_key = ?", [idempotencyKey], (e2, ordenRepetida) => {
+                        if (e2 || !ordenRepetida) {
+                            console.error("🚨 Error recuperando la orden repetida:", err.message);
+                            return res.status(500).json({ success: false, error: "Error al guardar la orden." });
+                        }
+                        return res.json({ success: true, message: "Orden ya registrada.", orderId: ordenRepetida.id, externalReference: ordenRepetida.external_reference });
+                    });
+                }
                 console.error("🚨 Error al guardar la orden:", err.message);
                 return res.status(500).json({ success: false, error: "Error al guardar la orden." });
             }
 
-            // Restar del inventario
-            items.forEach(item => {
-                const sqlSelect = "SELECT stock FROM productos WHERE id = ?";
-                db.get(sqlSelect, [item.id], (err, row) => {
-                    if (!err && row) {
-                        let stockActual;
-                        try { stockActual = JSON.parse(row.stock); } catch (e) { return; }
-                        if (stockActual[item.size] !== undefined) {
-                            stockActual[item.size] -= item.quantity;
-                            if (stockActual[item.size] < 0) stockActual[item.size] = 0;
-                            const sqlUpdate = "UPDATE productos SET stock = ? WHERE id = ?";
-                            db.run(sqlUpdate, [JSON.stringify(stockActual), item.id]);
-                        }
-                    }
-                });
-            });
+            // Reservar inventario dentro de una transacción.
+            decrementarStock(items, (errStock) => {
+                if (errStock) {
+                    console.error("🚨 Error reservando inventario:", errStock.message);
+                    return res.status(500).json({ success: false, error: "No hay stock suficiente para completar la orden." });
+                }
 
-            res.json({
-                success: true,
-                message: "¡Orden registrada con éxito!",
-                orderId: this.lastID,
-                externalReference
+                res.json({
+                    success: true,
+                    message: "¡Orden registrada con éxito!",
+                    orderId: this.lastID,
+                    externalReference
+                });
             });
         });
     });
+    }
 });
 
 // ========================================== //
@@ -703,67 +868,89 @@ const limitadorRecibo = rateLimit({
 });
 
 app.post('/api/enviar-recibo', limitadorRecibo, (req, res) => {
-    const { carrito, cliente } = req.body;
-    
-    if (!carrito || !cliente) return res.status(400).json({ error: "Datos incompletos" });
-
-    const emailLimpio = typeof cliente.email === 'string' ? cliente.email.trim().toLowerCase() : '';
-    if (!emailLimpio || !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(emailLimpio)) {
-        return res.status(400).json({ error: "Correo del cliente inválido." });
+    // El recibo se construye siempre con lo que está guardado en la base de
+    // datos, nunca con el carrito que manda el navegador.
+    const externalReference = typeof req.body.externalReference === 'string' ? req.body.externalReference.trim() : '';
+    if (!externalReference) {
+        return res.status(400).json({ error: "Falta la referencia de la orden." });
     }
 
-    let totalProductos = 0;
-    let listaHTML = '';
-    
-    carrito.forEach(item => {
-        const precio = Number(item.price) || 0;
-        const cantidad = Number(item.quantity) || 0;
-        totalProductos += (precio * cantidad);
-        listaHTML += `
-            <li style="margin-bottom: 10px; border-bottom: 1px solid #eee; padding-bottom: 10px;">
-                <strong>${cantidad}x</strong> ${escaparHTML(item.name)} (Talla: <strong>${escaparHTML(item.size)}</strong>) <br>
-                <span style="color: #555;">$${(precio * cantidad).toFixed(2)} MXN</span>
-            </li>`;
-    });
+    buscarOrdenPorReferencia(externalReference, (err, orden) => {
+        if (err) {
+            console.error("🚨 Error consultando la orden:", err.message);
+            return res.status(500).json({ error: "Error del servidor." });
+        }
+        if (!orden) return res.status(404).json({ error: "La orden no existe." });
 
-    const envio = calcularEnvio(totalProductos);
-    const total = totalProductos + envio;
+        if (orden.estado !== 'pagado') {
+            return res.status(400).json({ error: "El pago de esta orden aún no está confirmado." });
+        }
 
-    const mailOptions = {
-        from: '"Società Di Calcio" <ventas.societadicalcio@gmail.com>',
-        to: emailLimpio,
-        subject: 'Confirmación de tu pedido ⚽ - Società Di Calcio',
-        html: `
-            <div style="font-family: 'Helvetica Neue', Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden;">
-                <div style="background-color: #000; padding: 20px; text-align: center;">
-                    <img src="${SITE_URL}/logo-fondo-verde.png" alt="Società Di Calcio" style="max-width: 120px; border-radius: 50%;">
-                </div>
-                <div style="padding: 30px;">
-                    <h2 style="color: #000; text-transform: uppercase; letter-spacing: 1px;">¡Pago Aprobado, ${escaparHTML(cliente.nombre)}!</h2>
-                    <p style="color: #555; font-size: 16px;">Tu pago se procesó correctamente y ya estamos preparando tus prendas. Aquí está tu recibo oficial:</p>
-                    <div style="background-color: #f9f9f9; padding: 20px; border-radius: 6px; margin: 25px 0;">
-                        <h3 style="margin-top: 0; border-bottom: 2px solid #000; padding-bottom: 10px; text-transform: uppercase; font-size: 14px;">Resumen de tu Orden</h3>
-                        <ul style="list-style: none; padding: 0; margin: 0;">${listaHTML}</ul>
-                        <div style="margin-top: 15px; padding-top: 15px; border-top: 2px solid #000; font-size: 16px; text-align: right;">
-                            ${envio > 0 ? `<div style="color: #555;">Envío Nacional: $${envio.toFixed(2)} MXN</div>` : '<div style="color: #28a745;">Envío Gratis 🎉</div>'}
-                            <div style="font-size: 18px; font-weight: bold;">Total: $${total.toFixed(2)} MXN</div>
+        if (orden.recibo_enviado) {
+            return res.json({ success: true, yaEnviado: true });
+        }
+
+        let items;
+        try { items = JSON.parse(orden.productos); } catch (e) {
+            return res.status(500).json({ error: "Los datos de la orden están dañados." });
+        }
+
+        const envio = Number(orden.envio) || 0;
+        let listaHTML = '';
+
+        items.forEach(item => {
+            const precio = Number(item.price) || 0;
+            const cantidad = Number(item.quantity) || 0;
+            listaHTML += `
+                <li style="margin-bottom: 10px; border-bottom: 1px solid #eee; padding-bottom: 10px;">
+                    <strong>${cantidad}x</strong> ${escaparHTML(item.name)} (Talla: <strong>${escaparHTML(item.size)}</strong>) <br>
+                    <span style="color: #555;">$${(precio * cantidad).toFixed(2)} MXN</span>
+                </li>`;
+        });
+
+        const total = Number(orden.total) || 0;
+
+        const mailOptions = {
+            from: '"Società Di Calcio" <ventas.societadicalcio@gmail.com>',
+            to: orden.email,
+            subject: 'Confirmación de tu pedido ⚽ - Società Di Calcio',
+            html: `
+                <div style="font-family: 'Helvetica Neue', Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden;">
+                    <div style="background-color: #000; padding: 20px; text-align: center;">
+                        <img src="${SITE_URL}/logo-fondo-verde.png" alt="Società Di Calcio" style="max-width: 120px; border-radius: 50%;">
+                    </div>
+                    <div style="padding: 30px;">
+                        <h2 style="color: #000; text-transform: uppercase; letter-spacing: 1px;">¡Pago Aprobado, ${escaparHTML(orden.nombre)}!</h2>
+                        <p style="color: #555; font-size: 16px;">Tu pago se procesó correctamente y ya estamos preparando tus prendas. Aquí está tu recibo oficial:</p>
+                        <div style="background-color: #f9f9f9; padding: 20px; border-radius: 6px; margin: 25px 0;">
+                            <h3 style="margin-top: 0; border-bottom: 2px solid #000; padding-bottom: 10px; text-transform: uppercase; font-size: 14px;">Resumen de tu Orden</h3>
+                            <ul style="list-style: none; padding: 0; margin: 0;">${listaHTML}</ul>
+                            <div style="margin-top: 15px; padding-top: 15px; border-top: 2px solid #000; font-size: 16px; text-align: right;">
+                                ${envio > 0 ? `<div style="color: #555;">Envío Nacional: $${envio.toFixed(2)} MXN</div>` : '<div style="color: #28a745;">Envío Gratis 🎉</div>'}
+                                <div style="font-size: 18px; font-weight: bold;">Total: $${total.toFixed(2)} MXN</div>
+                            </div>
+                        </div>
+                        <div style="background-color: #f9f9f9; padding: 20px; border-radius: 6px;">
+                            <h3 style="margin-top: 0; border-bottom: 2px solid #000; padding-bottom: 10px; text-transform: uppercase; font-size: 14px;">Dirección de Envío 📍</h3>
+                            <p style="color: #333; margin: 0; font-size: 15px;">${escaparHTML(orden.direccion)}</p>
                         </div>
                     </div>
-                    <div style="background-color: #f9f9f9; padding: 20px; border-radius: 6px;">
-                        <h3 style="margin-top: 0; border-bottom: 2px solid #000; padding-bottom: 10px; text-transform: uppercase; font-size: 14px;">Dirección de Envío 📍</h3>
-                        <p style="color: #333; margin: 0; font-size: 15px;">${escaparHTML(cliente.direccion)}</p>
-                    </div>
                 </div>
-            </div>
-        `
-    };
+            `
+        };
 
-    transporter.sendMail(mailOptions, (error, info) => {
-        if (error) console.error("🚨 Error al enviar el correo:", error);
-        else console.log("✅ Recibo enviado a:", emailLimpio);
+        transporter.sendMail(mailOptions, (error) => {
+            if (error) {
+                console.error("🚨 Error al enviar el correo:", error);
+                return res.status(500).json({ error: "No se pudo enviar el correo." });
+            }
+            console.log("✅ Recibo enviado a:", orden.email);
+            db.run("UPDATE ordenes SET recibo_enviado = 1 WHERE id = ?", [orden.id], (errMarcar) => {
+                if (errMarcar) console.error("🚨 Error marcando recibo como enviado:", errMarcar.message);
+                res.json({ success: true });
+            });
+        });
     });
-
-    res.json({ success: true });
 });
 
 // ========================================== //
@@ -871,12 +1058,40 @@ app.put('/api/admin/productos/:id/actualizar', requiereAdmin, (req, res) => {
 });
 
 // Encender el servidor (solo cuando el esquema está listo)
-asegurarEsquema((err) => {
-    if (err) {
-        console.error("🚨 No se pudo preparar la base de datos. El servidor no arrancará:", err.message);
-        process.exit(1);
-    }
-    app.listen(PORT, () => {
-        console.log(`🚀 Servidor de Societa Di Calcio corriendo en el puerto ${PORT}`);
+// La promesa 'cuandoListo' permite a los tests esperar a que la base de datos
+// esté preparada antes de hacer peticiones HTTP.
+const cuandoListo = new Promise((resolver, rechazar) => {
+    asegurarEsquema((err) => {
+        if (err) {
+            console.error("🚨 No se pudo preparar la base de datos. El servidor no arrancará:", err.message);
+            return rechazar(err);
+        }
+        resolver(app);
     });
 });
+
+function arrancar() {
+    cuandoListo.then(() => {
+        // Avisar (o bloquear en producción) si faltan secretos o siguen con el valor de ejemplo.
+        const configuracionOk = verificarConfiguracion();
+        if (process.env.NODE_ENV === 'production' && !configuracionOk) {
+            console.error("🚨 Configuración inválida. El servidor no arrancará en modo producción.");
+            process.exit(1);
+        }
+
+        app.listen(PORT, () => {
+            console.log(`🚀 Servidor de Societa Di Calcio corriendo en el puerto ${PORT}`);
+        });
+    }).catch((err) => {
+        console.error("🚨 No se pudo preparar la base de datos. El servidor no arrancará:", err.message);
+        process.exit(1);
+    });
+}
+
+// Solo arranca si se ejecuta directamente (node server.js). Los tests requieren
+// el módulo y arrancan su propio servidor en un puerto aleatorio.
+if (require.main === module) {
+    arrancar();
+}
+
+module.exports = { app, db, cuandoListo, arrancar };

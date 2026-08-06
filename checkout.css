@@ -1,0 +1,92 @@
+/* ========================================== */
+/* DISEÑO PREMIUM Y SIMÉTRICO                 */
+/* ========================================== */
+
+/* Encabezado: Centrado absoluto con Flexbox */
+.checkout-header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 25px 0;
+    border-bottom: 1px solid #eaeaea;
+    background-color: #fff;
+    width: 100%;
+}
+.checkout-header img {
+    max-height: 70px;
+    object-fit: contain;
+    display: block;
+    margin: 0 auto;
+}
+
+.checkout-wrapper {
+    max-width: 1100px;
+    margin: 40px auto;
+    padding: 20px;
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    display: flex;
+    gap: 50px;
+    align-items: flex-start;
+    min-height: 60vh;
+}
+
+/* Columna Izquierda: Formulario */
+.checkout-form-container { flex: 1; width: 100%; }
+
+/* Título de Envío: Perfectamente centrado */
+.checkout-form-container h1 { 
+    text-align: center; 
+    margin-bottom: 30px; 
+    font-size: 1.5rem; 
+    text-transform: uppercase; 
+    letter-spacing: 2px; 
+}
+
+.form-group { margin-bottom: 20px; }
+.form-group label { display: block; margin-bottom: 8px; font-weight: bold; font-size: 0.85rem; color: #000; text-transform: uppercase; text-align: left; }
+.form-group input { width: 100%; padding: 14px; border: 1px solid #ccc; border-radius: 4px; font-size: 1rem; box-sizing: border-box; }
+.form-group input:focus { border-color: #000; outline: none; }
+
+.btn-pagar { width: 100%; padding: 16px; background-color: #000; color: #fff; border: none; font-size: 1rem; font-weight: bold; cursor: pointer; text-transform: uppercase; letter-spacing: 1.5px; transition: background 0.3s; margin-top: 10px; }
+.btn-pagar:hover { background-color: #333; }
+
+/* Columna Derecha: Resumen de la Orden */
+.checkout-summary-container {
+    width: 400px;
+    background-color: #f9f9f9;
+    padding: 30px;
+    border-radius: 8px;
+    position: sticky;
+    top: 20px;
+}
+.checkout-summary-container h2 { font-size: 1.1rem; text-transform: uppercase; margin-bottom: 20px; border-bottom: 1px solid #ddd; padding-bottom: 10px; text-align: center; }
+
+.summary-item { display: flex; align-items: center; gap: 15px; margin-bottom: 15px; }
+.summary-item img { width: 65px; height: 65px; object-fit: cover; border-radius: 4px; border: 1px solid #eee; }
+
+.summary-totals { margin-top: 25px; border-top: 1px solid #ddd; padding-top: 20px; }
+.summary-row { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 0.95rem; }
+.summary-row.total { font-weight: bold; font-size: 1.3rem; margin-top: 15px; border-top: 1px solid #ddd; padding-top: 15px; }
+
+/* Comportamiento exacto en Celulares */
+@media (max-width: 800px) {
+    .checkout-wrapper { 
+        flex-direction: column-reverse; 
+        margin-top: 10px;
+        padding: 15px; /* Da un respiro a los lados en pantallas chicas */
+    }
+    .checkout-summary-container { 
+        width: 100%; 
+        box-sizing: border-box; 
+        position: static; 
+        margin-bottom: 30px;
+    }
+}
+
+/* Estilo para el Footer de Checkout */
+.checkout-footer {
+    border-top: 1px solid #eaeaea;
+    padding-bottom: 30px;
+    background-color: #fff;
+    text-align: center; /* Asegura que el footer también esté centrado */
+}
