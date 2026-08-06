@@ -23,7 +23,7 @@
     max-width: 1100px;
     margin: 40px auto;
     padding: 20px;
-    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-family: var(--fuente-cuerpo, 'Helvetica Neue', Arial, sans-serif);
     display: flex;
     gap: 50px;
     align-items: flex-start;
@@ -47,26 +47,35 @@
 .form-group input { width: 100%; padding: 14px; border: 1px solid #ccc; border-radius: 4px; font-size: 1rem; box-sizing: border-box; }
 .form-group input:focus { border-color: #000; outline: none; }
 
-.btn-pagar { width: 100%; padding: 16px; background-color: #000; color: #fff; border: none; font-size: 1rem; font-weight: bold; cursor: pointer; text-transform: uppercase; letter-spacing: 1.5px; transition: background 0.3s; margin-top: 10px; }
-.btn-pagar:hover { background-color: #333; }
+.btn-pagar { width: 100%; padding: 16px; background-color: var(--verde-pino, #000); color: #fff; border: none; border-radius: var(--radio-sm); font-size: 1rem; font-weight: bold; cursor: pointer; text-transform: uppercase; letter-spacing: 1.5px; transition: background 0.3s, box-shadow 0.3s; margin-top: 10px; }
+.btn-pagar:hover { background-color: var(--verde-oscuro, #333); box-shadow: var(--sombra-md); }
+
+/* Nota de seguridad bajo el botón de pago */
+.secure-note { font-size: 0.85rem; color: var(--gris); margin-top: 15px; text-align: center; }
 
 /* Columna Derecha: Resumen de la Orden */
 .checkout-summary-container {
     width: 400px;
-    background-color: #f9f9f9;
+    background-color: var(--beige-claro, #f9f9f9);
     padding: 30px;
-    border-radius: 8px;
+    border-radius: var(--radio);
     position: sticky;
     top: 20px;
 }
-.checkout-summary-container h2 { font-size: 1.1rem; text-transform: uppercase; margin-bottom: 20px; border-bottom: 1px solid #ddd; padding-bottom: 10px; text-align: center; }
+.checkout-summary-container h2 { font-size: 1.1rem; text-transform: uppercase; margin-bottom: 20px; border-bottom: 1px solid var(--beige); padding-bottom: 10px; text-align: center; }
 
 .summary-item { display: flex; align-items: center; gap: 15px; margin-bottom: 15px; }
-.summary-item img { width: 65px; height: 65px; object-fit: cover; border-radius: 4px; border: 1px solid #eee; }
+.summary-item img { width: 65px; height: 65px; object-fit: cover; border-radius: var(--radio-sm); border: 1px solid var(--beige); }
 
-.summary-totals { margin-top: 25px; border-top: 1px solid #ddd; padding-top: 20px; }
+/* Detalles del item en el resumen (generado por cart.js) */
+.checkout-item-details { flex-grow: 1; }
+.checkout-item-details h4 { margin: 0; font-size: 0.95rem; color: var(--negro); }
+.checkout-item-details p { margin: 0; font-size: 0.8rem; color: var(--gris); }
+.checkout-item-price { font-weight: 700; }
+
+.summary-totals { margin-top: 25px; border-top: 1px solid var(--beige); padding-top: 20px; }
 .summary-row { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 0.95rem; }
-.summary-row.total { font-weight: bold; font-size: 1.3rem; margin-top: 15px; border-top: 1px solid #ddd; padding-top: 15px; }
+.summary-row.total { font-weight: bold; font-size: 1.3rem; margin-top: 15px; border-top: 1px solid var(--beige); padding-top: 15px; }
 
 /* Comportamiento exacto en Celulares */
 @media (max-width: 800px) {

@@ -38,3 +38,19 @@ Estado: `Completado` | `Pendiente` | `Parcial`.
 | P2-Preconnect | `preconnect` agregado a Google Fonts (`fonts.googleapis.com` + `fonts.gstatic.com` con crossorigin) y a `cdnjs.cloudflare.com` (Font Awesome) en los `<head>` de las páginas que los usan. | `index.html`, `product.html`, `thank-you.html`, `carrito.html`, `checkout.html`, `admin.html`, `faq.html` | Completado |
 | P2-Limpieza | Eliminados `setupDB.js`, `poblarDB.js`, `upgradeDB.js`, `crearOrdenes.js`, `migrarDB.js`, `database.js`, `arreglarFoto.js` y el directorio `SC2/backend/`. Se quitó `<script src="database.js">` de `product.html`, el script `migrar` de `package.json` y las entradas correspondientes de `ARCHIVOS_BLOQUEADOS`. | — | Completado |
 | Pendientes P2 | Todos los ítems de la lista original quedaron resueltos. | — | Completado |
+
+---
+
+## 2026-08-06 — Fase 3: Rediseño visual y estructura del frontend
+
+| Área | Descripción | Archivos | Estatus |
+|------|-------------|----------|---------|
+| Sistema de diseño | Tokens CSS ampliados (`--verde-oscuro #012a12`, `--beige-claro #f7f6f2`, `--gris`, sombras, radios), tipografía fluida con `clamp()`, `.eyebrow`, `:focus-visible`, base `.btn`/`.btn-blanco` refinada y estados hover de cards (transform + sombra + zoom de imagen). | `styles.css` | Completado |
+| Badges de producto | Badges Nuevo / -X% / Próximamente con clases (`.product-badge--nuevo/descuento/proximamente`) y `oldPrice` tachado en grid principal y relacionados; se reemplazaron los inline `style="color:#ff8c00"` y los del `mostrarError()` por clases. | `index-loader.js`, `product.js`, `styles.css` | Completado |
+| Estados vacíos | Drawer y carrito vacíos con clases (`.empty-cart-state`) en lugar de inline styles; ítems del checkout con clases (`.checkout-item-details/price`). | `cart.js`, `checkout.css` | Completado |
+| Menú móvil reparado | Botón hamburguesa + `#main-nav` + `#close-menu-btn` en `product.html` (repara el toggle móvil, que ya tenía CSS). Header y footer completos con logo, nav, carrito y drawer en `faq.html`, `terms.html`, `returns.html`. | `product.html`, `faq.html`, `terms.html`, `returns.html` | Completado |
+| Páginas informativas | `faq.html` con sección nueva "¿Cuánto cuesta el envío?" (99 MXN, gratis +$1,500); `terms.html` y `returns.html` reescritos completos (`<!DOCTYPE html>`, head con fonts/preconnect, header/footer, drawer y `cart.js`). | `faq.html`, `terms.html`, `returns.html` | Completado |
+| Home | Eyebrows agregados (banner lookbook, hero, nosotros, colecciones, newsletter); Google Fonts uniformes `Montserrat 400;500;600;700` + `Playfair 400;600;700` en todos los HTML. | `index.html` | Completado |
+| Checkout | Google Fonts + Playfair + nota de seguridad `.secure-note` bajo el botón; estilos de ítems con tokens. | `checkout.html`, `checkout.css` | Completado |
+| Admin | Limpieza total de inline `style=` (login/panel, lista inventario/ventas, botones, topbar) movidos a clases (`.admin-topbar`, `.admin-lista`, `.admin-cargando`, `.inventario-card*`, `.venta-card*`, `.etiqueta-estado*`); `etiquetaEstado()` genera clases en vez de colores inline; botón guardar verde pino y radios unificados. | `admin.html`, `admin.css`, `admin.js` | Completado |
+| Verificación | `npm test` 10/10; smoke test: las 9 páginas + 3 CSS responden 200 con CSP. Únicos `style=` restantes: template de email de `server.js` (correcto para clientes de correo). Sin `onclick=`/`javascript:`/scripts inline. | — | Completado |

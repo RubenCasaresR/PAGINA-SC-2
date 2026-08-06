@@ -123,6 +123,17 @@ document.addEventListener('DOMContentLoaded', async () => {
                 addToCartButton.style.border = "none";
             }
         } else {
+            // Deshabilitamos visualmente las tallas que no tienen stock
+            tallasBtns.forEach(btn => {
+                const talla = btn.innerText.trim();
+                const stockDisponible = product.stock ? (product.stock[talla] || 0) : 0;
+                if (stockDisponible === 0) {
+                    btn.disabled = true;
+                    btn.classList.add('agotado');
+                    btn.title = 'Agotado en esta talla';
+                }
+            });
+
             tallasBtns.forEach(btn => {
                 btn.addEventListener('click', () => {
                     tallasBtns.forEach(b => b.classList.remove('selected'));
@@ -221,12 +232,19 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const relatedProduct = products[relatedId];
                 if(relatedProduct){
                     let relatedPriceDisplay = `$${relatedProduct.price.toFixed(2)}`;
-                    if (relatedProduct.oldPrice) {
+                    if (relatedProduct.oldPrice && relatedProduct.oldPrice > relatedProduct.price) {
                         relatedPriceDisplay = `<span class="old-price">$${relatedProduct.oldPrice.toFixed(2)}</span> $${relatedProduct.price.toFixed(2)}`;
                     }
-                    
-                    if(relatedProduct.status === 'coming_soon') {
-                        relatedPriceDisplay = `<span style="color: #ff8c00; font-weight: 700; font-size: 0.9rem; text-transform: uppercase;">Próximamente</span>`;
+
+                    let relatedBadgeHTML = '';
+                    if (relatedProduct.status === 'coming_soon') {
+                        relatedPriceDisplay = '<span class="coming-soon-text">Lanzamiento Oficial</span>';
+                        relatedBadgeHTML = '<span class="product-badge product-badge--proximamente">Próximamente</span>';
+                    } else if (relatedProduct.oldPrice && relatedProduct.oldPrice > relatedProduct.price) {
+                        const descuento = Math.round((1 - relatedProduct.price / relatedProduct.oldPrice) * 100);
+                        relatedBadgeHTML = `<span class="product-badge product-badge--descuento">-${descuento}%</span>`;
+                    } else if (relatedProduct.categoria === 'novedades-cat') {
+                        relatedBadgeHTML = '<span class="product-badge product-badge--nuevo">Nuevo</span>';
                     }
 
                     const imgPrincipal = relatedProduct.images[0].toLowerCase().endsWith('.mp4') ? 'logo SC sin fondo.png' : relatedProduct.images[0];
@@ -241,6 +259,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         <a href="product.html?product=${idSeguro}" class="product-card-link">
                             <div class="product-card">
                                 <div class="product-image-container">
+                                    ${relatedBadgeHTML}
                                     <img src="${imgPrincipalSegura}" alt="${nombreSeguro}" class="main-img" loading="lazy">
                                     <img src="${imgHoverSegura}" alt="${nombreSeguro}" class="hover-img" loading="lazy">
                                 </div>
@@ -281,6 +300,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 function mostrarError() {
     const mainContent = document.querySelector('.product-page-main');
     if (mainContent) {
-        mainContent.innerHTML = '<h1 style="text-align:center; padding: 50px;">Producto no encontrado</h1>';
+        mainContent.innerHTML = '<h1 class="product-error">Producto no encontrado</h1>';
     }
 }

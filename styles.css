@@ -1,11 +1,26 @@
 /* Paleta de Colores y Fuentes */
 :root {
     --verde-pino: #023a19; /* Un verde oscuro y elegante */
+    --verde-oscuro: #012a12; /* Verde aún más profundo (hover) */
     --blanco: #FFFFFF;
     --beige: #EAE7DC;
+    --beige-claro: #f7f6f2; /* Fondo cálido suave (antes #f9f9f9) */
     --negro: #1a1a1a;
+    --gris: #6b6b6b;
+    --gris-claro: #9a9a9a;
+    --exito: #28a745;
+    --peligro: #d9534f;
+    --aviso: #ff8c00;
+
+    --radio: 10px;
+    --radio-sm: 6px;
+    --radio-pill: 999px;
+    --sombra-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
+    --sombra-md: 0 12px 32px rgba(0, 0, 0, 0.12);
+
     --fuente-titulos: 'Playfair Display', serif;
     --fuente-cuerpo: 'Montserrat', sans-serif;
+    --transicion: 0.3s ease;
 }
 
 /* Estilos Generales */
@@ -15,22 +30,61 @@ body {
     background-color: var(--blanco);
     color: var(--negro);
     line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
 }
+
+/* Tipografía fluida: escala que responde al ancho de pantalla */
+h1 { font-size: clamp(2rem, 5vw, 3.4rem); }
+h2 { font-size: clamp(1.7rem, 3.4vw, 2.6rem); }
+h3 { font-size: clamp(1.15rem, 2vw, 1.4rem); }
 
 h1, h2, h3 {
     font-family: var(--fuente-titulos);
     color: var(--verde-pino);
     font-weight: 700;
+    line-height: 1.2;
+}
+
+/* Etiqueta pequeña en mayúsculas (eyebrow) para títulos de sección */
+.eyebrow {
+    display: inline-block;
+    font-family: var(--fuente-cuerpo);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: var(--verde-pino);
+    margin-bottom: 12px;
+}
+
+.eyebrow--claro {
+    color: var(--blanco);
 }
 
 a {
     text-decoration: none;
     color: var(--verde-pino);
-    transition: color 0.3s ease;
+    transition: color var(--transicion);
 }
 
 a:hover {
     color: var(--negro);
+}
+
+/* Accesibilidad: anillo de foco visible para navegación por teclado */
+:focus-visible {
+    outline: 2px solid var(--verde-pino);
+    outline-offset: 2px;
+}
+
+/* Estado vacío del carrito */
+.empty-cart-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--gris);
+}
+.empty-cart-state a {
+    font-weight: 700;
 }
 
 /* Header y Navegación */
@@ -124,20 +178,41 @@ a:hover {
 .hero-text p {
     font-size: 1.2rem;
     margin-bottom: 2rem;
+    color: var(--gris);
 }
 
 .btn {
+    display: inline-block;
     background-color: var(--verde-pino);
     color: var(--blanco);
-    padding: 12px 25px;
-    border-radius: 5px;
+    padding: 14px 28px;
+    border-radius: var(--radio-sm);
+    font-family: var(--fuente-cuerpo);
     font-weight: 700;
-    transition: background-color 0.3s ease;
+    font-size: 0.9rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    border: none;
+    cursor: pointer;
+    transition: background-color var(--transicion), box-shadow var(--transicion), transform var(--transicion);
 }
 
 .btn:hover {
-    background-color: #1e3a3a;
+    background-color: var(--verde-oscuro);
     color: var(--blanco);
+    box-shadow: var(--sombra-md);
+    transform: translateY(-1px);
+}
+
+.btn:active {
+    transform: translateY(0);
+}
+
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
 }
 
 .hero-images {
@@ -225,18 +300,33 @@ a:hover {
 .product-card {
     cursor: pointer;
     text-align: left;
+    transition: transform var(--transicion);
+}
+
+.product-card:hover {
+    transform: translateY(-4px);
 }
 
 .product-image-container {
     position: relative;
     overflow: hidden;
-    border-radius: 10px;
+    border-radius: var(--radio);
+    box-shadow: var(--sombra-sm);
+    transition: box-shadow var(--transicion);
+}
+
+.product-card:hover .product-image-container {
+    box-shadow: var(--sombra-md);
 }
 
 .product-image-container img {
     width: 100%;
     display: block;
-    transition: opacity 0.4s ease;
+    transition: opacity 0.4s ease, transform 0.6s ease;
+}
+
+.product-card:hover .product-image-container img.main-img {
+    transform: scale(1.03);
 }
 
 .product-image-container .hover-img {
@@ -250,6 +340,27 @@ a:hover {
     opacity: 1;
 }
 
+/* Badges sobre la foto del producto */
+.product-badge {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    z-index: 3;
+    padding: 5px 12px;
+    border-radius: var(--radio-pill);
+    font-family: var(--fuente-cuerpo);
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--blanco);
+    background-color: var(--verde-pino);
+    box-shadow: var(--sombra-sm);
+}
+.product-badge--nuevo { background-color: var(--verde-pino); }
+.product-badge--descuento { background-color: var(--blanco); color: var(--peligro); }
+.product-badge--proximamente { background-color: var(--negro); }
+
 .product-info {
     padding-top: 15px;
 }
@@ -258,6 +369,11 @@ a:hover {
     margin: 0;
     font-size: 1.2rem;
     color: var(--verde-pino);
+    transition: color var(--transicion);
+}
+
+.product-card:hover .product-info h3 {
+    color: var(--negro);
 }
 
 .price {
@@ -268,7 +384,7 @@ a:hover {
 
 .old-price {
     text-decoration: line-through;
-    color: #999;
+    color: var(--gris-claro);
     margin-right: 10px;
 }
 
@@ -386,6 +502,22 @@ a:visited {
     background-color: var(--verde-pino);
     color: var(--blanco);
     border-color: var(--verde-pino);
+}
+
+/* Tallas sin stock: se ven agotadas y no son seleccionables */
+.tallas button.agotado {
+    color: var(--gris-claro);
+    border-color: var(--beige);
+    cursor: not-allowed;
+    text-decoration: line-through;
+    background: none;
+}
+
+.tallas button.agotado:hover,
+.tallas button.agotado.selected {
+    background: none;
+    color: var(--gris-claro);
+    border-color: var(--beige);
 }
 
 .selector-cantidad {
@@ -515,10 +647,22 @@ a:visited {
     flex-grow: 1;
 }
 
-.cart-item-details h3 {
+.cart-item-details h3,
+.cart-item-details h4 {
     margin: 0 0 5px 0;
     font-size: 1.1rem;
     color: var(--negro);
+}
+
+.cart-item-details p {
+    margin: 0 0 5px 0;
+    font-size: 0.9rem;
+    color: var(--gris);
+}
+
+.cart-item-price {
+    font-weight: 700;
+    font-size: 1rem;
 }
 
 .quantity-selector {
@@ -546,9 +690,9 @@ a:visited {
 }
 
 .cart-summary {
-    background-color: #f9f9f9;
+    background-color: var(--beige-claro);
     padding: 30px;
-    border-radius: 10px;
+    border-radius: var(--radio);
     position: sticky;
     top: 120px;
 }
@@ -572,8 +716,10 @@ a:visited {
 }
 
 .btn-checkout {
+    display: block;
     width: 100%;
     margin-top: 10px;
+    text-align: center;
 }
 
 
@@ -655,7 +801,26 @@ a:visited {
     padding: 0 5%;
 }
 .thank-you-content h1 {
-    font-size: 3rem;
+    font-size: clamp(2.2rem, 5vw, 3rem);
+}
+.thank-you-icon {
+    font-size: 4rem;
+    color: var(--exito);
+    margin-bottom: 20px;
+}
+.thank-you-order {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-bottom: 30px;
+}
+.thank-you-order #order-number {
+    color: var(--verde-pino);
+}
+.thank-you-note {
+    color: var(--gris);
+    max-width: 600px;
+    margin: 0 auto 40px auto;
+    font-size: 1rem;
 }
 .thank-you-content p {
     font-size: 1.2rem;
@@ -681,9 +846,9 @@ a:visited {
 
 .guia-tallas-panel {
     display: none; /* Oculto por defecto */
-    background-color: #f9f9f9;
+    background-color: var(--beige-claro);
     border: 1px solid var(--beige);
-    border-radius: 5px;
+    border-radius: var(--radio);
     padding: 20px;
     margin-top: 15px;
     position: relative;
@@ -1146,18 +1311,27 @@ a:visited {
 .btn-checkout-drawer {
     width: 100%;
     padding: 15px;
-    font-size: 1rem;
+    font-size: 0.9rem;
+    letter-spacing: 1px;
     text-align: center;
-    background: #000;
-    color: #fff;
+    text-transform: uppercase;
+    background: var(--negro);
+    color: var(--blanco);
     border: none;
+    border-radius: var(--radio-sm);
     cursor: pointer;
-    font-family: 'Montserrat', sans-serif;
-    font-weight: bold;
+    font-family: var(--fuente-cuerpo);
+    font-weight: 700;
+    transition: background-color var(--transicion);
 }
 .btn-checkout-drawer:hover {
-    background: #333;
+    background: var(--verde-pino);
 }
+.product-error {
+    text-align: center;
+    padding: 50px 0;
+}
+
 /* ========================================= */
 /* ======= SECCIÓN LOOKBOOK (1 BANNER + 4) = */
 /* ========================================= */
@@ -1188,7 +1362,7 @@ a:visited {
 .banner-overlay {
     position: absolute;
     top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0,0,0,0.2); /* Oscurece un poquito la foto para que se lea el texto */
+    background: linear-gradient(to top, rgba(0,0,0,0.55), rgba(0,0,0,0.15));
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -1198,7 +1372,7 @@ a:visited {
 
 .banner-overlay h2 {
     color: var(--blanco);
-    font-size: 3rem;
+    font-size: clamp(2rem, 4vw, 3rem);
     margin-bottom: 20px;
     text-shadow: 2px 2px 10px rgba(0,0,0,0.5); /* Sombra para resaltar el texto */
 }
@@ -1209,16 +1383,18 @@ a:visited {
 .btn-blanco:active {
     background-color: var(--blanco) !important;
     color: var(--negro) !important; /* El !important fuerza a que el texto siempre sea negro */
-    padding: 12px 30px;
-    border-radius: 5px;
+    padding: 14px 30px;
+    border-radius: var(--radio-sm);
     font-weight: bold;
     text-transform: uppercase;
+    letter-spacing: 1px;
     border: none;
 }
 
 .btn-blanco:hover {
-    background-color: var(--beige) !important;
-    color: var(--negro) !important;
+    background-color: var(--blanco) !important;
+    color: var(--verde-pino) !important;
+    box-shadow: var(--sombra-md);
 }
 
 /* 2. Grid de 4 Verticales */
@@ -1507,37 +1683,33 @@ body.no-scroll {
     cursor: default;
 }
 /* ========================================== */
-/* TINTA NEGRA ABSOLUTA PARA EL CARRITO       */
+/* CARRITO: TEXTO SIEMPRE LEGIBLE             */
 /* ========================================== */
 
-/* Atacamos cualquier texto dentro de la lista del carrito */
-#cart-drawer-items *,
-#cart-drawer-items h1,
-#cart-drawer-items h2,
-#cart-drawer-items h3,
-#cart-drawer-items p,
-#cart-drawer-items span,
-#cart-drawer-items div {
-    color: #000000 !important;
-    opacity: 1 !important;
-    text-shadow: none !important;
+/* Aseguramos que los títulos y precios del carrito nunca hereden el verde
+   de los headings de la marca (siempre se leen en negro). */
+#cart-drawer-items .drawer-item h4,
+#cart-drawer-items .drawer-item p {
+    color: var(--negro);
+    opacity: 1;
+    text-shadow: none;
 }
 
-/* Forzamos el grosor de la letra del producto */
 .cart-item-title,
 .cart-item-name,
 .cart-product-title {
-    font-weight: 700 !important;
-    font-size: 1rem !important;
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--negro);
 }
 
 /* Subtotal oscuro y contundente */
 #drawer-subtotal,
 .drawer-summary-row span,
 .drawer-summary-row div {
-    color: #000000 !important;
-    font-weight: 700 !important;
-    opacity: 1 !important;
+    color: var(--negro);
+    font-weight: 700;
+    opacity: 1;
 }
 /* ========================================== */
 /* DISEÑO EDITORIAL DE PRODUCTO (TIPO ZARA)   */
@@ -1597,10 +1769,10 @@ body.no-scroll {
 /* DISEÑO PREMIUM DEL NEWSLETTER              */
 /* ========================================== */
 .newsletter-section {
-    background-color: #f9f9f9;
+    background-color: var(--beige-claro);
     padding: 70px 20px;
     text-align: center;
-    border-top: 1px solid #eaeaea;
+    border-top: 1px solid var(--beige);
 }
 .newsletter-container {
     max-width: 600px;

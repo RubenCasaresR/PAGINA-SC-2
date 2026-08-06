@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="preconnect" href="https://cdnjs.cloudflare.com">
     <link rel="stylesheet" href="styles.css">
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
 <body>
@@ -35,10 +35,10 @@
 
     <main class="thank-you-page">
         <div class="thank-you-content">
-            <i class="fas fa-check-circle" style="font-size: 4rem; color: #28a745; margin-bottom: 20px;"></i>
+            <i class="fas fa-check-circle thank-you-icon"></i>
             <h1>¡Gracias por tu compra!</h1>
-            <p style="font-size: 1.5rem; font-weight: bold;">Tu pedido <span id="order-number" style="color: var(--verde-pino);">#SDC-0000</span> ha sido confirmado.</p>
-            <p style="color: #666; max-width: 600px; margin: 0 auto 40px auto; font-size: 1rem;">
+            <p class="thank-you-order">Tu pedido <span id="order-number">#SDC-0000</span> ha sido confirmado.</p>
+            <p class="thank-you-note">
                 En breve recibirás un correo electrónico con los detalles de tu recibo y la información de seguimiento para que sepas exactamente cuándo llegará tu paquete.
             </p>
             <a href="index.html" class="btn">Seguir explorando la tienda</a>
@@ -72,6 +72,29 @@
             <p>&copy; 2026 Societa Di Calcio. Todos los derechos reservados.</p>
         </div>
     </footer>
+
+    <div class="cart-overlay" id="cart-overlay"></div>
+    <div class="cart-drawer" id="cart-drawer">
+        <div class="cart-drawer-header">
+            <h2>Tu Carrito</h2>
+            <button class="close-cart-btn" id="close-cart-btn">&times;</button>
+        </div>
+        <div class="shipping-progress-container">
+            <p id="shipping-message">Calculando envío...</p>
+            <div class="progress-bar-bg">
+                <div class="progress-bar-fill" id="shipping-progress-fill"></div>
+            </div>
+        </div>
+        <div class="cart-drawer-items" id="cart-drawer-items"></div>
+        <div class="cart-drawer-footer">
+            <div class="drawer-summary-row">
+                <span>Subtotal</span>
+                <span id="drawer-subtotal">$0.00</span>
+            </div>
+            <p class="shipping-note">Impuestos y envío calculados en el checkout.</p>
+            <button class="btn btn-checkout-drawer" id="btn-checkout-drawer">Proceder al Pago</button>
+        </div>
+    </div>
 
     <script src="cart.js"></script>
     <script src="thank-you.js"></script>

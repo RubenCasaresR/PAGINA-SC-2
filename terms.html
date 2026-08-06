@@ -1,15 +1,95 @@
 <!DOCTYPE html>
 <html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Términos y Condiciones - Societa Di Calcio</title>
+    <link rel="icon" href="logo-fondo-verde.png" type="image/png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+</head>
 <body>
     <header class="main-header">
-        </header>
+        <button class="hamburger-btn" id="hamburger-btn">
+            <i class="fas fa-bars"></i>
+        </button>
+        <div class="logo">
+            <a href="index.html"><img src="logo SC sin fondo.png" width="120" alt="Logo de la Marca"></a>
+        </div>
+        <nav class="main-nav" id="main-nav">
+            <button class="close-menu-btn" id="close-menu-btn">&times;</button>
+            <a href="index.html#novedades">Novedades</a>
+            <a href="index.html#colecciones">Colecciones</a>
+            <a href="index.html#nosotros">Nosotros</a>
+            <a href="index.html#contacto">Contacto</a>
+        </nav>
+        <div class="cart-icon">
+            <a href="carrito.html">🛒 Carrito (0)</a>
+        </div>
+    </header>
+
     <main class="support-page-main">
         <h1>Términos y Condiciones</h1>
         <div class="support-content">
             <p>Bienvenido a Societa Di Calcio. Al acceder y utilizar este sitio web, aceptas cumplir y estar sujeto a los siguientes términos y condiciones de uso. El contenido de las páginas de este sitio web es para tu información y uso general. Está sujeto a cambios sin previo aviso. Este sitio web utiliza cookies para monitorear las preferencias de navegación.</p>
         </div>
     </main>
+
     <footer id="contacto" class="main-footer">
-        </footer>
+        <div class="footer-grid">
+            <div class="footer-column">
+                <h4>Societa Di Calcio</h4>
+                <p>Ropa inspirada en la pasión del fútbol, diseñada para el día a día.</p>
+            </div>
+            <div class="footer-column">
+                <h4>Soporte</h4>
+                <ul>
+                    <li><a href="faq.html">Preguntas Frecuentes</a></li>
+                    <li><a href="returns.html">Políticas de Devolución</a></li>
+                    <li><a href="terms.html">Términos y Condiciones</a></li>
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h4>Síguenos</h4>
+                <div class="social-media">
+                    <a href="https://www.instagram.com/societadicalcio?igsh=MWM4NjZhbXh6ZDVkaQ==" target="_blank"><i class="fab fa-instagram"></i></a>
+                    <a href="https://www.tiktok.com/@societadicalcio?_t=ZS-90L4HyP5Aud&_r=1" target="_blank"><i class="fab fa-tiktok"></i></a>
+                    <a href="#" target="_blank"><i class="fab fa-facebook"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 Societa Di Calcio. Todos los derechos reservados.</p>
+        </div>
+    </footer>
+
+    <div class="cart-overlay" id="cart-overlay"></div>
+    <div class="cart-drawer" id="cart-drawer">
+        <div class="cart-drawer-header">
+            <h2>Tu Carrito</h2>
+            <button class="close-cart-btn" id="close-cart-btn">&times;</button>
+        </div>
+        <div class="shipping-progress-container">
+            <p id="shipping-message">Calculando envío...</p>
+            <div class="progress-bar-bg">
+                <div class="progress-bar-fill" id="shipping-progress-fill"></div>
+            </div>
+        </div>
+        <div class="cart-drawer-items" id="cart-drawer-items"></div>
+        <div class="cart-drawer-footer">
+            <div class="drawer-summary-row">
+                <span>Subtotal</span>
+                <span id="drawer-subtotal">$0.00</span>
+            </div>
+            <p class="shipping-note">Impuestos y envío calculados en el checkout.</p>
+            <button class="btn btn-checkout-drawer" id="btn-checkout-drawer">Proceder al Pago</button>
+        </div>
+    </div>
+
+    <script src="cart.js"></script>
 </body>
 </html>

@@ -11,7 +11,7 @@
 </head>
 <body>
 
-    <div id="login-screen" class="login-screen" style="display:none;">
+    <div id="login-screen" class="login-screen">
         <div class="login-box">
             <h1>🔐 Acceso Restringido</h1>
             <p>Panel de administración de Società Di Calcio</p>
@@ -19,13 +19,13 @@
                 <label>Contraseña de Administrador</label>
                 <input type="password" id="login-password" autocomplete="current-password">
             </div>
-            <button class="btn-guardar" id="btn-login" style="margin-top: 10px;">Entrar al Panel</button>
+            <button class="btn-guardar" id="btn-login">Entrar al Panel</button>
             <div id="login-error" class="mensaje"></div>
         </div>
     </div>
 
-    <div class="admin-container" id="admin-panel" style="display:none;">
-        <div style="text-align: right; margin-bottom: 20px;">
+    <div class="admin-container" id="admin-panel">
+        <div class="admin-topbar">
             <button class="btn-eliminar btn-logout" id="btn-logout">🚪 Cerrar Sesión</button>
         </div>
         <h1>⚙️ Ingreso de Nueva Mercancía</h1>
@@ -67,8 +67,8 @@
         <hr>
 
         <h1>👕 Inventario Actual</h1>
-        <div id="lista-inventario" style="margin-top: 20px;">
-            <p style="text-align: center; color: #777;">Cargando inventario...</p>
+        <div id="lista-inventario" class="admin-lista">
+            <p class="admin-cargando">Cargando inventario...</p>
         </div>
 
         <hr>
@@ -81,8 +81,8 @@
         <hr>
         
         <h1>📦 Registro de Ventas</h1>
-        <div id="lista-ordenes" style="margin-top: 20px;">
-            <p style="text-align: center; color: #777;">Cargando ventas...</p>
+        <div id="lista-ordenes" class="admin-lista">
+            <p class="admin-cargando">Cargando ventas...</p>
         </div>
     </div>
 

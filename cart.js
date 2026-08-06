@@ -127,7 +127,7 @@ function renderCartDrawer() {
     if (!container) return; // Por si no existe el HTML
 
     if (cart.length === 0) {
-        container.innerHTML = '<p style="text-align:center; margin-top: 20px;">Tu carrito está vacío.</p>';
+        container.innerHTML = '<div class="empty-cart-state"><p>Tu carrito está vacío.</p></div>';
         updateDrawerSummary(0);
         return;
     }
@@ -267,7 +267,7 @@ function renderCheckoutSummary() {
     const cart = JSON.parse(localStorage.getItem('shoppingCart')) || [];
     
     if (cart.length === 0) {
-        container.innerHTML = '<p>Tu carrito está vacío.</p>';
+        container.innerHTML = '<p class="empty-cart-state">Tu carrito está vacío.</p>';
         if(subtotalEl) subtotalEl.innerText = '$0.00';
         if(shippingEl) shippingEl.innerText = '$0.00';
         if(totalEl) totalEl.innerText = '$0.00';
@@ -288,11 +288,11 @@ function renderCheckoutSummary() {
         const imagenSegura = escaparHTML(item.image);
         itemDiv.innerHTML = `
             <img src="${imagenSegura}" alt="${nombreSeguro}">
-            <div style="flex-grow: 1;">
-                <h4 style="margin: 0; font-size: 0.95rem;">${nombreSeguro}</h4>
-                <p style="margin: 0; font-size: 0.8rem; color: #666;">Talla: ${tallaSegura} | Cantidad: ${item.quantity}</p>
+            <div class="checkout-item-details">
+                <h4>${nombreSeguro}</h4>
+                <p>Talla: ${tallaSegura} | Cantidad: ${item.quantity}</p>
             </div>
-            <span style="font-weight: bold;">$${(item.price * item.quantity).toFixed(2)}</span>
+            <span class="checkout-item-price">$${(item.price * item.quantity).toFixed(2)}</span>
         `;
         container.appendChild(itemDiv);
     });
@@ -338,7 +338,7 @@ function loadCartItems() {
     const cart = JSON.parse(localStorage.getItem('shoppingCart')) || [];
 
     if (cart.length === 0) {
-        container.innerHTML = '<p style="text-align: center; margin: 20px 0;">Tu carrito está vacío. <a href="index.html">Seguir comprando</a></p>';
+        container.innerHTML = '<div class="empty-cart-state"><p>Tu carrito está vacío.</p><a href="index.html" class="btn">Seguir comprando</a></div>';
         if (subtotalEl) subtotalEl.innerText = '$0.00';
         if (shippingEl) shippingEl.innerText = '$0.00';
         if (totalEl) totalEl.innerText = '$0.00';
@@ -358,7 +358,7 @@ function loadCartItems() {
         const idSeguro = escaparHTML(item.id);
         const imagenSegura = escaparHTML(item.image);
         itemDiv.innerHTML = `
-            <img src="${imagenSegura}" alt="${nombreSeguro}">
+            <img src="${imagenSegura}" alt="${nombreSeguro}" class="cart-item-image">
             <div class="cart-item-details">
                 <h4>${nombreSeguro}</h4>
                 <p>Talla: ${tallaSegura} | Cantidad: ${item.quantity}</p>

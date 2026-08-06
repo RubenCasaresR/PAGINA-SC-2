@@ -122,7 +122,7 @@ async function cargarInventario() {
         const contenedor = document.getElementById('lista-inventario');
 
         if (productos.length === 0) {
-            contenedor.innerHTML = '<p style="text-align: center;">Tu bodega está vacía.</p>';
+            contenedor.innerHTML = '<p class="admin-cargando">Tu bodega está vacía.</p>';
             return;
         }
 
@@ -141,14 +141,13 @@ async function cargarInventario() {
             const fotosSeguras = escaparHTMLAdmin(fotosActuales);
 
             htmlInventario += `
-            <div style="background: #f9f9f9; padding: 15px; margin-bottom: 15px; border-radius: 8px; border-left: 5px solid #000; display: flex; flex-direction: column; gap: 10px;">
-                
-                <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div class="inventario-card">
+                <div class="inventario-card-header">
                     <div>
-                        <strong style="font-size: 1.1rem;">${nombreSeguro}</strong> <span style="color: #888; font-size: 0.9em;">(ID: ${idSeguro})</span><br>
-                        <div style="display: flex; align-items: center; margin-top: 5px;">
-                            <span style="color: #28a745; font-weight: bold; margin-right: 5px;">$</span>
-                            <input type="number" id="edit-precio-${idSeguro}" value="${prod.precio}" step="0.01" style="width: 80px; padding: 5px; border: 1px solid #ccc; border-radius: 4px; font-weight: bold; color: #28a745;">
+                        <strong class="inventario-card-title">${nombreSeguro}</strong> <span class="inventario-card-id">(ID: ${idSeguro})</span><br>
+                        <div class="inventario-card-precio">
+                            <span>$</span>
+                            <input type="number" id="edit-precio-${idSeguro}" value="${prod.precio}" step="0.01" class="edit-precio-input">
                         </div>
                     </div>
                     <div>
@@ -157,8 +156,8 @@ async function cargarInventario() {
                     </div>
                 </div>
 
-                <div style="background: #eee; padding: 10px; border-radius: 4px; display: flex; flex-direction: column; gap: 10px;">
-                    <div style="display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">
+                <div class="inventario-card-stock">
+                    <div class="inventario-card-stock-row">
                         <strong>Inventario:</strong>
                         <label>XS: <input type="number" id="edit-xs-${idSeguro}" class="talla-input" value="${xsStock}" min="0"></label>
                         <label>S: <input type="number" id="edit-s-${idSeguro}" class="talla-input" value="${sStock}" min="0"></label>
@@ -167,7 +166,7 @@ async function cargarInventario() {
                         <label>XL: <input type="number" id="edit-xl-${idSeguro}" class="talla-input" value="${xlStock}" min="0"></label>
                     </div>
                     
-                    <div style="border-top: 1px dashed #ccc; padding-top: 10px;">
+                    <div class="inventario-card-img">
                         <strong>📸 Imágenes (Separadas por comas):</strong>
                         <input type="text" id="edit-img-${idSeguro}" class="img-input" value="${fotosSeguras}" placeholder="ej: foto-frente.png, foto-atras.png">
                     </div>
@@ -254,14 +253,14 @@ function escaparHTMLAdmin(texto) {
 }
 
 function etiquetaEstado(estado) {
-    const colores = {
-        pagado: '#28a745',
-        pendiente: '#f0ad4e',
-        rechazado: '#d9534f'
+    const clases = {
+        pagado: 'etiqueta-pagado',
+        pendiente: 'etiqueta-pendiente',
+        rechazado: 'etiqueta-rechazado'
     };
     const texto = ['pagado', 'pendiente', 'rechazado'].includes(estado) ? estado : 'sin pago';
-    const color = colores[texto] || '#999';
-    return `<span style="background: ${color}; color: #fff; padding: 3px 10px; border-radius: 12px; font-size: 0.8rem; text-transform: uppercase;">${texto}</span>`;
+    const clase = clases[texto] || 'etiqueta-default';
+    return `<span class="etiqueta-estado ${clase}">${texto}</span>`;
 }
 
 async function cargarVentas() {
@@ -271,7 +270,7 @@ async function cargarVentas() {
         const contenedor = document.getElementById('lista-ordenes');
 
         if (ventas.length === 0) {
-            contenedor.innerHTML = '<p style="text-align: center;">Aún no hay ventas registradas.</p>';
+            contenedor.innerHTML = '<p class="admin-cargando">Aún no hay ventas registradas.</p>';
             return;
         }
 
@@ -279,23 +278,23 @@ async function cargarVentas() {
         ventas.forEach(venta => {
             let listaArticulos = '';
             venta.productos.forEach(item => {
-                listaArticulos += `<li style="margin-bottom: 5px;"><strong>${item.quantity}x</strong> ${escaparHTMLAdmin(item.name)} (Talla: ${escaparHTMLAdmin(item.size)}) - $${(item.price * item.quantity).toFixed(2)}</li>`;
+                listaArticulos += `<li><strong>${item.quantity}x</strong> ${escaparHTMLAdmin(item.name)} (Talla: ${escaparHTMLAdmin(item.size)}) - $${(item.price * item.quantity).toFixed(2)}</li>`;
             });
 
             htmlVentas += `
-            <div style="background: white; padding: 20px; margin-bottom: 20px; border-radius: 8px; border-left: 5px solid #28a745; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
-                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 10px;">
-                    <strong style="font-size: 1.1rem;">Orden #${venta.id}</strong>
-                    <div style="text-align: right;">
+            <div class="venta-card">
+                <div class="venta-card-header">
+                    <strong class="venta-card-titulo">Orden #${venta.id}</strong>
+                    <div class="venta-card-meta">
                         ${etiquetaEstado(venta.estado)}
-                        <span style="color: #666; display: block; margin-top: 4px;">${new Date(venta.fecha).toLocaleString()}</span>
+                        <span>${new Date(venta.fecha).toLocaleString()}</span>
                     </div>
                 </div>
-                <p style="margin: 5px 0;"><strong>👤 Cliente:</strong> ${escaparHTMLAdmin(venta.nombre)} (${escaparHTMLAdmin(venta.email)})</p>
-                <p style="margin: 5px 0;"><strong>📍 Dirección:</strong> ${escaparHTMLAdmin(venta.direccion)}</p>
-                <p style="margin: 5px 0; color: #28a745;"><strong>💰 Total: $${venta.total.toFixed(2)}</strong></p>
-                <div style="margin-top: 15px; background: #f9f9f9; padding: 10px;">
-                    <ul style="margin: 0;">${listaArticulos}</ul>
+                <p class="venta-linea"><strong>👤 Cliente:</strong> ${escaparHTMLAdmin(venta.nombre)} (${escaparHTMLAdmin(venta.email)})</p>
+                <p class="venta-linea"><strong>📍 Dirección:</strong> ${escaparHTMLAdmin(venta.direccion)}</p>
+                <p class="venta-total"><strong>💰 Total: $${venta.total.toFixed(2)}</strong></p>
+                <div class="venta-articulos">
+                    <ul>${listaArticulos}</ul>
                 </div>
             </div>`;
         });

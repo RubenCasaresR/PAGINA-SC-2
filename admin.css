@@ -1,30 +1,71 @@
+/* Estado inicial oculto: admin.js lo muestra con style.display (CSSOM) */
+#login-screen { display: none; }
+#admin-panel { display: none; }
+
+.admin-topbar { text-align: right; margin-bottom: 20px; }
+.login-box .btn-guardar { margin-top: 10px; }
+.admin-lista { margin-top: 20px; }
+.admin-cargando { text-align: center; color: #777; }
+
 /* admin.css — Panel de administración (admin.html) */
-body { font-family: 'Helvetica Neue', Arial, sans-serif; background-color: #f4f4f4; padding: 40px; }
-.admin-container { background-color: white; max-width: 850px; margin: 0 auto; padding: 30px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+body { font-family: 'Montserrat', 'Helvetica Neue', Arial, sans-serif; background-color: #f4f4f4; padding: 40px; }
+.admin-container { background-color: white; max-width: 850px; margin: 0 auto; padding: 30px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
 h1 { text-align: center; color: #333; font-size: 24px; margin-bottom: 20px; }
 .form-group { margin-bottom: 15px; }
 label { display: block; font-weight: bold; margin-bottom: 5px; color: #555; font-size: 14px; }
-input[type="text"], input[type="number"], textarea { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+input[type="text"], input[type="number"], textarea { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-family: inherit; }
 .stock-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
-.btn-guardar { background-color: #000; color: white; border: none; padding: 12px 20px; width: 100%; font-size: 16px; font-weight: bold; cursor: pointer; border-radius: 4px; margin-top: 20px; }
-.btn-guardar:hover { background-color: #333; }
-.btn-eliminar { background-color: #dc3545; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; transition: background 0.3s;}
+.btn-guardar { background-color: #023a19; color: white; border: none; padding: 12px 20px; width: 100%; font-size: 16px; font-weight: bold; cursor: pointer; border-radius: 6px; margin-top: 20px; transition: background 0.3s; }
+.btn-guardar:hover { background-color: #012a12; }
+.btn-eliminar { background-color: #dc3545; color: white; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-weight: bold; transition: background 0.3s;}
 .btn-eliminar:hover { background-color: #c82333; }
-.btn-actualizar { background-color: #007bff; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; transition: background 0.3s; margin-right: 5px;}
+.btn-actualizar { background-color: #007bff; color: white; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-weight: bold; transition: background 0.3s; margin-right: 5px;}
 .btn-actualizar:hover { background-color: #0056b3; }
-.mensaje { display: none; padding: 10px; margin-top: 15px; text-align: center; border-radius: 4px; font-weight: bold; }
+.mensaje { display: none; padding: 10px; margin-top: 15px; text-align: center; border-radius: 6px; font-weight: bold; }
 .exito { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
 hr { margin: 40px 0; border: none; border-top: 2px dashed #ccc; }
-.talla-input { width: 50px !important; padding: 5px !important; text-align: center; border: 1px solid #ccc; border-radius: 4px; }
-.img-input { width: 100% !important; padding: 8px !important; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px; font-family: monospace;}
+.talla-input { width: 50px !important; padding: 5px !important; text-align: center; border: 1px solid #ccc; border-radius: 6px; }
+.img-input { width: 100% !important; padding: 8px !important; margin-top: 5px; border: 1px solid #ccc; border-radius: 6px; font-family: monospace;}
 
 /* Estilo para el botón de Excel */
-.btn-excel { background-color: #28a745; color: white; padding: 12px 20px; font-weight: bold; border: none; cursor: pointer; border-radius: 4px; text-transform: uppercase; width: 100%; font-size: 16px; transition: background 0.3s;}
+.btn-excel { background-color: #28a745; color: white; padding: 12px 20px; font-weight: bold; border: none; cursor: pointer; border-radius: 6px; text-transform: uppercase; width: 100%; font-size: 16px; transition: background 0.3s;}
 .btn-excel:hover { background-color: #218838; }
 
 /* Estilo para la pantalla de acceso */
 .login-screen { display: flex; justify-content: center; align-items: center; min-height: 80vh; }
-.login-box { background-color: white; max-width: 400px; width: 100%; padding: 30px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); text-align: center; }
+.login-box { background-color: white; max-width: 400px; width: 100%; padding: 30px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); text-align: center; }
 .login-box h1 { font-size: 22px; margin-bottom: 10px; }
 .login-box p { color: #777; margin-bottom: 25px; font-size: 14px; }
 .btn-logout { width: auto; padding: 8px 15px; font-size: 14px; }
+
+/* Tarjetas de inventario (admin.js) */
+.inventario-card { background: #f9f9f9; padding: 15px; margin-bottom: 15px; border-radius: 8px; border-left: 5px solid #023a19; display: flex; flex-direction: column; gap: 10px; }
+.inventario-card-header { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+.inventario-card-title { font-size: 1.1rem; }
+.inventario-card-id { color: #888; font-size: 0.9em; }
+.inventario-card-precio { display: flex; align-items: center; margin-top: 5px; gap: 5px; }
+.inventario-card-precio span { color: #28a745; font-weight: bold; }
+.edit-precio-input { width: 80px; padding: 5px; border: 1px solid #ccc; border-radius: 4px; font-weight: bold; color: #28a745; }
+.inventario-card-stock { background: #eee; padding: 10px; border-radius: 4px; display: flex; flex-direction: column; gap: 10px; }
+.inventario-card-stock-row { display: flex; gap: 15px; align-items: center; flex-wrap: wrap; }
+.inventario-card-stock-row label { margin-bottom: 0; }
+.inventario-card-img { border-top: 1px dashed #ccc; padding-top: 10px; }
+
+/* Tarjetas de ventas (admin.js) */
+.venta-card { background: white; padding: 20px; margin-bottom: 20px; border-radius: 8px; border-left: 5px solid #28a745; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+.venta-card-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 10px; gap: 10px; flex-wrap: wrap; }
+.venta-card-titulo { font-size: 1.1rem; }
+.venta-card-meta { text-align: right; }
+.venta-card-meta span { color: #666; display: block; margin-top: 4px; }
+.venta-linea { margin: 5px 0; }
+.venta-total { margin: 5px 0; color: #28a745; }
+.venta-articulos { margin-top: 15px; background: #f9f9f9; padding: 10px; }
+.venta-articulos ul { margin: 0; }
+.venta-articulos li { margin-bottom: 5px; }
+
+/* Etiquetas de estado de pago (admin.js) */
+.etiqueta-estado { color: #fff; padding: 3px 10px; border-radius: 12px; font-size: 0.8rem; text-transform: uppercase; display: inline-block; }
+.etiqueta-pagado { background: #28a745; }
+.etiqueta-pendiente { background: #f0ad4e; }
+.etiqueta-rechazado { background: #d9534f; }
+.etiqueta-default { background: #999; }

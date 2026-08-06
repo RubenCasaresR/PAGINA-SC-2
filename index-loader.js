@@ -60,7 +60,23 @@ function renderizarCuadricula(productos) {
         const esProximamente = (totalStock === 0 || producto.status === 'coming_soon');
 
         // 3. Formateamos el precio
-        const priceDisplay = esProximamente ? `<span class="coming-soon-text">Lanzamiento Oficial</span>` : `$${producto.precio.toFixed(2)}`;
+        let priceDisplay = `$${producto.precio.toFixed(2)}`;
+        if (esProximamente) {
+            priceDisplay = `<span class="coming-soon-text">Lanzamiento Oficial</span>`;
+        } else if (producto.oldPrice && producto.oldPrice > producto.precio) {
+            priceDisplay = `<span class="old-price">$${producto.oldPrice.toFixed(2)}</span> $${producto.precio.toFixed(2)}`;
+        }
+
+        // 3b. Badge sobre la foto (siempre visible, también en móvil)
+        let badgeHTML = '';
+        if (esProximamente) {
+            badgeHTML = '<span class="product-badge product-badge--proximamente">Próximamente</span>';
+        } else if (producto.oldPrice && producto.oldPrice > producto.precio) {
+            const descuento = Math.round((1 - producto.precio / producto.oldPrice) * 100);
+            badgeHTML = `<span class="product-badge product-badge--descuento">-${descuento}%</span>`;
+        } else if (producto.categoria === 'novedades-cat') {
+            badgeHTML = '<span class="product-badge product-badge--nuevo">Nuevo</span>';
+        }
 
         // 4. Link bloqueado si no hay stock
         const linkDestino = esProximamente ? '#' : `product.html?product=${escaparHTML(producto.id)}`;
@@ -85,6 +101,7 @@ function renderizarCuadricula(productos) {
             <a href="${linkDestino}" class="product-card-link ${esProximamente ? 'proximamente-link' : ''}">
                 <div class="product-card filterDiv ${claseFiltro} ${esProximamente ? 'is-coming-soon' : ''}">
                     <div class="product-image-container">
+                        ${badgeHTML}
                         <img src="${foto1Segura}" alt="${nombreSeguro}" class="main-img" loading="lazy">
                         <img src="${foto2Segura}" alt="${nombreSeguro}" class="hover-img" loading="lazy">
                         
